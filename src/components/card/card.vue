@@ -22,9 +22,9 @@
         <div class="p-4 mt-13 ">
           <ul>
             <li class="text-gray-500 ">Hodo Foods</li>
-            <li class="font-semibold ">{{ name }}</li>
-            <li class="py-1 text-xl font-semibold gap-2 ">
-              <span class="flex gap-1.5">
+            <li class="font-semibold py-1">{{ name }}</li>
+            <li class="py-1 text-xl text-gray-400 font-semibold gap-2 ">
+              <span class="flex gap-2">
                 <template v-for="star in 5" :key="star">
 
                   <i v-if="rating >= star" class="pi pi-star-fill text-yellow-400 text-lg"></i>
@@ -33,7 +33,10 @@
 
                   <i v-else class="pi pi-star text-gray-300 text-lg"></i>
                 </template>
-                ({{ rating.toFixed(1) }})
+                <div class="ps-3 -mt-1">
+                  ({{ rating.toFixed(1) }})
+
+                </div>
               </span>
             </li>
             <li class="text-gray-500 font-semibold">{{size}}gram</li>
