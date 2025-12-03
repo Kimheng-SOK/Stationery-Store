@@ -13,9 +13,6 @@ export default {
 </script>
 
 <template>
-  <NavBar/>
-  
- 
-  
+  <NavBar/> 
   <Footer/>
 </template>

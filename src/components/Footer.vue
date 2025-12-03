@@ -13,14 +13,14 @@
               Premium stationery and office supplies for creative minds and organized professionals.
             </p>
             <div class="d-flex gap-2">
-              <a href="#" class="social-icon">
-                <img src="/facebook.png" alt="facebook" style="width: 18px; height: 18px;">
+              <a href="#" class="social-icon d-flex align-items-center justify-content-center" style="width:18px; height:18px;">
+                <i class="bi bi-facebook fs-6" style="color:#6c757d;"></i>
               </a>
-              <a href="#" class="social-icon">
-                <img src="/instagram.png" alt="instagram" style="width: 18px; height: 18px;">
+              <a href="#" class="social-icon d-flex align-items-center justify-content-center" style="width:18px; height:18px;">
+                <i class="bi bi-instagram fs-6" style="color:#6c757d;"></i>
               </a>
-              <a href="#" class="social-icon">
-                <img src="/twitter.png" alt="twitter" style="width: 18px; height: 18px;">
+              <a href="#" class="social-icon d-flex align-items-center justify-content-center" style="width:18px; height:18px;">
+                <i class="bi bi-twitter fs-6" style="color:#6c757d;"></i>
               </a>
             </div>
           </div>
@@ -50,12 +50,16 @@
           <!-- Reach Us -->
           <div class="col-lg-2 col-md-6 mb-4 mb-lg-0">
             <h6 class="fw-bold text-dark mb-3" style="font-size: 15px;">Reach Us</h6>
-            <div class="d-flex align-items-start gap-2 mb-3">
-              <img src="/call.png" alt="phone" style="width: 16px; height: 16px; margin-top: 2px;">
+            <div class="d-flex align-items-center gap-2 mb-3">
+              <span class="d-flex align-items-center" style="width:16px;">
+                <i class="bi bi-telephone-fill fs-6" style="color:#6c757d;"></i>
+              </span>
               <span class="text-secondary" style="font-size: 13px;">(+971) 58 8284186</span>
             </div>
-            <div class="d-flex align-items-start gap-2">
-              <img src="/location.png" alt="location" style="width: 16px; height: 16px; margin-top: 2px;">
+            <div class="d-flex align-items-center gap-2">
+              <span class="d-flex align-items-center" style="width:16px;">
+                <i class="bi bi-geo-alt-fill fs-6" style="color:#6c757d;"></i>
+              </span>
               <a href="#" class="footer-link">View Store Location</a>
             </div>
           </div>
@@ -74,7 +78,7 @@
                 style="font-size: 13px; padding: 8px 12px; background: white; border-color: #dee2e6;"
               >
               <button class="btn btn-teal px-3" type="submit">
-                <img src="/email.png" alt="send" style="width: 16px; height: 16px; filter: brightness(0) invert(1);">
+                <i class="bi bi-envelope-fill fs-6 text-white"></i>
               </button>
             </div>
           </div>

@@ -3,13 +3,13 @@
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
     <div class="container-fluid px-4" style="max-width: 1400px; margin: 0 auto;">
 
-      <!-- Logo (always visible) -->
+      <!-- Logo (still an image) -->
       <a class="navbar-brand d-flex align-items-center" href="#">
         <img src="/logo.png" alt="logo" class="rounded-circle me-2" style="width: 40px; height: 40px;">
         <span class="fw-semibold fs-5">StationeryBox</span>
       </a>
 
-      <!-- Desktop content – exactly as you had it -->
+      <!-- Desktop content – exactly as original -->
       <div class="collapse navbar-collapse" id="navbarContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
           <li class="nav-item"><a class="nav-link px-3" href="#">Shop All</a></li>
@@ -23,11 +23,14 @@
         </div>
 
         <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
+          <!-- Account Icon -->
           <button class="btn btn-link p-2 text-white border-0">
-            <img src="/acc.png" alt="account" style="width: 20px; height: 20px;">
+            <i class="bi bi-person-circle"></i>
           </button>
+
+          <!-- Cart Icon -->
           <button class="btn btn-link p-2 text-white border-0 position-relative">
-            <img src="/shopping-cart.png" alt="cart" style="width: 24px; height: 24px;">
+            <i class="bi bi-cart3"></i>
             <span class="position-absolute badge rounded-pill bg-danger"
                   style="font-size: 0.65rem; top: 0; right: 0; min-width: 16px; height: 16px; padding: 2px 5px;">
               {{ CartNum }}
@@ -40,24 +43,24 @@
       <div class="d-flex align-items-center gap-3 d-lg-none">
         <!-- Account -->
         <button class="btn btn-link p-2 text-white border-0">
-          <img src="/acc.png" alt="account" style="width: 20px; height: 20px;">
+          <i class="bi bi-person-circle"></i>
         </button>
 
-        <!-- Cart with badge -->
+        <!-- Cart -->
         <button class="btn btn-link p-2 text-white border-0 position-relative">
-          <img src="/shopping-cart.png" alt="cart" style="width: 24px; height: 24px;">
+          <i class="bi bi-cart3"></i>
           <span class="position-absolute badge rounded-pill bg-danger"
                 style="font-size: 0.65rem; top: 0; right: 0; min-width: 16px; height: 16px; padding: 2px 5px;">
             {{ CartNum }}
           </span>
         </button>
 
-        <!-- Hamburger (now next to cart) -->
+        <!-- Hamburger -->
         <button class="navbar-toggler border-0 p-2"
                 type="button"
                 data-bs-toggle="offcanvas"
                 data-bs-target="#mobileSidebar">
-          <span class="navbar-toggler-icon"></span>
+          <i class="bi bi-list"></i>
         </button>
       </div>
 

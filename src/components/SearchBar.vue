@@ -1,7 +1,8 @@
 <template>
   <div class="input-group search-container bg-white rounded shadow-sm">
     <span class="input-group-text bg-white border-0">
-      <img src="/search.png" alt="search-icon" class="search-icon">
+      <!-- Replaced the image with Bootstrap Icon -->
+      <i class="bi bi-search search-icon"></i>
     </span>
     <input 
       type="text" 
@@ -31,8 +32,7 @@ export default {
 }
 
 .search-icon {
-  width: 18px;
-  height: 18px;
+  font-size: 18px; 
   opacity: 0.5;
 }
 
