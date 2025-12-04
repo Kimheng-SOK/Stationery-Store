@@ -8,6 +8,12 @@ export default [
     children: [
       { path: 'dashboard', name: 'AdminDashboard', component: Dashboard },
       // Add more children here: Products, Orders, etc.
+      {
+        path: '/shop',
+        name: 'Shop',
+        component: () => import('@/views/user/ShopView.vue')
+
+      }
     ],
   },
 ]
