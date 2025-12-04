@@ -8,11 +8,12 @@ export default {
     NavBar,
     Footer,
   },
-  
+
 }
 </script>
 
 <template>
-  <NavBar/> 
+  <NavBar/>
+  <router-view/>
   <Footer/>
 </template>
