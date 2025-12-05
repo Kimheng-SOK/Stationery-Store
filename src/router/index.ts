@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import Privacy from '@/views/Privacy.vue'
 
 import adminRoutes from './admin'
 import userRoutes from './user' // if any
