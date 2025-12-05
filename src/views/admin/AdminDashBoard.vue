@@ -25,19 +25,7 @@
     </div>
 
     <!-- Chart Section -->
-    <div class="card shadow-sm border-0 rounded-4 mb-4 p-4">
-      <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-        <h2 class="h5 mb-0">Products Sell Analysis</h2>
-        <div
-          class="d-flex align-items-center gap-2 px-3 py-1 border rounded-pill bg-white small fw-semibold text-secondary"
-          style="cursor: pointer"
-        >
-          <span>This Year</span>
-          <i class="bi bi-chevron-down"></i>
-        </div>
-      </div>
-      <apexchart type="bar" height="280" :options="chartOptions" :series="chartSeries" />
-    </div>
+    <ChartSection :dataset="dataset" />
 
     <!-- Popular Products -->
     <div class="card shadow-sm border-0 rounded-4 mb-4 p-4">
@@ -103,31 +91,72 @@
 </template>
 
 <script setup lang="ts">
-import ApexCharts from 'vue3-apexcharts'
+import ChartSection from '../../components/common/ChartComponent.vue'
+
+// Example dataset structure for easy API integration
+const dataset = [
+  {
+    year: 2025,
+    categories: [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ],
+    sales: [120, 150, 170, 140, 180, 200, 220, 210, 190, 230, 250, 270],
+  },
+  {
+    year: 2024,
+    categories: [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ],
+    sales: [100, 130, 160, 120, 160, 180, 200, 190, 170, 210, 230, 250],
+  },
+  {
+    year: 2023,
+    categories: [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ],
+    sales: [90, 110, 140, 100, 120, 150, 170, 160, 140, 180, 200, 220],
+  },
+]
+
 const stats = [
   { icon: 'bi-people-fill', bg: 'bg-danger', value: '5,583', label: 'Customers' },
   { icon: 'bi-bag-check', bg: 'bg-primary', value: '539', label: 'Order' },
   { icon: 'bi-truck', bg: 'bg-pink', value: '105', label: 'Delivery Partners' },
   { icon: 'bi-currency-dollar', bg: 'bg-warning', value: '20,835', label: 'Revenue' },
 ]
-const chartBars = [84, 36, 50, 98, 58, 66, 71, 41, 58, 14, 41, 63]
-const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
-const chartSeries = [
-  {
-    name: 'Sales',
-    data: chartBars,
-  },
-]
-const chartOptions = {
-  chart: { toolbar: { show: false } },
-  plotOptions: { bar: { borderRadius: 6, columnWidth: '40%' } },
-  dataLabels: { enabled: false },
-  xaxis: { categories: months },
-  yaxis: { labels: { formatter: (val: number) => `$${val}` } },
-  colors: ['#4f80ff'],
-  grid: { borderColor: '#f2f2f2' },
-  tooltip: { y: { formatter: (val: number) => `$${val}` } },
-}
 const products = [
   {
     img: 'https://api.builder.io/api/v1/image/assets/TEMP/c9e15809575ecaf144fc9222abbe48a51d8c9c0f?width=260',
@@ -186,8 +215,12 @@ const customers = [
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import ApexCharts from 'vue3-apexcharts'
 export default defineComponent({
-  components: { apexchart: ApexCharts },
+  components: {
+    apexchart: ApexCharts,
+    ChartSection,
+  },
 })
 </script>
 
