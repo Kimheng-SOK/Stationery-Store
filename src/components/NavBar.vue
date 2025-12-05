@@ -36,9 +36,9 @@
 
         <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
           <!-- Account Icon -->
-          <button class="btn btn-link p-2 text-white border-0">
+          <router-link to="/signin" class="btn btn-link p-2 text-white border-0">
             <i class="bi bi-person-circle fs-4"></i>
-          </button>
+          </router-link>
 
           <!-- Cart Icon -->
           <button class="btn btn-link p-2 text-white border-0 position-relative">

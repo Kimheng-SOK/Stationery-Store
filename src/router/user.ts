@@ -25,6 +25,11 @@ export default [
         name: 'Terms',
         component: () => import('@/views/TermCondition.vue'),
       },
+      {
+        path: '/privacy',
+        name: 'Privacy',
+        component: () => import('@/views/Privacy.vue'),
+      },
     ],
   },
 ]
