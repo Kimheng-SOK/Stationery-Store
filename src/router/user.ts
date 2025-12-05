@@ -1,20 +1,30 @@
 import ClientAdminLayout from '../layouts/ClientLayout.vue'
 import ShopView from '../views/user/ShopView.vue'
 import NewArrivalView from '../views/user/NewArrivalView.vue'
+import ShopByCategory from '@/components/product/ShopByCategory.vue'
+// import PopularProduct from '@/components/product/PopularProduct.vue'
 
 export default [
   {
     path: '/',
-    redirect: '/user/shop', // route to home page  or landing page
+    redirect: '/shop', // route to home page  or landing page
   },
 
   {
     path: '/user',
     component: ClientAdminLayout,
     children: [
-      { path: '', redirect: 'user/shop' },
-      { path: 'shop', name: 'Shop', component: ShopView },
-      { path: 'new-arrival', name: 'NewArrival', component: NewArrivalView },
+      { path: '', redirect: '/shop' },
+      { path: '/shop', name: 'Shop', component: ShopView },
+      { path: '/new-arrival', name: 'NewArrival', component: NewArrivalView },
+      { path: '/categories', name: 'ShopByCategory', component: ShopByCategory },
+      // { path: 'popular', name: 'PopularProduct', component: PopularProduct },
+
+      {
+        path: '/terms',
+        name: 'Terms',
+        component: () => import('@/views/TermCondition.vue'),
+      },
     ],
   },
 ]

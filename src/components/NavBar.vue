@@ -17,16 +17,16 @@
       <div class="collapse navbar-collapse" id="navbarContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
           <li class="nav-item">
-            <router-link to="/user/shop" class="nav-link px-3">Shop All</router-link>
+            <router-link to="/shop" class="nav-link px-3">Shop All</router-link>
           </li>
           <li class="nav-item">
-            <router-link to="/user/new-arrival" class="nav-link px-3">New Arrival</router-link>
+            <router-link to="/new-arrival" class="nav-link px-3">New Arrival</router-link>
           </li>
           <li class="nav-item">
-            <router-link to="/user/categories" class="nav-link px-3">Categories</router-link>
+            <router-link to="/categories" class="nav-link px-3">Categories</router-link>
           </li>
           <li class="nav-item">
-            <router-link to="/user/hots" class="nav-link px-3">Hots</router-link>
+            <router-link to="/hots" class="nav-link px-3">Hots</router-link>
           </li>
         </ul>
 
@@ -126,20 +126,16 @@
 
       <!-- Menu items -->
       <div class="d-flex flex-column">
-        <router-link to="/user/shop" class="px-4 py-3 text-white text-decoration-none hover-bg"
+        <router-link to="/shop" class="px-4 py-3 text-white text-decoration-none hover-bg"
           >Shop All</router-link
         >
-        <router-link
-          to="/user/new-arrival"
-          class="px-4 py-3 text-white text-decoration-none hover-bg"
+        <router-link to="/new-arrival" class="px-4 py-3 text-white text-decoration-none hover-bg"
           >New Arrival</router-link
         >
-        <router-link
-          to="/user/categories"
-          class="px-4 py-3 text-white text-decoration-none hover-bg"
+        <router-link to="/categories" class="px-4 py-3 text-white text-decoration-none hover-bg"
           >Categories</router-link
         >
-        <router-link to="/user/hots" class="px-4 py-3 text-white text-decoration-none hover-bg"
+        <router-link to="/hots" class="px-4 py-3 text-white text-decoration-none hover-bg"
           >Hots</router-link
         >
       </div>
