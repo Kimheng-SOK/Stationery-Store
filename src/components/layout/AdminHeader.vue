@@ -26,15 +26,6 @@
           <i class="bi bi-person-circle text-white fs-3"></i>
         </button>
       </div>
-
-      <!-- Mobile Icons -->
-      <div class="d-flex align-items-center gap-2 d-lg-none">
-        <button
-          class="btn rounded-circle border-0 d-flex align-items-center justify-content-center"
-        >
-          <i class="bi bi-person-circle text-white fs-3"></i>
-        </button>
-      </div>
     </div>
   </nav>
 

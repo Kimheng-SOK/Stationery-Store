@@ -1,25 +1,20 @@
 import ClientAdminLayout from '../layouts/ClientLayout.vue'
-import Dashboard from '../views/admin/AdminDashBoard.vue'
+import ShopView from '../views/user/ShopView.vue'
+import NewArrivalView from '../views/user/NewArrivalView.vue'
 
 export default [
+  {
+    path: '/',
+    redirect: '/user/shop', // route to home page  or landing page
+  },
+
   {
     path: '/user',
     component: ClientAdminLayout,
     children: [
-      { path: '', redirect: '/user/dashboard' },
-      { path: 'dashboard', name: 'AdminDashboard', component: Dashboard },
-      // Add more children here: Products, Orders, etc.
-      {
-        path: '/shop',
-        name: 'Shop',
-        component: () => import('@/views/user/ShopView.vue')
-
-      },
-      {
-        path: '/new-arrival',
-        name: 'NewArrival',
-        component: () => import('@/views/user/NewArrivalView.vue')
-      }
+      { path: '', redirect: 'user/shop' },
+      { path: 'shop', name: 'Shop', component: ShopView },
+      { path: 'new-arrival', name: 'NewArrival', component: NewArrivalView },
     ],
   },
 ]

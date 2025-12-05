@@ -126,10 +126,22 @@
 
       <!-- Menu items -->
       <div class="d-flex flex-column">
-        <a href="#" class="px-4 py-3 text-white text-decoration-none hover-bg">Shop All</a>
-        <a href="#" class="px-4 py-3 text-white text-decoration-none hover-bg">New Arrival</a>
-        <a href="#" class="px-4 py-3 text-white text-decoration-none hover-bg">Categories</a>
-        <a href="#" class="px-4 py-3 text-white text-decoration-none hover-bg">Hots</a>
+        <router-link to="/user/shop" class="px-4 py-3 text-white text-decoration-none hover-bg"
+          >Shop All</router-link
+        >
+        <router-link
+          to="/user/new-arrival"
+          class="px-4 py-3 text-white text-decoration-none hover-bg"
+          >New Arrival</router-link
+        >
+        <router-link
+          to="/user/categories"
+          class="px-4 py-3 text-white text-decoration-none hover-bg"
+          >Categories</router-link
+        >
+        <router-link to="/user/hots" class="px-4 py-3 text-white text-decoration-none hover-bg"
+          >Hots</router-link
+        >
       </div>
     </div>
   </div>
