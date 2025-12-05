@@ -1,44 +1,76 @@
 <template>
   <footer class="footer">
     <div class="footer-main py-5 px-3">
-      <div class="container" style="max-width: 1400px;">
+      <div class="container" style="max-width: 1400px">
         <div class="row gx-5">
           <!-- Brand Section -->
           <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
             <div class="d-flex align-items-center gap-2 mb-3">
-              <img class="rounded-circle" src="/logo.png" alt="logo image" style="width: 40px; height: 40px; object-fit: cover; filter: brightness(0) saturate(100%) invert(15%) sepia(18%) saturate(1285%) hue-rotate(183deg) brightness(95%) contrast(92%);">
-              <span class="fw-bold text-dark" style="font-size: 18px;">StationeryHub</span>
+              <img
+                class="rounded-circle"
+                src="/logo.png"
+                alt="logo image"
+                style="
+                  width: 40px;
+                  height: 40px;
+                  object-fit: cover;
+                  filter: brightness(0) saturate(100%) invert(15%) sepia(18%) saturate(1285%)
+                    hue-rotate(183deg) brightness(95%) contrast(92%);
+                "
+              />
+              <span class="fw-bold text-dark" style="font-size: 18px">StationeryHub</span>
             </div>
-            <p class="text-secondary mb-4" style="font-size: 13px; line-height: 1.7; max-width: 280px;">
+            <p
+              class="text-secondary mb-4"
+              style="font-size: 13px; line-height: 1.7; max-width: 280px"
+            >
               Premium stationery and office supplies for creative minds and organized professionals.
             </p>
             <div class="d-flex gap-2">
-              <a href="#" class="social-icon d-flex align-items-center justify-content-center" style="width:18px; height:18px;">
-                <i class="bi bi-facebook fs-6" style="color:#6c757d;"></i>
+              <a
+                href="#"
+                class="social-icon d-flex align-items-center justify-content-center"
+                style="width: 18px; height: 18px"
+              >
+                <i class="bi bi-facebook fs-6" style="color: #6c757d"></i>
               </a>
-              <a href="#" class="social-icon d-flex align-items-center justify-content-center" style="width:18px; height:18px;">
-                <i class="bi bi-instagram fs-6" style="color:#6c757d;"></i>
+              <a
+                href="#"
+                class="social-icon d-flex align-items-center justify-content-center"
+                style="width: 18px; height: 18px"
+              >
+                <i class="bi bi-instagram fs-6" style="color: #6c757d"></i>
               </a>
-              <a href="#" class="social-icon d-flex align-items-center justify-content-center" style="width:18px; height:18px;">
-                <i class="bi bi-twitter fs-6" style="color:#6c757d;"></i>
+              <a
+                href="#"
+                class="social-icon d-flex align-items-center justify-content-center"
+                style="width: 18px; height: 18px"
+              >
+                <i class="bi bi-twitter fs-6" style="color: #6c757d"></i>
               </a>
             </div>
           </div>
 
           <!-- Shop Links -->
           <div class="col-lg-2 col-md-6 col-6 mb-4 mb-lg-0">
-            <h6 class="fw-bold text-dark mb-3" style="font-size: 15px;">Shop</h6>
+            <h6 class="fw-bold text-dark mb-3" style="font-size: 15px">Shop</h6>
             <ul class="list-unstyled">
-              <li class="mb-2"><a href="#" class="footer-link">All Products</a></li>
-              <li class="mb-2"><a href="#" class="footer-link">New Arrival</a></li>
-              <li class="mb-2"><a href="#" class="footer-link">Categories</a></li>
-              <li class="mb-2"><a href="#" class="footer-link">Hots</a></li>
+              <li class="mb-2">
+                <router-link to="/shop" class="footer-link">All Products</router-link>
+              </li>
+              <li class="mb-2">
+                <router-link to="/new-arrival" class="footer-link">New Arrival</router-link>
+              </li>
+              <li class="mb-2">
+                <router-link to="/categories" class="footer-link">Categories</router-link>
+              </li>
+              <li class="mb-2"><router-link to="/hots" class="footer-link">Hots</router-link></li>
             </ul>
           </div>
 
           <!-- Support Links -->
           <div class="col-lg-2 col-md-6 col-6 mb-4 mb-lg-0">
-            <h6 class="fw-bold text-dark mb-3" style="font-size: 15px;">Support</h6>
+            <h6 class="fw-bold text-dark mb-3" style="font-size: 15px">Support</h6>
             <ul class="list-unstyled">
               <li class="mb-2"><a href="#" class="footer-link">Contact Us</a></li>
               <li class="mb-2"><a href="#" class="footer-link">FAQ</a></li>
@@ -49,16 +81,16 @@
 
           <!-- Reach Us -->
           <div class="col-lg-2 col-md-6 mb-4 mb-lg-0">
-            <h6 class="fw-bold text-dark mb-3" style="font-size: 15px;">Reach Us</h6>
+            <h6 class="fw-bold text-dark mb-3" style="font-size: 15px">Reach Us</h6>
             <div class="d-flex align-items-center gap-2 mb-3">
-              <span class="d-flex align-items-center" style="width:16px;">
-                <i class="bi bi-telephone-fill fs-6" style="color:#6c757d;"></i>
+              <span class="d-flex align-items-center" style="width: 16px">
+                <i class="bi bi-telephone-fill fs-6" style="color: #6c757d"></i>
               </span>
-              <span class="text-secondary" style="font-size: 13px;">(+971) 58 8284186</span>
+              <span class="text-secondary" style="font-size: 13px">(+971) 58 8284186</span>
             </div>
             <div class="d-flex align-items-center gap-2">
-              <span class="d-flex align-items-center" style="width:16px;">
-                <i class="bi bi-geo-alt-fill fs-6" style="color:#6c757d;"></i>
+              <span class="d-flex align-items-center" style="width: 16px">
+                <i class="bi bi-geo-alt-fill fs-6" style="color: #6c757d"></i>
               </span>
               <a href="#" class="footer-link">View Store Location</a>
             </div>
@@ -66,17 +98,17 @@
 
           <!-- Newsletter -->
           <div class="col-lg-3 col-md-6">
-            <h6 class="fw-bold text-dark mb-3" style="font-size: 15px;">Newsletter</h6>
-            <p class="text-secondary mb-3" style="font-size: 13px; line-height: 1.6;">
+            <h6 class="fw-bold text-dark mb-3" style="font-size: 15px">Newsletter</h6>
+            <p class="text-secondary mb-3" style="font-size: 13px; line-height: 1.6">
               Subscribe to get special offers and updates.
             </p>
             <div class="input-group input-group-sm">
-              <input 
-                type="email" 
-                class="form-control border-end-0" 
-                placeholder="Enter your email" 
-                style="font-size: 13px; padding: 8px 12px; background: white; border-color: #dee2e6;"
-              >
+              <input
+                type="email"
+                class="form-control border-end-0"
+                placeholder="Enter your email"
+                style="font-size: 13px; padding: 8px 12px; background: white; border-color: #dee2e6"
+              />
               <button class="btn btn-teal px-3" type="submit">
                 <i class="bi bi-envelope-fill fs-6 text-white"></i>
               </button>
@@ -88,16 +120,18 @@
 
     <!-- Bottom Bar -->
     <div class="footer-bottom py-3 px-3">
-      <div class="container" style="max-width: 1400px;">
+      <div class="container" style="max-width: 1400px">
         <div class="row align-items-center">
           <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
-            <p class="mb-0 text-light" style="font-size: 12px;">© 2025 StationeryHub. All rights reserved.</p>
+            <p class="mb-0 text-light" style="font-size: 12px">
+              © 2025 StationeryHub. All rights reserved.
+            </p>
           </div>
           <div class="col-md-6">
             <div class="d-flex gap-4 justify-content-center justify-content-md-end">
-              <a href="#" class="footer-bottom-link">Privacy Policy</a>
-              <a href="#" class="footer-bottom-link">Terms of Service</a>
-              <a href="#" class="footer-bottom-link">Returns</a>
+              <router-link to="/privacy" class="footer-bottom-link">Privacy Policy</router-link>
+              <router-link to="/terms" class="footer-bottom-link">Terms of Service</router-link>
+              <router-link to="#" class="footer-bottom-link">Returns</router-link>
             </div>
           </div>
         </div>
@@ -108,11 +142,14 @@
 
 <style scoped>
 .footer {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    sans-serif;
 }
 
 .footer-main {
-  background-color: #f5f5f5;
+  background-color: #e7e2da;
 }
 
 .social-icon {
