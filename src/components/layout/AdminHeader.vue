@@ -3,10 +3,10 @@
   <nav class="navbar h-auto navbar-expand-lg navbar-dark admin-navbar shadow-sm">
     <div class="container-fluid px-4" style="max-width: 1400px; margin: 0 auto">
       <!-- Logo -->
-      <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+      <router-link to="/admin" class="navbar-brand d-flex align-items-center gap-2">
         <img src="/logo.png" alt="logo" class="rounded-circle logo-img" />
         <span class="fw-bold fs-4 brand-text">StationeryBox</span>
-      </a>
+      </router-link>
 
       <!-- Desktop Search -->
       <div class="d-flex align-items-center flex-grow-1 mx-lg-3" style="max-width: 380px">
@@ -58,6 +58,7 @@
 <script lang="ts">
 // @ts-ignore: no declaration file for .vue SFC; add proper shims (e.g. src/shims-vue.d.ts) to fix this properly
 import SearchBar from '../SearchBar.vue'
+import { RouterLink } from 'vue-router'
 
 export default {
   name: 'NavBar',

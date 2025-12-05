@@ -6,6 +6,7 @@ export default [
     path: '/user',
     component: ClientAdminLayout,
     children: [
+      { path: '', redirect: '/user/dashboard' },
       { path: 'dashboard', name: 'AdminDashboard', component: Dashboard },
       // Add more children here: Products, Orders, etc.
       {
