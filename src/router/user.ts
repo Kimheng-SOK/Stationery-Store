@@ -13,6 +13,11 @@ export default [
         name: 'Shop',
         component: () => import('@/views/user/ShopView.vue')
 
+      },
+      {
+        path: '/new-arrival',
+        name: 'NewArrival',
+        component: () => import('@/views/user/NewArrivalView.vue')
       }
     ],
   },
