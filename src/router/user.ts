@@ -1,24 +1,35 @@
 import ClientAdminLayout from '../layouts/ClientLayout.vue'
-import Dashboard from '../views/admin/AdminDashBoard.vue'
+import ShopView from '../views/user/ShopView.vue'
+import NewArrivalView from '../views/user/NewArrivalView.vue'
+import ShopByCategory from '@/components/product/ShopByCategory.vue'
+// import PopularProduct from '@/components/product/PopularProduct.vue'
 
 export default [
+  {
+    path: '/',
+    redirect: '/shop', // route to home page  or landing page
+  },
+
   {
     path: '/user',
     component: ClientAdminLayout,
     children: [
-      { path: 'dashboard', name: 'AdminDashboard', component: Dashboard },
-      // Add more children here: Products, Orders, etc.
-      {
-        path: '/shop',
-        name: 'Shop',
-        component: () => import('@/views/user/ShopView.vue')
+      { path: '', redirect: '/shop' },
+      { path: '/shop', name: 'Shop', component: ShopView },
+      { path: '/new-arrival', name: 'NewArrival', component: NewArrivalView },
+      { path: '/categories', name: 'ShopByCategory', component: ShopByCategory },
+      // { path: 'popular', name: 'PopularProduct', component: PopularProduct },
 
+      {
+        path: '/terms',
+        name: 'Terms',
+        component: () => import('@/views/TermCondition.vue'),
       },
       {
-        path: '/new-arrival',
-        name: 'NewArrival',
-        component: () => import('@/views/user/NewArrivalView.vue')
-      }
+        path: '/privacy',
+        name: 'Privacy',
+        component: () => import('@/views/Privacy.vue'),
+      },
     ],
   },
 ]
