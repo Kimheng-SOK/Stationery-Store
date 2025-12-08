@@ -149,7 +149,7 @@
 }
 
 .footer-main {
-  background-color: #e7e2da;
+  background-color: #ffffff;
 }
 
 .social-icon {
