@@ -74,7 +74,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import ProductCard from './ProductCard.vue'
+import ProductCard from './product/ProductCard.vue'
 
 interface Product {
   id: number
