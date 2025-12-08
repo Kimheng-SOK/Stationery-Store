@@ -49,19 +49,19 @@ export default defineComponent({
   name: 'Privacy',
   setup() {
     const items = [
-      'What information do we collect?',
-      'What are your privacy rights?',
-      'Will your information be shared with anyone?',
-      'Controls for do-not-track features',
-      'Do we use cookies and other tracking technologies?',
-      'Do California residents have specific privacy rights?',
-      'How do we handle your social logins?',
-      'Do we make updates to this notice?',
-      'Is your information transferred internationally?',
-      'How can you contact us about this notice?',
-      'How long do we keep your information?',
-      'How can you review, update or delete the data we collect from you?',
-      'Do we collect information from minors?',
+      '1 What information do we collect?',
+      '2 What are your privacy rights?',
+      '3 Will your information be shared with anyone?',
+      '4 Controls for do-not-track features',
+      '5 Do we use cookies and other tracking technologies?',
+      '6 Do California residents have specific privacy rights?',
+      '7 How do we handle your social logins?',
+      '8 Do we make updates to this notice?',
+      '9 Is your information transferred internationally?',
+      '10 How can you contact us about this notice?',
+      '11 How long do we keep your information?',
+      '12 How can you review, update or delete the data we collect from you?',
+      '13 Do we collect information from minors?',
     ]
     const answers = [
       `<nav class='Point'>1. WHAT INFORMATION DO WE COLLECT?</nav>
