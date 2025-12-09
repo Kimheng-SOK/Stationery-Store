@@ -55,9 +55,12 @@ const navItems = [
     opacity 0.2s,
     color 0.2s;
 }
+
 .nav-link:hover {
-  opacity: 0.9;
+  color: #ff4f5a;
+  opacity: 1;
 }
+
 @media (max-width: 768px) {
   aside.bg-dark {
     width: 100% !important;

@@ -27,7 +27,7 @@ import AsideNavigation from '../components/layout/AdminASide.vue'
 .app-body {
   display: flex;
   padding-top: 5px;
-  min-height: calc(100vh - 5px);
+  min-height: calc(100vh - 80px);
 }
 
 .admin-sidebar {
@@ -45,7 +45,7 @@ import AsideNavigation from '../components/layout/AdminASide.vue'
 
 .main-content {
   flex: 1;
-  padding: 32px 30px;
+  /* padding: 32px 30px; */
   overflow-y: auto;
   margin-left: 215px;
   background: #fff;
