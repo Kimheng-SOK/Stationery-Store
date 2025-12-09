@@ -2,7 +2,7 @@
 import Footer from './components/Footer.vue'
 import NavBar from './components/NavBar.vue'
 import AdminSideBar from './components/layout/AdminASide.vue'
-
+import ProductDetails from './components/product/ProductDetails.vue';
 export default {
   name: 'App',
   components: {
@@ -14,5 +14,6 @@ export default {
 </script>
 
 <template>
+  <ProductDetails/>
   <router-view />
 </template>
