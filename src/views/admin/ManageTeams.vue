@@ -151,7 +151,6 @@
 </template>
 
 <script setup lang="ts">
-import { convertCompilerOptionsFromJson } from 'typescript'
 import { ref } from 'vue'
 
 interface TeamMember {
