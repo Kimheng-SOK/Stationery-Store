@@ -1,9 +1,9 @@
 <template>
-  <div class="container-fluid py-4 py-md-5">
+  <div class="container-fluid py-2 py-md-0">
     <div style="max-width: 1175px; margin: 0 auto; padding: 0 20px">
       <!-- Header Section -->
-      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-4 mb-5">
-        <h1 class="text-design-dark mb-0" style="font-size: 2rem; font-weight: 600">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
+        <h1 class="text-design-dark mb-0" style="font-size: 1.3rem; font-weight: 600">
           Team Members
         </h1>
         <div class="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3">
@@ -22,7 +22,7 @@
       </div>
 
       <!-- Divider -->
-      <div style="height: 1px; background-color: #dadada; margin-bottom: 3rem"></div>
+      <div style="height: 1px; background-color: #dadada; margin-bottom: 2rem"></div>
 
       <!-- Team Members Grid -->
       <div class="row g-4">
@@ -151,6 +151,7 @@
 </template>
 
 <script setup lang="ts">
+import { convertCompilerOptionsFromJson } from 'typescript'
 import { ref } from 'vue'
 
 interface TeamMember {
@@ -242,4 +243,13 @@ const handleDelete = (id: string) => {
 .modal.show {
   display: block;
 }
+.btn-design-red {
+  background-color: #FF4F5A;
+  color: white;
+  border: none;
+}
+.btn-design-red:hover {
+  background-color: #d9363e;
+}
+
 </style>
