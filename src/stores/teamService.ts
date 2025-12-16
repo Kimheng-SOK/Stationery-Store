@@ -57,3 +57,4 @@ export async function deleteTeamMember(id: string): Promise<void> {
     setTimeout(() => resolve(), 100)
   })
 }
+
