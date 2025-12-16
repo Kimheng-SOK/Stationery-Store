@@ -1,22 +1,6 @@
-export interface Customer {
-  id: string
-  name: string
-  phone: string
-  email: string
-  memberSince: string
-  purchasedItems: number
-  rewardPoints: number
-  avatar: string
-}
+import type { Customer } from '@/types/customer'
 
-export interface CustomersResponse {
-  data: Customer[]
-  total: number
-  page: number
-  pageSize: number
-}
-
-const staticCustomers: Customer[] = [
+export const customers: Customer[] = [
   {
     id: '1',
     name: 'Kevin Pollard',
@@ -161,39 +145,3 @@ const staticCustomers: Customer[] = [
       'https://api.builder.io/api/v1/image/assets/TEMP/17f82b9b79d74d66469b12d0193f3902d55cd835?width=60',
   },
 ]
-
-export const customerDataService = {
-  getCustomers: async (page: number = 1, pageSize: number = 20): Promise<CustomersResponse> => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 300))
-
-    const start = (page - 1) * pageSize
-    const end = start + pageSize
-    const paginatedData = staticCustomers.slice(start, end)
-
-    return {
-      data: paginatedData,
-      total: staticCustomers.length,
-      page,
-      pageSize,
-    }
-  },
-
-  searchCustomers: async (query: string): Promise<Customer[]> => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 200))
-
-    const lowerQuery = query.toLowerCase()
-    return staticCustomers.filter(
-      (customer) =>
-        customer.name.toLowerCase().includes(lowerQuery) ||
-        customer.email.toLowerCase().includes(lowerQuery) ||
-        customer.phone.includes(query),
-    )
-  },
-
-  getCustomerById: async (id: string): Promise<Customer | null> => {
-    await new Promise((resolve) => setTimeout(resolve, 100))
-    return staticCustomers.find((customer) => customer.id === id) || null
-  },
-}
