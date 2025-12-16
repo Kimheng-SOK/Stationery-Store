@@ -3,7 +3,6 @@
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-8 text-center">
-
           <h2 class="section-title">What Our Customers Say</h2>
           <p class="section-subtitle">Join thousands of satisfied customers worldwide</p>
 
@@ -11,9 +10,9 @@
           <div v-if="loading" class="d-flex justify-content-center py-5">
             <div
               class="spinner-border text-primary"
-              style="width:3rem;height:3rem"
-              role="status">
-            </div>
+              style="width: 3rem; height: 3rem"
+              role="status"
+            ></div>
           </div>
 
           <!-- Reviews -->
@@ -36,18 +35,11 @@
                   ></i>
                 </div>
 
-                <p class="fst-italic text-secondary mb-4">
-                  "{{ review.text }}"
-                </p>
+                <p class="fst-italic text-secondary mb-4">"{{ review.text }}"</p>
 
                 <!-- Reviewer -->
                 <div class="d-flex justify-content-center align-items-center gap-3">
-                  <img
-                    :src="review.avatar"
-                    class="rounded-circle"
-                    width="50"
-                    height="50"
-                  />
+                  <img :src="review.avatar" class="rounded-circle" width="50" height="50" />
                   <div class="text-start">
                     <p class="mb-0 fw-semibold">{{ review.author }}</p>
                     <small class="text-muted">{{ review.role }}</small>
@@ -67,23 +59,23 @@
               ></button>
             </div>
           </div>
-
         </div>
       </div>
     </div>
   </div>
 </template>
 
+<script lang="ts">
+import type { Review } from '@/types/review'
 
-<script>
 export default {
   name: 'CustomerReviewsCarousel',
   data() {
     return {
-      reviews: [],
+      reviews: [] as Review[],
       currentIndex: 0,
       loading: true,
-      autoPlayInterval: null
+      autoPlayInterval: null as number | null,
     }
   },
 
@@ -112,40 +104,40 @@ export default {
         this.reviews = [
           {
             id: 1,
-            text: "Absolutely love this product! The quality is amazing and delivery was super fast. Highly recommend!",
-            author: "Emma Wilson",
-            role: "Happy Customer",
-            avatar: "https://i.pravatar.cc/150?img=68",
-            rating: 5
+            text: 'Absolutely love this product! The quality is amazing and delivery was super fast. Highly recommend!',
+            author: 'Emma Wilson',
+            role: 'Happy Customer',
+            avatar: 'https://i.pravatar.cc/150?img=68',
+            rating: 5,
           },
           {
             id: 2,
             text: "Best purchase I've made this year. Customer service went above and beyond. Will definitely buy again!",
-            author: "James Martinez",
-            role: "Loyal Customer",
-            avatar: "https://i.pravatar.cc/150?img=56",
-            rating: 5
+            author: 'James Martinez',
+            role: 'Loyal Customer',
+            avatar: 'https://i.pravatar.cc/150?img=56',
+            rating: 5,
           },
           {
             id: 3,
-            text: "Exceeded all my expectations! Great value for money and the packaging was eco-friendly too.",
-            author: "Sophia Anderson",
-            role: "Verified Buyer",
-            avatar: "https://i.pravatar.cc/150?img=32",
-            rating: 5
-          }
+            text: 'Exceeded all my expectations! Great value for money and the packaging was eco-friendly too.',
+            author: 'Sophia Anderson',
+            role: 'Verified Buyer',
+            avatar: 'https://i.pravatar.cc/150?img=32',
+            rating: 5,
+          },
         ]
       } finally {
         this.loading = false
       }
-    }
-  }
+    },
+  },
 }
 </script>
 
 <style scoped>
 .reviews-wrapper {
-  height: 80vh; 
+  height: 80vh;
 }
 .review-card-container {
   max-width: 650px;
