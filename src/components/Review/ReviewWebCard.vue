@@ -1,5 +1,5 @@
 <template>
-  <div class="reviews-wrapper d-flex align-items-center justify-content-center min-vh-100 bg-light">
+  <div class="reviews-wrapper d-flex align-items-center justify-content-center bg-light">
     <div class="container">
       <div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-8 text-center">
@@ -144,6 +144,9 @@ export default {
 </script>
 
 <style scoped>
+.reviews-wrapper {
+  height: 80vh; 
+}
 .review-card-container {
   max-width: 650px;
   overflow: hidden;

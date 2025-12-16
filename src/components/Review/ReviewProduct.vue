@@ -1,17 +1,19 @@
 <template>
   <div class="container py-5">
     <div class="row">
-      <!-- Left: Form -->
+      <!-- Left: Form (Sticky) -->
       <div class="col-lg-5 mb-4">
-        <ReviewProductForm 
-          :productId="productId"
-          @submit-review="addReview"
-          @cancel="showForm = false"
-        />
+        <div class="sticky-form">
+          <ReviewProductForm 
+            :productId="productId"
+            @submit-review="addReview"
+            @cancel="showForm = false"
+          />
+        </div>
       </div>
 
       <!-- Right: Show All Reviews -->
-      <div class="col-lg-7">
+      <div class="col-lg-6">
         <ReviewProductCard 
           :reviews="allReviews"
           :averageRating="average"
@@ -22,9 +24,7 @@
     </div>
     
   </div>
-   <ReviewWebCard />
 
-    <ReviewWebForm userName="Ahmed Khan" serviceDate="Sunday, December 8" />
 </template>
 
 <script>
@@ -34,13 +34,12 @@ import ReviewWebForm from './ReviewWebForm.vue'
 import ReviewWebCard from './ReviewWebCard.vue'
 
 export default {
-  components: { ReviewProductForm, ReviewProductCard , ReviewWebCard, ReviewWebForm},
+  components: { ReviewProductForm, ReviewProductCard, ReviewWebCard, ReviewWebForm },
   data() {
     return {
       productId: 'PROD123',
       showForm: true,
       allReviews: []
-        
     }
   },
   computed: {
@@ -59,57 +58,8 @@ export default {
       }
     }
   },
-//   methods: {
-//     async addReview(reviewData) {
-//         // Step 1: Show the review instantly (for good UX)
-//         const imageUrls = reviewData.images.map(file => URL.createObjectURL(file))
-
-//         const newReview = {
-//         id: Date.now(),
-//         name: reviewData.name,
-//         rating: reviewData.rating,
-//         title: reviewData.title,
-//         content: reviewData.content,
-//         createdAt: new Date().toISOString().split('T')[0],
-//         verified: false,
-//         images: imageUrls,           // shows photos right away
-//         helpfulCount: 0
-//         }
-//         this.allReviews.unshift(newReview)   // ← appears instantly!
-
-//         // Step 2: Send to your real server (uncomment when ready)
-//         try {
-//         const formData = new FormData()
-//         formData.append('productId', this.productId)
-//         formData.append('name', reviewData.name)
-//         formData.append('email', reviewData.email)
-//         formData.append('rating', reviewData.rating)
-//         formData.append('title', reviewData.title)
-//         formData.append('content', reviewData.content)
-//         reviewData.images.forEach(file => formData.append('images', file))
-
-//         const response = await fetch('https://your-website.com/api/reviews', {
-//             method: 'POST',
-//             body: formData
-//         })
-
-//         if (response.ok) {
-//             alert('Review saved forever on the server!')
-//         } else {
-//             alert('Saved locally, but server is offline right now')
-//         }
-//         } catch (err) {
-//         console.log('Server not connected (this is normal when testing offline)')
-//         alert('Review saved locally – you’re testing offline! Everything works!')
-//         }
-//     }
-//     }
-
-
-
   methods: {
     addReview(reviewData) {
-      // Turn uploaded photos into URLs so they can be shown
       const imageUrls = reviewData.images.map(file => URL.createObjectURL(file))
 
       const newReview = {
@@ -118,16 +68,13 @@ export default {
         rating: reviewData.rating,
         title: reviewData.title,
         content: reviewData.content,
-        createdAt: new Date().toISOString().split('T')[0], // YYYY-MM-DD
+        createdAt: new Date().toISOString().split('T')[0],
         verified: false,
-        images: imageUrls,        // ← This makes photos appear!
+        images: imageUrls,
         helpfulCount: 0
       }
 
-      // Add new review to the top
       this.allReviews.unshift(newReview)
-
-      // Success message
       alert('Thank you! Your review is now visible below 👇')
     }
   }
@@ -135,5 +82,24 @@ export default {
 </script>
 
 <style scoped>
-.container { max-width: 1400px; }
+.container { 
+  max-width: 1400px;
+  padding: 60px 30px; /* Bigger margin */
+}
+
+.row {
+  gap: 40px; /* Space between columns */
+}
+
+.sticky-form {
+  position: sticky;
+  top: 20px; /* Distance from top when scrolling */
+  z-index: 10;
+}
+
+@media (max-width: 991px) {
+  .sticky-form {
+    position: static; /* Remove sticky on mobile */
+  }
+}
 </style>
