@@ -18,6 +18,11 @@ export default [
         path: '/new-arrival',
         name: 'NewArrival',
         component: () => import('@/views/user/NewArrivalView.vue')
+      },
+      {
+        path: '/checkout',
+        name: 'Checkout',
+        component: () => import('@/views/user/CheckoutView.vue')
       }
     ],
   },
