@@ -4,6 +4,7 @@ import NewArrivalView from '../views/user/NewArrivalView.vue'
 import ShopByCategory from '@/components/product/ShopByCategory.vue'
 import PopularProduct from '@/components/product/PopularProduct.vue'
 import HomePageView from '@/views/user/HomePageView.vue'
+import Checkout from'@/views/user/CheckoutView.vue'
 
 export default [
   {
@@ -21,6 +22,7 @@ export default [
       { path: '/categories', name: 'ShopByCategory', component: ShopByCategory },
       { path: '/hots', name: 'PopularProduct', component: PopularProduct },
       { path: '/home', name: 'HomePageView', component: HomePageView},
+      { path: '/checkout', name: 'Checkout', component: Checkout},
 
       {
         path: '/terms',
