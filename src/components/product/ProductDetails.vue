@@ -1,183 +1,172 @@
 <template>
-  <div class="w-full min-h-screen bg-gray-50 font-quicksand">
-    <div class="flex flex-col lg:flex-row">
-      <div class="relative w-full lg:w-1/2 flex justify-center items-center h-96 lg:h-screen bg-white">
-        <button
-          v-if="images.length > 1"
-          @click="prevSlide"
-          class="absolute top-12 left-6 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white shadow-lg hover:bg-gray-50 flex items-center justify-center text-gray-800 transition"
-        >
-          <i class="fa fa-arrow-left text-xl"></i>
-        </button>
-
-        <div class="relative w-full h-full overflow-hidden">
-          <div
-            v-for="(image, index) in images"
-            :key="index"
-            :class="[
-              'absolute w-full h-full transition-opacity duration-700 ease-in-out',
-              index === currentSlide ? 'opacity-100' : 'opacity-0'
-            ]"
-          >
-            <img :src="image" alt="Book Image" class="w-full h-full object-cover">
-          </div>
-
-          <button
-            v-if="images.length > 1"
-            @click="prevSlide"
-            class="absolute top-1/2 left-8 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white shadow-lg hover:bg-gray-50 flex items-center justify-center text-gray-800 transition"
-          >
-            <i class="fa fa-chevron-left text-xl"></i>
+  <div class="w-100 min-vh-100 bg-white" style="font-family: Quicksand, sans-serif;">
+    <!-- Header with Progress -->
+    <div class="border-bottom py-3">
+      <div class="container-fluid">
+        <div class="d-flex align-items-center fw-bold">
+          <button class="btn btn-link text-dark text-decoration-none d-flex align-items-center gap-2 p-0">
+            <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+            <span class="fw-bold">Back to shopping</span>
           </button>
 
-          <button
-            v-if="images.length > 1"
-            @click="nextSlide"
-            class="absolute top-1/2 right-8 -translate-y-1/2 z-10 w-12 h-12 rounded-full bg-white shadow-lg hover:bg-gray-50 flex items-center justify-center text-gray-800 transition"
-          >
-            <i class="fa fa-chevron-right text-xl"></i>
-          </button>
+          <div class="d-flex align-items-center gap-4 position-absolute start-50 translate-middle-x">
+            <div class="d-flex align-items-center gap-2 step-item"
+                :class="{ active: currentStep === 'cart' }"
+                @click="currentStep = 'cart'"
+                style="cursor: pointer;">
+              <span :class="currentStep === 'cart' ? 'fw-bold text-dark' : 'text-muted'">Cart</span>
+            </div>
 
-          <div class="absolute bottom-8 right-8 z-10 flex flex-col gap-2">
-            <button class="w-12 h-12 rounded-full bg-white shadow-lg hover:bg-gray-50 flex items-center justify-center transition">
-              <i :class="slideLiked ? 'fas fa-heart text-red-500 text-xl' : 'far fa-heart text-xl'" @click="toggleSlideHeart"></i>
-            </button>
-            <button class="w-12 h-12 rounded-full bg-white shadow-lg hover:bg-gray-50 flex items-center justify-center transition">
-              <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
-              </svg>
-            </button>
-          </div>
-          <div v-if="images.length > 1" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-            <button
-              v-for="(image, index) in images"
-              :key="index"
-              @click="goToSlide(index)"
-              :class="[
-                'h-2 rounded-full transition duration-1000',
-                index === currentSlide ? 'bg-indigo-600 w-8' : 'bg-white/50 w-2'
-              ]"
-            />
-          </div>
-        </div>
-      </div>
+            <div class="text-muted" style="font-size: 0.875rem;">- - - - - - - - - -</div>
 
-      <div class="w-full lg:w-1/2 p-8 lg:p-16 bg-gray-50">
-        <div class="flex items-center gap-2 text-sm text-gray-500 mb-8 font-bold">
-          <span>Books</span>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-          </svg>
-          <span>Medicine</span>
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-          </svg>
-          <span class="text-gray-900 font-medium">Surgery</span>
-        </div>
+            <div class="d-flex align-items-center gap-2 step-item"
+                :class="{ active: currentStep === 'address' }"
+                @click="currentStep = 'address'"
+                style="cursor: pointer;">
+              <span :class="currentStep === 'address' ? 'fw-bold text-dark' : 'text-muted'">Address</span>
+            </div>
 
-        <h1 class="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-          Brand Name - Product name,
-        </h1>
-        <p class="text-gray-600 mb-8 font-bold">
-          its specifications and all other details of it
-        </p>
-        <div class="text-4xl text-gray-900 mb-8 font-bold">
-          20$
-        </div>
-        <div class="flex items-center gap-4 mb-8">
-          <div class="flex items-center gap-3">
-            <button @click="decreaseQuantity" class="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded transition">
-              <svg class="w-5 h-5 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
-              </svg>
-            </button>
-            <span class="text-lg font-bold w-8 text-center">{{ quantity }}</span>
-            <button @click="increaseQuantity" class="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded transition">
-              <svg class="w-5 h-5 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-              </svg>
-            </button>
+            <div class="text-muted" style="font-size: 0.875rem;">- - - - - - - - - -</div>
+
+            <div class="d-flex align-items-center gap-2 step-item"
+                :class="{ active: currentStep === 'payment' }"
+                @click="currentStep = 'payment'"
+                style="cursor: pointer;">
+              <span :class="currentStep === 'payment' ? 'fw-bold text-dark' : 'text-muted'">Payment</span>
+            </div>
           </div>
-          <button class="w-50 h-12 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-bold">
-            Add to cart
-          </button>
-        </div>
-        <div class="text-sm font-bold pt-10">
-          <span class="font-bold text-black">Barcode:</span> 8901425031926
         </div>
       </div>
     </div>
 
-    <div class="p-12">
-      <div class="mt-12 w-1/2">
-        <h2 class="text-xl font-bold text-gray-900 mb-4">Description</h2>
+    <div class="container-fluid py-4">
+      <div class="row g-4">
+        <!-- Cart Items -->
+        <div class="col-lg-7">
+          <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+            <h2 class="h6 fw-bold mb-0">Product</h2>
+            <div class="d-flex gap-5 me-12">
+              <span class="h6 fw-bold mb-0 me-8" style="width: 80px; text-align: center;">Quantity</span>
+              <span class="h6 fw-bold mb-0 me-3" style="width: 80px; text-align: right;">Total</span>
+            </div>
+          </div>
 
-        <!-- FIXED READ MORE SECTION -->
-        <p class="text-gray-600 text-sm leading-relaxed mb-4">
-          {{ showFullDescription ? descriptionPage.description : descriptionPage.description.substring(0, 100) + '...' }}
-        </p>
-
-        <button class="text-indigo-600 font-bold text-sm hover:text-indigo-700" @click="toggleDescription">
-          {{ showFullDescription ? 'Read less' : 'Read more' }}
-        </button>
-      </div>
-
-      <div class="mt-12">
-        <h2 class="text-xl font-bold text-gray-900 mb-6">Product details</h2>
-        <div class="space-y-4">
-          <div class="flex justify-between text-sm py-3 border-b border-gray-200">
-            <span class="text-gray-600 font-bold">ISBN :</span>
-            <span class="text-gray-900 font-medium">{{ product_details.ISBNNumber }}</span>
-          </div>
-          <div class="flex justify-between text-sm py-3 border-b border-gray-200">
-            <span class="text-gray-600 font-bold">Weight:</span>
-            <span class="text-gray-900 font-medium">{{ product_details.weight }} g</span>
-          </div>
-          <div class="flex justify-between text-sm py-3 border-b border-gray-200">
-            <span class="text-gray-600 font-bold">Author:</span>
-            <span class="text-gray-900 font-medium">{{ product_details.authorName }}</span>
-          </div>
-          <div class="flex justify-between text-sm py-3 border-b border-gray-200">
-            <span class="text-gray-600 font-bold">Dimensions:</span>
-            <span class="text-gray-900 font-medium">{{ product_details.dimensions }} mm</span>
-          </div>
-          <div class="flex justify-between text-sm py-3 border-b border-gray-200">
-            <span class="text-gray-600 font-bold">Pages:</span>
-            <span class="text-gray-900 font-medium">{{ product_details.pageNumber }}</span>
-          </div>
-          <div class="flex justify-between text-sm py-3">
-            <span class="text-gray-600 font-bold">Published in:</span>
-            <span class="text-gray-900 font-medium">{{ product_details.publishIn }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="w-full  py-16 ">
-        <h2 class="text-2xl font-bold text-gray-900 mb-8">Related products</h2>
-        <div class="flex gap-6 overflow-x-auto scrollbar-hide pb-12">
-          <div
-            v-for="(product, index) in products"
-            :key="index"
-            class="group relative bg-gray-100 rounded-lg overflow-hidden shrink-0"
-          >
-            <div class="relative aspect-square w-65 h-75">
-              <img :src="product.image" alt="Product" class="w-full h-full object-cover">
-
-              <button class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white shadow-md hover:bg-gray-50 flex items-center justify-center transition">
-                <i
-                  :class="product.liked ? 'fas fa-heart text-red-500 text-xl' : 'far fa-heart text-xl'"
-                  @click="product.liked = !product.liked"
-                ></i>
-              </button>
-              <button class="absolute bottom-4 right-4 w-12 h-12 rounded-xl border-2 border-white bg-blue-900 hover:bg-blue-800 text-white flex items-center justify-center transition">
-                <i class="fa-solid fa-shopping-cart"></i>
-              </button>
+          <!-- Cart Item -->
+          <div v-for="(item, index) in cartItems" :key="index" class="d-flex gap-3 mb-3 pb-3 border-bottom position-relative">
+            <div v-if="item.badge" class="position-absolute start-0 top-0 bg-warning text-white px-2 py-1 rounded-bottom border border-white" style="font-size: 0.75rem; font-weight: 600; z-index: 1;">
+              {{ item.badge }}
             </div>
 
-            <div class="p-4">
-              <h3 class="text-sm font-medium text-gray-900 mb-1">{{ product.name }}</h3>
-              <p class="text-xs text-gray-600 mb-3">{{ product.description }}</p>
-              <p class="text-lg font-bold text-gray-900">{{ product.price }}</p>
+            <div class="position-relative" style="width: 150px; height: 150px; flex-shrink: 0;">
+              <img :src="item.image" alt="Product" class="w-100 h-100 rounded" style="object-fit: cover;">
+            </div>
+
+            <div class="flex-grow-1">
+              <h3 class="fw-bold mb-1" style="font-size: 0.9rem;">{{ item.name }}</h3>
+              <p class="text-muted fw-bold mb-2" style="font-size: 0.8rem;">{{ item.description }}</p>
+              <div class="d-flex gap-3 align-items-center">
+                <span class="fw-bold">${{ item.price.toFixed(2) }}</span>
+                <span class="text-muted text-decoration-line-through" style="font-size: 0.85rem;">{{ item.originalPrice.toFixed(2) }}</span>
+              </div>
+              <p class="text-muted fw-bold mb-0" style="font-size: 0.75rem;">SKU: {{ item.sku }}</p>
+              <p class="text-muted fw-bold mb-0" style="font-size: 0.75rem;">Delivery by {{ item.delivery }}</p>
+            </div>
+
+            <div class="d-flex align-items-center gap-4 ">
+              <div class="addbtn d-flex align-items-center gap-2 border-0 px-2 h-25 me-8" style="height: 32px;">
+                <button @click="decreaseItemQuantity(index)" class="btn btn-link p-0 text-dark text-decoration-none " style="width: 30px; height: 30px; font-size: 1.6rem; line-height: 1;">
+                  −
+                </button>
+                <span class="fw-bold " style="min-width: 30px; text-align: center; font-size: 1.3rem;">{{ item.quantity }}</span>
+                <button @click="increaseItemQuantity(index)" class="btn btn-link p-0 text-dark text-decoration-none " style="width: 30px; height: 30px; font-size: 1.6rem; line-height: 1;">
+                  +
+                </button>
+              </div>
+
+              <span class="fw-bold me-4" style="width: 80px; text-align: right;">${{ (item.price * item.quantity).toFixed(2) }}</span>
+
+              <button @click="removeItem(index)" class="btn btn-link p-0 text-dark bg-secondary-subtle h-full  ">
+                <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="col-lg-5">
+          <div class="border rounded p-4 bg-light " >
+
+            <h2 class="h5 fw-bold mb-4 " >Order Summary</h2>
+           <hr class="opacity-100" style="border-top: 2px solid var(--main-color2);">
+            <div class="d-flex align-items-start gap-2 mb-3 p-3 rounded relative">
+              <svg xmlns="http://www.w3.org/2000/svg" width="42" height="22" fill="currentColor" class="bi bi-check-circle-fill text-success absolute left-0 top-2" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="42" fill="currentColor" class="bi bi-truck text-secondary  " viewBox="0 0 16 16">
+                <path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h9A1.5 1.5 0 0 1 12 3.5V5h1.02a1.5 1.5 0 0 1 1.17.563l1.481 1.85a1.5 1.5 0 0 1 .329.938V10.5a1.5 1.5 0 0 1-1.5 1.5H14a2 2 0 1 1-4 0H5a2 2 0 1 1-3.998-.085A1.5 1.5 0 0 1 0 10.5zm1.294 7.456A2 2 0 0 1 4.732 11h5.536a2 2 0 0 1 .732-.732V3.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .294.456M12 10a2 2 0 0 1 1.732 1h.768a.5.5 0 0 0 .5-.5V8.35a.5.5 0 0 0-.11-.312l-1.48-1.85A.5.5 0 0 0 13.02 6H12zm-9 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2m9 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>
+              </svg>
+              <p class="mb-0 small text-dark pt-2 fs-5 fw-bold">
+                Yay! Free shipping available on this order.
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted text-main-color2 fw-bold">Item Total ({{ totalItems }} Items)</span>
+                <span class="fw-medium">{{ itemTotal.toFixed(2) }}</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted text-main-color2 fw-bold">Discount</span>
+                <span class="fw-medium text-secondary">2.50</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="d-flex align-items-center gap-2">
+                  <input type="radio" name="shipping" value="shipping" style="color: var(--main-color2);" checked>
+                  <span class="text-muted text-main-color2 fw-bold">Shipping</span>
+                </div>
+                <span class="fw-medium">2.50</span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center gap-2">
+                  <input type="radio" name="shipping" value="pickup">
+                  <span class="text-muted text-main-color2 fw-bold">Local Pickup</span>
+                </div>
+                <span class="fw-medium">Free</span>
+              </div>
+
+            <div class="d-flex mb-3 coupon-wrapper position-relative">
+              <input type="text" class="form-control fw-bold px-5" style="background-color:#eef0fb; width: 90% ; height: 50px;" placeholder="Coupon code" v-model="couponCode">
+              <button class="w-25 btn btn-primary px-4 position-absolute right-0" style="background-color: var(--main-color2); height: 50px;">Apply</button>
+            </div>
+
+              <hr class="opacity-100" style="border-top: 2px solid var(--main-color2);">
+              <div class="d-flex justify-content-between align-items-center pt-3 " style="color: var(--main-color2); ">
+                <span class="h5 fw-bold mb-0 text-main-color2">Grand Total</span>
+                <span class="h5 fw-bold mb-0">{{ grandTotal.toFixed(2) }} $</span>
+              </div>
+            </div>
+
+            <div class="form-check mb-3">
+              <input class="form-check-input " type="checkbox" v-model="deliverTogether" id="deliverTogether">
+              <label class="form-check-label small fw-bold" for="deliverTogether">
+                Deliver all together
+              </label>
+            </div>
+
+            <div class="text-center">
+              <p class="text-muted mb-2 fw-bold" style="font-size: 0.7rem;">
+                (estimated delivery by 17 Oct 2025)
+              </p>
+              <div class="d-flex justify-content-center">
+                <button class="btn btn-success fw-semibold rounded-3 fs-4 d-flex align-items-center justify-content-center"
+                        style="background-color: var(--main-color3); width: 75%; height: 50px;">
+                  Checkout
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -187,51 +176,164 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { assets } from '../assets/assets'
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
-const descriptionPage = ref({
-  description: "Vestibulum eu quam nec neque pellentesque efficitur id eget nisl. Proin porta est convallis lacus blandit pretium sed non enim. Maecenas lacinia non orci at aliquam. Donec finibus, urna bibendum ultricies laoreet, augue eros luctus sapien, ut euismod leo tortor ac enim. In hac habitasse platea dictumst. Sed cursus venenatis tellus, non lobortis diam volutpat sit amet. Sed tellus augue, hendrerit eu rutrum in, porttitor at metus. Mauris ac hendrerit metus. Phasellus mattis lectus commodo felis egestas, id accumsan justo ultrices. Phasellus aliquet, sem a placerat dapibus, enim purus dictum lacus, nec ultrices ante dui ac ante. Phasellus placerat, urna."
-})
-
-const product_details = ref(
+const cartItems = ref([
   {
-    ISBNNumber: '978-3-16-148410-0',
-    weight: '270',
-    authorName: 'Judy DeFilippo, Charles Skidmore',
-    dimensions: '210 × 276 × 10',
-    pageNumber: '120',
-    publishIn: 'Upper Saddle River United States'
+    image: assets.book_details,
+    name: 'Brand Name - Product name,',
+    description: 'its specifications and all other details of it',
+    price: 3.80,
+    originalPrice: 0.00,
+    quantity: 1,
+    sku: '890142503192​6',
+    delivery: '4 Jun 2025',
+    badge: 'Xmas'
+  },
+  {
+    image: assets.book_details,
+    name: 'Brand Name - Product name,',
+    description: 'its specifications and all other details of other...',
+    price: 3.80,
+    originalPrice: 0.00,
+    quantity: 1,
+    sku: '890142503192​6',
+    delivery: '4 Jun 2025',
+    badge: null
+  },
+  {
+    image: assets.book_details,
+    name: 'Brand Name - Product name,',
+    description: 'its specifications and all other details of it',
+    price: 3.80,
+    originalPrice: 0.00,
+    quantity: 1,
+    sku: '890142503192​6',
+    delivery: '4 Jun 2025',
+    badge: null
+  },
+  {
+    image: assets.book_details,
+    name: 'Brand Name - Product name,',
+    description: 'its specifications and all other details of it',
+    price: 3.80,
+    originalPrice: 0.00,
+    quantity: 1,
+    sku: '890142503192​6',
+    delivery: '4 Jun 2025',
+    badge: 'Sold out'
   }
-)
-
-const products = ref([
-  { image: assets.book_details ,  name: 'Brand Name - Acrylic painting pad', description: 'A4 | 360 gsm', price: 'AED 4.17', liked: false },
-  { image: assets.book_details, name: 'Brand Name - Sketch pad', description: 'A5 | 200 gsm', price: 'AED 3.50', liked: false },
-  { image: assets.book_details, name: 'Brand Name - Canvas board', description: '12x12', price: 'AED 6.00', liked: false },
-  { image: assets.book_details, name: 'Brand Name - Watercolor pad', description: 'A4 | 300 gsm', price: 'AED 5.25', liked: false },
-  { image: assets.book_details, name: 'Brand Name - Drawing pad', description: 'A3 | 350 gsm', price: 'AED 7.10', liked: false },
-  { image: assets.book_details, name: 'Brand Name - Mixed media pad', description: 'A4 | 300 gsm', price: 'AED 6.50', liked: false },
 ])
 
-const images = [assets.book_details, assets.facebook, assets.access, assets.google]
-const currentSlide = ref(0)
-const slideLiked = ref(false)
-const showFullDescription = ref(false)
+const couponCode = ref('')
+const deliverTogether = ref(false)
+const currentStep = ref('cart');
+const totalItems = computed(() => {
+  return cartItems.value.reduce((sum, item) => sum + item.quantity, 0)
+})
 
-const quantity = ref(1)
-const increaseQuantity = () => { if(quantity.value>0) quantity.value++ }
-const decreaseQuantity = () => { if(quantity.value>1) quantity.value-- }
+const itemTotal = computed(() => {
+  return cartItems.value.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+})
 
-const nextSlide = () => { currentSlide.value = (currentSlide.value + 1) % images.length }
-const prevSlide = () => { currentSlide.value = (currentSlide.value - 1 + images.length) % images.length }
-const goToSlide = (index: number) => { currentSlide.value = index }
+const grandTotal = computed(() => {
+  return itemTotal.value - 2.50 + 2.50
+})
 
-const toggleSlideHeart = () => { slideLiked.value = !slideLiked.value }
-const toggleDescription = () => { showFullDescription.value = !showFullDescription.value }
+const increaseItemQuantity = (index: number) => {
+  cartItems.value[index].quantity++;
+}
+
+const decreaseItemQuantity = (index: number) => {
+  if (cartItems.value[index].quantity > 1) {
+    cartItems.value[index].quantity--;
+  }
+}
+
+const removeItem = (index: number) => {
+  cartItems.value.splice(index, 1)
+}
 </script>
 
 <style>
+  .text-main-color2 {
+  color: var(--main-color2) !important;
+  }
+
+  .step-item {
+  position: relative;
+  padding-bottom: 4px;
+}
+
+.step-item.active span {
+  border-bottom: 2px solid #141B3E;
+  padding-bottom: 2px;
+}
+
+.step-item:hover {
+  opacity: 0.8;
+}
+
+.coupon-wrapper .form-control {
+  border-top-left-radius: 50px;
+  border-bottom-left-radius: 50px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: 0;
+}
+
+.coupon-wrapper .btn {
+  border-top-left-radius: 50px;
+  border-bottom-left-radius: 50px;
+  border-top-right-radius: 50px;
+  border-bottom-right-radius: 50px;
+  margin-left: -1px;
+}
+
+.coupon-wrapper .form-control {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.coupon-wrapper .form-control:focus {
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.form-check-input:checked {
+  background-color: #141B3E;
+  border-color: #141B3E;
+}
+.addbtn {
+  border: 1.5px solid #6c757d;
+  border-color: var(--bs-secondary) !important;
+}
+.form-check-input {
+  border: 1.5px solid #6c757d;
+  border-color: var(--bs-secondary) !important;
+}
+
+.form-check-input:checked {
+  background-color: var(--main-color2);
+  border-color: var(--main-color2) !important;
+}
+
+.form-check-input:focus {
+  border-color: var(--main-color2);
+  box-shadow: 0 0 0 0.25rem rgba(20, 27, 62, 0.25);
+}
+
+.form-check-input:focus {
+  border-color: #141B3E;
+  box-shadow: 0 0 0 0.25rem rgba(20, 27, 62, 0.25);
+}
+
+
 .scrollbar-hide::-webkit-scrollbar { height: 8px; }
 .scrollbar-hide::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,0.3); border-radius: 4px; }
 .scrollbar-hide::-webkit-scrollbar-track { background: transparent; }
