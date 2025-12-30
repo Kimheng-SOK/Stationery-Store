@@ -1,55 +1,128 @@
 <template>
-  <div class="flex flex-col lg:flex-row w-full min-h-screen">
+  <div class="d-flex flex-column flex-lg-row w-100 min-vh-100">
 
-    <div class="w-full lg:w-1/2 flex justify-center items-center h-64 sm:h-80 lg:h-screen">
+    <div class="w-100 d-flex justify-content-center align-items-center" style="height: 16rem; height: 20rem; height: 100vh;">
       <img
         src="../assets/image/pfp.png"
         alt="Access Image"
-        class="w-full h-full object-cover"
+        class="w-100 h-100"
+        style="object-fit: cover;"
       >
     </div>
 
 
-    <div class="w-full lg:w-1/2 flex justify-center items-center p-6 sm:p-10 lg:p-16">
-      <div class="text-center w-full sm:w-[85%] md:w-[75%] lg:w-[70%]">
-        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-main-black">Sign Up</h1>
-        <h1 class="text-base sm:text-lg lg:text-xl text-(--main-color1) font-quicksand mt-2">Create your account to start shopping</h1>
+    <div class="w-100 d-flex justify-content-center align-items-center p-3 ">
+      <div class="text-center w-100" style="max-width: 85%;">
+        <h1 class="fs-2 fs-sm-1 fw-bold text-dark">Sign Up</h1>
+        <h1 class="fs-5 fs-sm-4 mt-2" style="color: var(--main-color1); font-family: 'Quicksand', sans-serif;">Create your account to start shopping</h1>
 
-        <form action="" class="pt-4 sm:pt-6 space-y-4 sm:space-y-5 lg:space-y-7 py-5">
-          <input type="text" placeholder="Username" v-model="username" class="id border-[1.5px] border-(--main-color1) rounded-md h-12 sm:h-14 lg:h-15 w-full px-4 sm:px-6 lg:px-7 text-base sm:text-lg lg:text-xl text-(--main-color1) font-quicksand" required/>
-          <input type="email" placeholder="Email" v-model="email" class="id border-[1.5px] border-(--main-color1) rounded-md h-12 sm:h-14 lg:h-15 w-full px-4 sm:px-6 lg:px-7 text-base sm:text-lg lg:text-xl text-(--main-color1) font-quicksand" required/>
-
-          <div class="flex relative">
-            <input placeholder="Password" :type="showPassword ? 'text' : 'password'" v-model="password" class="pw border-[1.5px] border-(--main-color1) rounded-md h-12 sm:h-14 lg:h-15 w-full px-4 sm:px-6 lg:px-7 text-base sm:text-lg lg:text-xl text-(--main-color1) font-quicksand" required/>
-            <i class="fa absolute right-4 sm:right-6 lg:right-8 top-4 sm:top-[18px] lg:top-5 text-(--main-color1) cursor-pointer"  :class="showPassword ? 'fa-eye-slash' : 'fa-eye'" @click="togglePassword" aria-hidden="true"></i>
+        <form action="text" class="pt-3 pt-sm-4 ">
+          <div class="mb-3 mb-sm-4 mb-lg-5">
+            <input
+              type="text"
+              placeholder="Username"
+              v-model="username"
+              class="form-control fs-5 fs-sm-4 px-3 px-sm-4 px-lg-5"
+              style="border: 1.5px solid var(--main-color1); height: 3rem; color: var(--main-color1); font-family: 'Quicksand', sans-serif;"
+              required
+            />
           </div>
 
-          <div class="flex relative">
-            <input :type="showConfirmPassword ? 'text' : 'password'" v-model="confirmPassword" placeholder="confirm Password"  class="confirmPw border-[1.5px] border-(--main-color1) rounded-md h-12 sm:h-14 lg:h-15 w-full px-4 sm:px-6 lg:px-7 text-base sm:text-lg lg:text-xl text-(--main-color1) font-quicksand" required/>
-            <i class="fa absolute right-4 sm:right-6 lg:right-8 top-4 sm:top-[18px] lg:top-5 text-(--main-color1) cursor-pointer" :class="showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'" @click="toggleConfirmPassword"  aria-hidden="true"></i>
+          <div class="mb-3 mb-sm-4 mb-lg-5">
+            <input
+              type="email"
+              placeholder="Email"
+              v-model="email"
+              class="form-control fs-5 fs-sm-4 px-3 px-sm-4 px-lg-5"
+              style="border: 1.5px solid var(--main-color1); height: 3rem; color: var(--main-color1); font-family: 'Quicksand', sans-serif;"
+              required
+            />
+          </div>
+
+          <div class="position-relative mb-3 mb-sm-4 mb-lg-5">
+            <input
+              placeholder="Password"
+              :type="showPassword ? 'text' : 'password'"
+              v-model="password"
+              class="form-control fs-5 fs-sm-4 px-3 px-sm-4 px-lg-5"
+              style="border: 1.5px solid var(--main-color1); height: 3rem; color: var(--main-color1); font-family: 'Quicksand', sans-serif;"
+              required
+            />
+            <i
+              class="fa position-absolute top-50 translate-middle-y end-0 me-3 me-sm-4 me-lg-5"
+              style="color: var(--main-color1); cursor: pointer;"
+              :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"
+              @click="togglePassword"
+              aria-hidden="true"
+            ></i>
+          </div>
+
+          <div class="position-relative mb-3 mb-sm-4 mb-lg-5">
+            <input
+              :type="showConfirmPassword ? 'text' : 'password'"
+              v-model="confirmPassword"
+              placeholder="Confirm Password"
+              class="form-control fs-5 fs-sm-4 px-3 px-sm-4 px-lg-5"
+              style="border: 1.5px solid var(--main-color1); height: 3rem; color: var(--main-color1); font-family: 'Quicksand', sans-serif;"
+              required
+            />
+            <i
+              class="fa position-absolute top-50 translate-middle-y end-0 me-3 me-sm-4 me-lg-5"
+              style="color: var(--main-color1); cursor: pointer;"
+              :class="showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"
+              @click="toggleConfirmPassword"
+              aria-hidden="true"
+            ></i>
           </div>
         </form>
 
-        <div class="py-2">
-         <button @click="handleSignUp()" class="bg-(--main-color2) rounded-2xl h-12 sm:h-14 lg:h-15 w-full px-4 sm:px-6 lg:px-7 text-lg sm:text-xl lg:text-2xl text-white font-bold">Sign In</button>
+        <div class="">
+          <button
+            @click="handleSignUp()"
+            class="btn w-100 text-white fw-bold fs-4 fs-sm-3 px-3 px-sm-4 px-lg-5 rounded-3"
+            style="background-color: var(--main-color2); height: 3.5rem;"
+          >
+            Sign Up
+          </button>
         </div>
 
-        <router-link to="/signin"><p class="text-sm sm:text-base lg:text-md font-quicksand text-(--main-color1) mt-2">Already have your account? <span class="text-(--main-color2) font-semibold hover:text-blue-800">Sign In</span></p></router-link>
-        <p class="text-xs sm:text-sm lg:text-md font-quicksand text-(--main-color1) pt-2">By signing up you agree to our <span class="text-(--main-color1) underline">Terms of Service</span> and <br class="hidden sm:inline"> <span class="text-(--main-color1) underline">Privacy Policy</span></p>
-        <hr class="w-full sm:w-70 mx-auto border-[1.2px] border-(--main-color1) mt-6 sm:mt-8">
+        <router-link to="/signin" class="text-decoration-none">
+          <p class="small fs-sm-6 mt-2" style="color: var(--main-color1); font-family: 'Quicksand', sans-serif;">
+            Already have your account?
+            <span class="fw-semibold" style="color: var(--main-color2);">Sign In</span>
+          </p>
+        </router-link>
 
-         <div class="flex justify-center gap-4 mt-4 sm:mt-6">
-          <div class="flex gap-3 sm:gap-4 lg:gap-6">
-            <img :src="assets.google" alt="" class="w-15 h-15 border border-(--main-color1) p-3 rounded-xl cursor-pointer">
-            <img :src="assets.facebook" alt="" class="w-15 h-15 border border-(--main-color1) p-3 rounded-xl cursor-pointer">
-          </div>
+        <p class="small mt-2" style="color: var(--main-color1); font-family: 'Quicksand', sans-serif;">
+          By signing up you agree to our
+          <span class="text-decoration-underline" style="color: var(--main-color1);">Terms of Service</span>
+          and
+          <br class="d-none d-sm-inline">
+          <span class="text-decoration-underline" style="color: var(--main-color1);">Privacy Policy</span>
+        </p>
+
+        <hr class="mx-auto my-4 " style="max-width: 70%; border: 1.2px solid var(--main-color1);">
+
+        <div class="d-flex justify-content-center gap-3 gap-sm-4 gap-lg-5 mt-3 mt-sm-4">
+          <img
+            :src="assets.google"
+            alt=""
+            class="border rounded-3 p-3"
+            style="width: 3.75rem; height: 3.75rem; border-color: var(--main-color1) !important; cursor: pointer;"
+          >
+          <img
+            :src="assets.facebook"
+            alt=""
+            class="border rounded-3 p-3"
+            style="width: 3.75rem; height: 3.75rem; border-color: var(--main-color1) !important; cursor: pointer;"
+          >
         </div>
       </div>
     </div>
   </div>
 </template>
 
-<script lang="ts" >
+<script lang="ts">
 import { assets } from '../assets/assets'
 
 export default {
@@ -93,11 +166,18 @@ export default {
 
   }
 }
-
-
-
 </script>
 
-<style>
+<style scoped>
+/* Additional responsive adjustments if needed */
+@media (min-width: 576px) {
+  .fs-sm-1 { font-size: 2.5rem !important; }
+  .fs-sm-3 { font-size: 1.75rem !important; }
+  .fs-sm-4 { font-size: 1.25rem !important; }
+  .fs-sm-6 { font-size: 1rem !important; }
+}
 
+@media (min-width: 992px) {
+  .p-lg-5 { padding: 4rem !important; }
+}
 </style>
