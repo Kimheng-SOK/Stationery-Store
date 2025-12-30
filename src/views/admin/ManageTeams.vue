@@ -151,21 +151,10 @@
 </template>
 
 <script setup lang="ts">
+import { members as initialMembers } from '@/data/teamMembers'
 import { ref } from 'vue'
-
-interface TeamMember {
-  id: string
-  name: string
-  role: string
-}
-
-const members = ref<TeamMember[]>([
-  { id: '1', name: 'SOK Kimheng', role: 'Project manager' },
-  { id: '2', name: 'SOENG Prakbormey', role: 'Project manager' },
-  { id: '3', name: 'SAN Meyheing', role: 'QA & Tester' },
-  { id: '4', name: 'SAR Vichada', role: 'Reporter' },
-  { id: '5', name: 'PHE Rithika', role: 'Code reviewer' },
-])
+import type { TeamMember } from '@/types/teamMember'
+const members = ref([...initialMembers])
 
 const isDialogOpen = ref(false)
 const isEditMode = ref(false)
@@ -198,7 +187,7 @@ const handleSave = () => {
   }
 
   if (isEditMode.value && editingId.value) {
-    const index = members.value.findIndex((m) => m.id === editingId.value)
+    const index = members.value.findIndex((m: TeamMember) => m.id === editingId.value)
     if (index !== -1) {
       members.value[index] = {
         id: editingId.value,
@@ -220,7 +209,7 @@ const handleSave = () => {
 
 const handleDelete = (id: string) => {
   if (confirm('Are you sure you want to delete this member?')) {
-    members.value = members.value.filter((m) => m.id !== id)
+    members.value = members.value.filter((m: TeamMember) => m.id !== id)
   }
 }
 </script>
