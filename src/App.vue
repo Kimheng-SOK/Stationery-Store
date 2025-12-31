@@ -1,21 +1,16 @@
 <script lang="ts">
-import Footer from './components/Footer.vue'
-import NavBar from './components/NavBar.vue'
-import AdminSideBar from './components/layout/AdminASide.vue'
-import ProductDetails from './components/product/ProductDetails.vue' // Correct path
+import EmptyProduct from './components/product/EmptyProduct.vue';
+
 
 export default {
   name: 'App',
   components: {
-    NavBar,
-    Footer,
-    AdminSideBar,
-    ProductDetails, // Add to components
+    EmptyProduct, 
   },
 }
 </script>
 
 <template>
-  <ProductDetails/>
+  <EmptyProduct/>
   <router-view />
 </template>
