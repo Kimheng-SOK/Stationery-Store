@@ -3,151 +3,133 @@
     <div class="categories-container">
       <div class="categories-header">
         <h2 class="categories-title">Categories</h2>
-        <button class="btn btn-add-new">Add New</button>
+        <button class="btn btn-add-new" @click="openAddModal">Add New</button>
       </div>
       <div class="categories-divider"></div>
 
       <!-- Category Cards -->
       <div class="categories-list">
-        <!-- Book Category -->
-        <div class="category-card">
-          <div class="category-image-wrapper">
-            <img
-              src="/public/images/notebooks/book4.jpg"
-              alt="Notebook"
-              class="category-image"
-            />
-          </div>
-          <div class="category-content">
-            <h3 class="category-name">NoteBooks</h3>
-            <div class="category-subcategories">
-              <p class="sub-label">Tags</p>
-              <div class="sub-tags">
-                <span class="sub-tag">Premium Leather Journal</span>
-                <span class="sub-tag">Notebook Set - Premium</span>
-                <span class="sub-tag">School Notebooks</span>
-                <span class="sub-tag">College Notebooks</span>
-                <span class="sub-tag">Office Notebooks</span>
-                <span class="sub-tag">Exam Notebooks</span>
-                <span class="sub-tag">Drawing Notebook</span>
-                <span class="sub-tag">Executive Notebook Set</span>
-              </div>
-            </div>
-          </div>
-          <div class="category-actions">
-            <button class="btn btn-edit">Edit</button>
-            <button class="btn btn-delete">Delete</button>
-          </div>
+        <div v-if="categories.length === 0" class="text-center py-5 text-muted">
+          <p>No categories found. Click "Add New" to create one.</p>
         </div>
 
-        <!-- Pens & Pencils Category -->
-        <div class="category-card">
+        <div v-for="category in categories" :key="category.id" class="category-card">
           <div class="category-image-wrapper">
             <img
-              src="/public/images/pens&pencils/pen2.jpg"
-              alt="Pens & Pencils"
+              :src="category.image"
+              :alt="category.name"
               class="category-image"
             />
           </div>
           <div class="category-content">
-            <h3 class="category-name">Pens & Pencils</h3>
+            <h3 class="category-name">{{ category.name }}</h3>
             <div class="category-subcategories">
-              <p class="sub-label">Tags</p>
-              <div class="sub-tags">
-                <span class="sub-tag">Premium Pen Collection</span>
-                <span class="sub-tag">Professional Pen Set 2024</span>
-                <span class="sub-tag">Marker Set - Vibrant</span>
-                <span class="sub-tag">Highlighter Set - Pastel</span>
-                <span class="sub-tag">Health & Personal Care</span>
-                <span class="sub-tag">Gel Pens Set - All Colors</span>
-              </div>
+              <p class="sub-label">Description</p>
+              <p class="category-description">{{ category.description || 'No description added' }}</p>
             </div>
           </div>
           <div class="category-actions">
-            <button class="btn btn-edit">Edit</button>
-            <button class="btn btn-delete">Delete</button>
+            <button class="btn btn-edit" @click="editCategory(category)">Edit</button>
+            <button class="btn btn-delete" @click="confirmDelete(category)">Delete</button>
           </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Office supplies Category -->
-        <div class="category-card">
-          <div class="category-image-wrapper">
-            <img
-              src="/public/images/officeSupplies/office1.jpg"
-              alt="officesupplies"
-              class="category-image"
-            />
+    <!-- Add/Edit Modal -->
+    <div v-if="showModal" class="modal d-block" style="background-color: rgba(0, 0, 0, 0.5)">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title">
+              {{ editingCategory ? 'Edit Category' : 'Add New Category' }}
+            </h3>
+            <button
+              type="button"
+              class="btn-close"
+              @click="closeModal"
+              :disabled="isSubmitting"
+            ></button>
           </div>
-          <div class="category-content">
-            <h3 class="category-name">Office Supplies</h3>
-            <div class="category-subcategories">
-              <p class="sub-label">Tags</p>
-              <div class="sub-tags">
-                <span class="sub-tag">Desk Lamp Modern</span>
-                <span class="sub-tag">Bamboo Desk Organizer</span>
-                <span class="sub-tag">Desk Calendar 2025</span>
-              </div>
+
+          <form @submit.prevent="saveCategory" class="modal-body">
+            <!-- Success/Error Message -->
+            <div v-if="submitMessage" :class="['alert', `alert-${submitMessage.type}`]">
+              <i :class="`bi bi-${submitMessage.type === 'success' ? 'check-circle' : 'exclamation-circle'}`"></i>
+              {{ submitMessage.text }}
             </div>
-          </div>
-          <div class="category-actions">
-            <button class="btn btn-edit">Edit</button>
-            <button class="btn btn-delete">Delete</button>
-          </div>
+
+            <!-- Category Name -->
+            <div class="mb-3">
+              <label class="form-label">Category Name</label>
+              <input
+                v-model="formData.name"
+                type="text"
+                :class="['form-control', { 'is-invalid': errors.name }]"
+                placeholder="e.g., Notebooks, Pens & Pencils"
+              />
+              <small v-if="errors.name" class="text-danger">{{ errors.name }}</small>
+            </div>
+
+            <!-- Description -->
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <textarea
+                v-model="formData.description"
+                class="form-control"
+                rows="3"
+                placeholder="Enter category description (optional)"
+              ></textarea>
+            </div>
+
+            <!-- Category Image -->
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Category Image</label>
+              <FileUpload
+                v-model="formData.image"
+                alt-text="Category image"
+                @update:model-value="(val) => (formData.image = val)"
+              />
+              <small v-if="errors.image" class="text-danger d-block mt-2">{{ errors.image }}</small>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="modal-footer mt-4">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                @click="closeModal"
+                :disabled="isSubmitting"
+              >
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
+                <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+                {{ editingCategory ? 'Update' : 'Add' }}
+              </button>
+            </div>
+          </form>
         </div>
+      </div>
+    </div>
 
-        <!-- Art Supplies Category -->
-        <div class="category-card">
-          <div class="category-image-wrapper">
-            <img
-              src="/public/images/artSupplies/art1.jpg"
-              alt="Beauty"
-              class="category-image"
-            />
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteModal" class="modal d-block" style="background-color: rgba(0, 0, 0, 0.5)">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Confirm Delete</h5>
+            <button type="button" class="btn-close" @click="showDeleteModal = false"></button>
           </div>
-          <div class="category-content">
-            <h3 class="category-name">Art Supplies</h3>
-            <div class="category-subcategories">
-              <p class="sub-label">Tags</p>
-              <div class="sub-tags">
-                <span class="sub-tag">Watercolor Paint Set</span>
-                <span class="sub-tag">Acrylic Paint Set</span>
-                <span class="sub-tag">Sketching Pencil Set</span>
-                <span class="sub-tag">Brush Set for Artists</span>
-              </div>
-            </div>
+          <div class="modal-body">
+            <p>Are you sure you want to delete <strong>{{ categoryToDelete?.name }}</strong>?</p>
+            <p class="text-muted small">This action cannot be undone.</p>
           </div>
-          <div class="category-actions">
-            <button class="btn btn-edit">Edit</button>
-            <button class="btn btn-delete">Delete</button>
-          </div>
-        </div>
-
-        <!-- Sticky Note Category -->
-        <div class="category-card">
-          <div class="category-image-wrapper">
-            <img
-              src="/public/images/stickyNote/stick1.jpg"
-              alt="stickynote"
-              class="category-image"
-            />
-          </div>
-          <div class="category-content">
-            <h3 class="category-name">stickynote</h3>
-            <div class="category-subcategories">
-              <p class="sub-label">Tags</p>
-              <div class="sub-tags">
-                <span class="sub-tag">Colorful Sticky Notes Set</span>
-                <span class="sub-tag">Pastel Sticky Notes Set</span>
-                <span class="sub-tag">Neon Sticky Notes Pack</span>
-                <span class="sub-tag">Transparent Sticky Notes</span>
-                <span class="sub-tag">Page Marker Sticky Notes</span>
-                <span class="sub-tag">Mini Sticky Notes</span>
-              </div>
-            </div>
-          </div>
-          <div class="category-actions">
-            <button class="btn btn-edit">Edit</button>
-            <button class="btn btn-delete">Delete</button>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="showDeleteModal = false">
+              Cancel
+            </button>
+            <button type="button" class="btn btn-danger" @click="deleteCategory">Delete</button>
           </div>
         </div>
       </div>
@@ -155,7 +137,158 @@
   </div>
 </template>
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { ref } from 'vue'
+import FileUpload from '@/components/common/FileUpload.vue'
+import { useFormState } from '@/composables/useFormState'
+
+interface Category {
+  id: number
+  name: string
+  description?: string
+  image: string
+}
+
+// Sample data - in production, this would come from an API
+const initialCategories: Category[] = [
+  {
+    id: 1,
+    name: 'NoteBooks',
+    description: 'Wide range of premium notebooks for all purposes',
+    image: '/public/images/notebooks/book4.jpg',
+  },
+  {
+    id: 2,
+    name: 'Pens & Pencils',
+    description: 'Quality writing instruments for professionals and students',
+    image: '/public/images/pens&pencils/pen2.jpg',
+  },
+  {
+    id: 3,
+    name: 'Office Supplies',
+    description: 'Essential office equipment and accessories',
+    image: '/public/images/officeSupplies/office1.jpg',
+  },
+  {
+    id: 4,
+    name: 'Art Supplies',
+    description: 'Professional art materials for creative professionals',
+    image: '/public/images/artSupplies/art1.jpg',
+  },
+  {
+    id: 5,
+    name: 'Sticky Notes',
+    description: 'Colorful and practical sticky note collections',
+    image: '/public/images/stickyNote/stick1.jpg',
+  },
+]
+
+const categories = ref<Category[]>(initialCategories)
+const showModal = ref(false)
+const showDeleteModal = ref(false)
+const editingCategory = ref<Category | null>(null)
+const categoryToDelete = ref<Category | null>(null)
+
+const initialFormData = {
+  id: 0,
+  name: '',
+  description: '',
+  image: '',
+}
+
+const {
+  formData,
+  errors,
+  isSubmitting,
+  submitMessage,
+  validateForm,
+  resetForm,
+  showSuccess,
+  showError,
+  clearErrors,
+} = useFormState(initialFormData)
+
+const openAddModal = () => {
+  editingCategory.value = null
+  resetForm()
+  clearErrors()
+  showModal.value = true
+}
+
+const editCategory = (category: Category) => {
+  editingCategory.value = category
+  Object.assign(formData, category)
+  clearErrors()
+  showModal.value = true
+}
+
+const closeModal = () => {
+  showModal.value = false
+  editingCategory.value = null
+  resetForm()
+}
+
+const confirmDelete = (category: Category) => {
+  categoryToDelete.value = category
+  showDeleteModal.value = true
+}
+
+const saveCategory = async () => {
+  const validationRules = {
+    name: { required: true, minLength: 3, maxLength: 100 },
+    image: { required: true },
+  }
+
+  if (!validateForm(validationRules)) {
+    showError('Please fix the errors in the form')
+    return
+  }
+
+  isSubmitting.value = true
+
+  try {
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 500))
+
+    if (editingCategory.value) {
+      const index = categories.value.findIndex((c) => c.id === editingCategory.value!.id)
+      if (index !== -1) {
+        categories.value[index] = { ...formData } as Category
+      }
+      showSuccess('Category updated successfully')
+    } else {
+      const newCategory: Category = {
+        ...formData,
+        id: Math.max(...categories.value.map((c) => c.id), 0) + 1,
+      } as Category
+      categories.value.unshift(newCategory)
+      showSuccess('Category added successfully')
+    }
+
+    closeModal()
+  } catch (error) {
+    showError('Failed to save category')
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+const deleteCategory = async () => {
+  if (!categoryToDelete.value) return
+
+  try {
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 300))
+
+    categories.value = categories.value.filter((c) => c.id !== categoryToDelete.value!.id)
+    showSuccess('Category deleted successfully')
+    showDeleteModal.value = false
+    categoryToDelete.value = null
+  } catch (error) {
+    showError('Failed to delete category')
+  }
+}
+</script>
 
 <style scoped>
 .categories-page {
@@ -329,5 +462,13 @@
 .btn-delete:hover {
   background: #ff4f5a;
   color: #fff;
+}
+
+.category-description {
+  color: #495057;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
 }
 </style>
