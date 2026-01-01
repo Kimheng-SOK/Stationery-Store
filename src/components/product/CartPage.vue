@@ -12,31 +12,31 @@
           </button>
 
           <div class="d-flex align-items-center gap-4 position-absolute start-50 translate-middle-x">
-            <div class="d-flex align-items-center gap-2 step-item"
-                :class="{ active: currentStep === 'cart' }"
-                @click="currentStep = 'cart'"
-                style="cursor: pointer;">
-              <span :class="currentStep === 'cart' ? 'fw-bold text-dark' : 'text-muted'">Cart</span>
-            </div>
+    <div class="d-flex align-items-center gap-2 step-item"
+         :class="{ active: currentStep === 'cart' }"
+         @click="currentStep = 'cart'"
+         style="cursor: pointer;">
+      <span :class="currentStep === 'cart' ? 'fw-bold text-dark' : 'text-muted'">Cart</span>
+    </div>
 
-            <div class="text-muted" style="font-size: 0.875rem;">- - - - - - - - - -</div>
+    <div class="text-muted" style="font-size: 0.875rem;">- - - - - - - - - -</div>
 
-            <div class="d-flex align-items-center gap-2 step-item"
-                :class="{ active: currentStep === 'address' }"
-                @click="currentStep = 'address'"
-                style="cursor: pointer;">
-              <span :class="currentStep === 'address' ? 'fw-bold text-dark' : 'text-muted'">Address</span>
-            </div>
+    <div class="d-flex align-items-center gap-2 step-item"
+         :class="{ active: currentStep === 'address' }"
+         @click="currentStep = 'address'"
+         style="cursor: pointer;">
+      <span :class="currentStep === 'address' ? 'fw-bold text-dark' : 'text-muted'">Address</span>
+    </div>
 
-            <div class="text-muted" style="font-size: 0.875rem;">- - - - - - - - - -</div>
+    <div class="text-muted" style="font-size: 0.875rem;">- - - - - - - - - -</div>
 
-            <div class="d-flex align-items-center gap-2 step-item"
-                :class="{ active: currentStep === 'payment' }"
-                @click="currentStep = 'payment'"
-                style="cursor: pointer;">
-              <span :class="currentStep === 'payment' ? 'fw-bold text-dark' : 'text-muted'">Payment</span>
-            </div>
-          </div>
+    <div class="d-flex align-items-center gap-2 step-item"
+         :class="{ active: currentStep === 'payment' }"
+         @click="currentStep = 'payment'"
+         style="cursor: pointer;">
+      <span :class="currentStep === 'payment' ? 'fw-bold text-dark' : 'text-muted'">Payment</span>
+    </div>
+  </div>
         </div>
       </div>
     </div>
@@ -286,8 +286,8 @@ const removeItem = (index: number) => {
 }
 
 .coupon-wrapper .btn {
-  border-top-left-radius: 50px;
-  border-bottom-left-radius: 50px;
+  border-top-left-radius: 50px;  /* Change from 0 to 50px */
+  border-bottom-left-radius: 50px;  /* Change from 0 to 50px */
   border-top-right-radius: 50px;
   border-bottom-right-radius: 50px;
   margin-left: -1px;
@@ -310,11 +310,11 @@ const removeItem = (index: number) => {
   border-color: #141B3E;
 }
 .addbtn {
-  border: 1.5px solid #6c757d;
+  border: 1.5px solid #6c757d; /* Bootstrap secondary color */
   border-color: var(--bs-secondary) !important;
 }
 .form-check-input {
-  border: 1.5px solid #6c757d;
+  border: 1.5px solid #6c757d; /* Bootstrap secondary color */
   border-color: var(--bs-secondary) !important;
 }
 
