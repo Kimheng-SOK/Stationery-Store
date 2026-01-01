@@ -57,7 +57,8 @@
                   type="radio" 
                   :id="`rating-${rating}`"
                   :value="rating"
-                  v-model="selectedRating"
+                  v-model.number="selectedRating"
+                  name="rating-filter"
                 >
                 <label class="form-check-label" :for="`rating-${rating}`">
                   <span class="stars">{{ '★'.repeat(rating) }}{{ '☆'.repeat(5 - rating) }}</span>
@@ -90,7 +91,7 @@
           </div>
 
           <!-- Products Grid -->
-          <div class="row g-4 mb-4">
+          <div v-if="paginatedProducts.length > 0" class="row g-4 mb-4">
             <div 
               v-for="product in paginatedProducts" 
               :key="product.id"
@@ -128,6 +129,23 @@
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- No Products Message -->
+          <div v-else class="no-products">
+            <div class="text-center py-5">
+              <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
+              <h5 class="mt-3 text-muted">Oops, no products found!</h5>
+              <p class="text-muted" v-if="selectedRating > 0">
+                No products with {{ selectedRating }} star{{ selectedRating > 1 ? 's' : '' }} rating.
+              </p>
+              <p class="text-muted" v-else>
+                Try adjusting your filters to see more results.
+              </p>
+              <button @click="clearFilters" class="btn btn-primary mt-3">
+                Clear All Filters
+              </button>
             </div>
           </div>
 
@@ -181,7 +199,7 @@ interface Product {
 const products = ref<Product[]>([]);
 const selectedCategory = ref<string>('');
 const selectedBrand = ref<string>('');
-const selectedRating = ref<number | null>(null);
+const selectedRating = ref<number>(0);
 const priceRange = ref({ min: 0, max: 1000 });
 const sortBy = ref<string>('default');
 const currentPage = ref<number>(1);
@@ -345,8 +363,8 @@ const filteredProducts = computed(() => {
   );
 
   // Rating filter
-  if (selectedRating.value) {
-    result = result.filter(p => p.rating >= selectedRating.value!);
+  if (selectedRating.value > 0) {
+    result = result.filter(p => p.rating === selectedRating.value);
   }
 
   // Sorting
@@ -393,7 +411,7 @@ const changePage = (page: number) => {
 const clearFilters = () => {
   selectedCategory.value = '';
   selectedBrand.value = '';
-  selectedRating.value = null;
+  selectedRating.value = 0;
   priceRange.value = { min: 0, max: 1000 };
   sortBy.value = 'default';
   currentPage.value = 1;
@@ -413,7 +431,9 @@ const clearFilters = () => {
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   position: sticky;
-  top: 80px;
+  top: 20px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
 }
 
 .filter-title {
@@ -541,6 +561,13 @@ const clearFilters = () => {
 
 .pagination {
   margin-top: 2rem;
+}
+
+.no-products {
+  background: white;
+  border-radius: 8px;
+  padding: 2rem;
+  margin-bottom: 2rem;
 }
 
 .page-link {
