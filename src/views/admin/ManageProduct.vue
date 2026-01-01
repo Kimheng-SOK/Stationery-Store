@@ -269,20 +269,42 @@
             <h3 class="modal-title">
               {{ editingProduct ? 'Edit Product' : 'Add New Product' }}
             </h3>
-            <button @click="closeModal" type="button" class="btn-close" aria-label="Close"></button>
+            <button
+              @click="closeModal"
+              type="button"
+              class="btn-close"
+              aria-label="Close"
+              :disabled="isSubmitting"
+            ></button>
           </div>
 
           <form @submit.prevent="saveProduct" class="modal-body">
+            <!-- Success/Error Message -->
+            <div v-if="submitMessage" :class="['alert', `alert-${submitMessage.type}`]">
+              <i :class="`bi bi-${submitMessage.type === 'success' ? 'check-circle' : 'exclamation-circle'}`"></i>
+              {{ submitMessage.text }}
+            </div>
+
             <!-- Product Name & SKU -->
             <div class="row g-3 mb-4">
               <div class="col-md-6">
                 <label class="form-label">Product Name</label>
-                <input v-model="formData.name" type="text" required class="form-control" />
+                <input
+                  v-model="formData.name"
+                  type="text"
+                  :class="['form-control', { 'is-invalid': errors.name }]"
+                />
+                <small v-if="errors.name" class="text-danger">{{ errors.name }}</small>
               </div>
 
               <div class="col-md-6">
                 <label class="form-label">SKU</label>
-                <input v-model="formData.sku" type="text" required class="form-control" />
+                <input
+                  v-model="formData.sku"
+                  type="text"
+                  :class="['form-control', { 'is-invalid': errors.sku }]"
+                />
+                <small v-if="errors.sku" class="text-danger">{{ errors.sku }}</small>
               </div>
             </div>
 
@@ -293,21 +315,25 @@
                 <input
                   v-model.number="formData.price"
                   type="number"
-                  required
                   min="0"
                   step="0.01"
-                  class="form-control"
+                  :class="['form-control', { 'is-invalid': errors.price }]"
                 />
+                <small v-if="errors.price" class="text-danger">{{ errors.price }}</small>
               </div>
 
               <div class="col-md-6">
                 <label class="form-label">Category</label>
-                <select v-model="formData.category" required class="form-select">
+                <select
+                  v-model="formData.category"
+                  :class="['form-select', { 'is-invalid': errors.category }]"
+                >
                   <option value="">Select a category</option>
                   <option v-for="cat in categories" :key="cat.id" :value="cat.name">
                     {{ cat.name }}
                   </option>
                 </select>
+                <small v-if="errors.category" class="text-danger">{{ errors.category }}</small>
               </div>
             </div>
 
@@ -318,10 +344,10 @@
                 <input
                   v-model.number="formData.stock"
                   type="number"
-                  required
                   min="0"
-                  class="form-control"
+                  :class="['form-control', { 'is-invalid': errors.stock }]"
                 />
+                <small v-if="errors.stock" class="text-danger">{{ errors.stock }}</small>
               </div>
 
               <div class="col-md-6">
@@ -329,19 +355,93 @@
                 <input
                   v-model.number="formData.rating"
                   type="number"
-                  required
                   min="0"
                   max="5"
                   step="0.1"
+                  :class="['form-control', { 'is-invalid': errors.rating }]"
+                />
+                <small v-if="errors.rating" class="text-danger">{{ errors.rating }}</small>
+              </div>
+            </div>
+
+            <!-- Additional Fields -->
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label">Brand</label>
+                <input v-model="formData.brand" type="text" class="form-control" />
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Original Price ($)</label>
+                <input
+                  v-model.number="formData.originalPrice"
+                  type="number"
+                  min="0"
+                  step="0.01"
                   class="form-control"
                 />
               </div>
             </div>
 
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label">Discount (%)</label>
+                <input
+                  v-model.number="formData.discount"
+                  type="number"
+                  min="0"
+                  max="100"
+                  class="form-control"
+                />
+              </div>
+
+              <div class="col-md-6">
+                <div class="d-flex gap-3">
+                  <div class="form-check">
+                    <input
+                      v-model="formData.isNew"
+                      type="checkbox"
+                      class="form-check-input"
+                      id="isNew"
+                    />
+                    <label class="form-check-label" for="isNew">New Product</label>
+                  </div>
+                  <div class="form-check">
+                    <input
+                      v-model="formData.inStock"
+                      type="checkbox"
+                      class="form-check-input"
+                      id="inStock"
+                    />
+                    <label class="form-check-label" for="inStock">In Stock</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Image Upload -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold">Product Image</label>
+              <FileUpload
+                v-model="formData.image"
+                alt-text="Product image"
+                @update:model-value="(val) => (formData.image = val)"
+              />
+              <small v-if="errors.image" class="text-danger d-block mt-2">{{ errors.image }}</small>
+            </div>
+
             <!-- Action Buttons -->
             <div class="modal-footer mt-4">
-              <button @click="closeModal" type="button" class="btn btn-secondary">Cancel</button>
-              <button type="submit" class="btn btn-primary">
+              <button
+                @click="closeModal"
+                type="button"
+                class="btn btn-secondary"
+                :disabled="isSubmitting"
+              >
+                Cancel
+              </button>
+              <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
+                <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
                 {{ editingProduct ? 'Update' : 'Add' }}
               </button>
             </div>
@@ -356,6 +456,9 @@
 import { ref, computed } from 'vue'
 import type { Product } from '@/types/product'
 import { products as initialProducts, categories } from '@/data/products'
+import FileUpload from '@/components/common/FileUpload.vue'
+import { useFormState } from '@/composables/useFormState'
+import { usePagination } from '@/composables/usePagination'
 
 const products = ref<Product[]>(initialProducts)
 const showAddModal = ref(false)
@@ -365,10 +468,9 @@ const searchQuery = ref('')
 const selectedCategory = ref('')
 const sortBy = ref('rating')
 const sortOrder = ref<'asc' | 'desc'>('desc')
-const currentPage = ref(1)
 const itemsPerPage = 10
 
-const formData = ref({
+const initialFormData = {
   name: '',
   sku: '',
   price: 0,
@@ -381,7 +483,36 @@ const formData = ref({
   stock: 0,
   rating: 0,
   image: '',
-})
+}
+
+const {
+  formData,
+  errors,
+  isSubmitting,
+  submitMessage,
+  validateForm,
+  resetForm,
+  showSuccess,
+  showError,
+  clearErrors,
+} = useFormState(initialFormData)
+
+const applySorting = (filtered: Product[]): Product[] => {
+  const sortMap: Record<string, (a: Product, b: Product) => number> = {
+    rating: (a, b) => (sortOrder.value === 'desc' ? b.rating - a.rating : a.rating - b.rating),
+    price: (a, b) => (sortOrder.value === 'desc' ? b.price - a.price : a.price - b.price),
+    stock: (a, b) => (sortOrder.value === 'desc' ? b.stock - a.stock : a.stock - b.stock),
+    name: (a, b) =>
+      sortOrder.value === 'desc' ? b.name.localeCompare(a.name) : a.name.localeCompare(b.name),
+    date: (a, b) => {
+      const timeA = new Date(a.addedDate).getTime()
+      const timeB = new Date(b.addedDate).getTime()
+      return sortOrder.value === 'desc' ? timeB - timeA : timeA - timeB
+    },
+  }
+
+  return filtered.sort(sortMap[sortBy.value] || sortMap['rating'])
+}
 
 const filteredProducts = computed(() => {
   let filtered = products.value.filter((product) => {
@@ -392,46 +523,13 @@ const filteredProducts = computed(() => {
     return matchesSearch && matchesCategory
   })
 
-  // Sort
-  if (sortBy.value === 'rating' && sortOrder.value === 'desc') {
-    filtered.sort((a, b) => b.rating - a.rating)
-  } else if (sortBy.value === 'rating' && sortOrder.value === 'asc') {
-    filtered.sort((a, b) => a.rating - b.rating)
-  } else if (sortBy.value === 'price' && sortOrder.value === 'desc') {
-    filtered.sort((a, b) => b.price - a.price)
-  } else if (sortBy.value === 'price' && sortOrder.value === 'asc') {
-    filtered.sort((a, b) => a.price - b.price)
-  } else if (sortBy.value === 'stock' && sortOrder.value === 'desc') {
-    filtered.sort((a, b) => b.stock - a.stock)
-  } else if (sortBy.value === 'stock' && sortOrder.value === 'asc') {
-    filtered.sort((a, b) => a.stock - b.stock)
-  } else if (sortBy.value === 'name' && sortOrder.value === 'desc') {
-    filtered.sort((a, b) => b.name.localeCompare(a.name))
-  } else if (sortBy.value === 'name' && sortOrder.value === 'asc') {
-    filtered.sort((a, b) => a.name.localeCompare(b.name))
-  } else if (sortBy.value === 'date' && sortOrder.value === 'desc') {
-    filtered.sort((a, b) => new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime())
-  } else if (sortBy.value === 'date' && sortOrder.value === 'asc') {
-    filtered.sort((a, b) => new Date(a.addedDate).getTime() - new Date(b.addedDate).getTime())
-  }
-
-  return filtered
+  return applySorting(filtered)
 })
 
-const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage))
-
-const paginatedProducts = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  return filteredProducts.value.slice(start, start + itemsPerPage)
-})
-
-const previousPage = () => {
-  if (currentPage.value > 1) currentPage.value--
-}
-
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) currentPage.value++
-}
+const { currentPage, totalPages, paginatedItems: paginatedProducts, nextPage, previousPage } = usePagination(
+  filteredProducts,
+  { itemsPerPage }
+)
 
 const viewProductDetails = (product: Product) => {
   selectedProduct.value = product
@@ -439,7 +537,7 @@ const viewProductDetails = (product: Product) => {
 
 const editProduct = (product: Product) => {
   editingProduct.value = product
-  formData.value = {
+  Object.assign(formData, {
     name: product.name,
     sku: product.sku,
     price: product.price,
@@ -452,59 +550,71 @@ const editProduct = (product: Product) => {
     stock: product.stock,
     rating: product.rating,
     image: product.image ?? '',
-  }
+  })
+  clearErrors()
   showAddModal.value = true
 }
 
 const deleteProduct = (id: number) => {
   if (confirm('Are you sure you want to delete this product?')) {
     products.value = products.value.filter((p) => p.id !== id)
-    currentPage.value = 1
   }
 }
 
-const saveProduct = () => {
-  if (editingProduct.value) {
-    const index = products.value.findIndex((p) => p.id === editingProduct.value!.id)
-    if (index !== -1) {
-      products.value[index] = {
-        ...formData.value,
-        id: editingProduct.value.id,
-        addedDate: products.value[index]?.addedDate ?? new Date().toLocaleDateString(),
-        image:
-          products.value[index]?.image ??
-          'https://api.builder.io/api/v1/image/assets/TEMP/default-product.png?width=120',
-      }
-    }
-  } else {
-    const newProduct: Product = {
-      ...formData.value,
-      id: Date.now(),
-      addedDate: new Date().toLocaleDateString(),
-      image: 'https://api.builder.io/api/v1/image/assets/TEMP/default-product.png?width=120',
-    }
-    products.value.unshift(newProduct)
+const saveProduct = async () => {
+  const validationRules = {
+    name: { required: true, minLength: 3, maxLength: 100 },
+    sku: { required: true, minLength: 3 },
+    price: { required: true, min: 0 },
+    category: { required: true },
+    stock: { required: true, min: 0 },
+    rating: { required: true, min: 0, max: 5 },
+    image: { required: true },
   }
-  closeModal()
+
+  if (!validateForm(validationRules)) {
+    showError('Please fix the errors in the form')
+    return
+  }
+
+  isSubmitting.value = true
+
+  try {
+    // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 500))
+
+    if (editingProduct.value) {
+      const index = products.value.findIndex((p) => p.id === editingProduct.value!.id)
+      if (index !== -1) {
+        products.value[index] = {
+          ...(formData as unknown as Product),
+          id: editingProduct.value.id,
+          addedDate: products.value[index]?.addedDate ?? new Date().toLocaleDateString(),
+        }
+      }
+      showSuccess('Product updated successfully')
+    } else {
+      const newProduct: Product = {
+        ...(formData as unknown as Product),
+        id: Date.now(),
+        addedDate: new Date().toLocaleDateString(),
+      }
+      products.value.unshift(newProduct)
+      showSuccess('Product added successfully')
+    }
+
+    closeModal()
+  } catch (error) {
+    showError('Failed to save product')
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
 const closeModal = () => {
   showAddModal.value = false
   editingProduct.value = null
-  formData.value = {
-    name: '',
-    sku: '',
-    price: 0,
-    originalPrice: 0,
-    discount: 0,
-    isNew: false,
-    inStock: false,
-    brand: '',
-    category: '',
-    stock: 0,
-    rating: 0,
-    image: '',
-  }
+  resetForm()
 }
 </script>
 
