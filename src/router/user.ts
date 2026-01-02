@@ -4,6 +4,8 @@ import NewArrivalView from '../views/user/NewArrivalView.vue'
 import ShopByCategory from '@/components/product/ShopByCategory.vue'
 import PopularProduct from '@/components/product/PopularProduct.vue'
 import HomePageView from '@/views/user/HomePageView.vue'
+import Privacy from '@/views/user/Privacy.vue'
+import TermCondition from '@/views/user/TermCondition.vue'
 
 export default [
   {
@@ -21,17 +23,10 @@ export default [
       { path: '/categories', name: 'ShopByCategory', component: ShopByCategory },
       { path: '/hots', name: 'PopularProduct', component: PopularProduct },
       { path: '/home', name: 'HomePageView', component: HomePageView},
+      { path: '/privacy', name: 'Privacy', component:Privacy},
+      { path: '/TermCondition', name: 'TermCondition', component: TermCondition},
 
-      {
-        path: '/terms',
-        name: 'Terms',
-        component: () => import('@/views/TermCondition.vue'),
-      },
-      {
-        path: '/privacy',
-        name: 'Privacy',
-        component: () => import('@/views/Privacy.vue'),
-      },
+     
     ],
   },
 ]
