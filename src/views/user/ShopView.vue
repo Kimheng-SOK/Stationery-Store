@@ -4,73 +4,15 @@
       <div class="row">
         <!-- Sidebar Filter -->
         <aside class="col-lg-3 col-md-4 mb-4">
-          <div class="filter-sidebar">
-            <h5 class="mb-3">Filters</h5>
-            
-            <!-- Category Filter -->
-            <div class="filter-section mb-4">
-              <h6 class="filter-title">All Categories</h6>
-              <select v-model="selectedCategory" class="form-select form-select-sm">
-                <option value="">All Categories</option>
-                <option v-for="category in categories" :key="category" :value="category">
-                  {{ category }}
-                </option>
-              </select>
-            </div>
-
-            <!-- Price Filter -->
-            <div class="filter-section mb-4">
-              <h6 class="filter-title">Price</h6>
-              <div class="price-inputs">
-                <input 
-                  v-model.number="priceRange.min" 
-                  type="number" 
-                  class="form-control form-control-sm mb-2" 
-                  placeholder="Min"
-                >
-                <input 
-                  v-model.number="priceRange.max" 
-                  type="number" 
-                  class="form-control form-control-sm" 
-                  placeholder="Max"
-                >
-              </div>
-            </div>
-
-            <!-- Brand Filter -->
-            <div class="filter-section mb-4">
-              <h6 class="filter-title">Brand</h6>
-              <select v-model="selectedBrand" class="form-select form-select-sm">
-                <option value="">All Brands</option>
-                <option v-for="brand in brands" :key="brand" :value="brand">
-                  {{ brand }}
-                </option>
-              </select>
-            </div>
-
-            <!-- Rating Filter -->
-            <div class="filter-section mb-4">
-              <h6 class="filter-title">Rating</h6>
-              <div class="form-check" v-for="rating in [5, 4, 3, 2, 1]" :key="rating">
-                <input 
-                  class="form-check-input" 
-                  type="radio" 
-                  :id="`rating-${rating}`"
-                  :value="rating"
-                  v-model.number="selectedRating"
-                  name="rating-filter"
-                >
-                <label class="form-check-label" :for="`rating-${rating}`">
-                  <span class="stars">{{ '★'.repeat(rating) }}{{ '☆'.repeat(5 - rating) }}</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Clear Filters -->
-            <button @click="clearFilters" class="btn btn-outline-secondary btn-sm w-100">
-              Clear Filters
-            </button>
-          </div>
+          <SidebarFilter
+            v-model:selected-category="selectedCategory"
+            v-model:selected-brand="selectedBrand"
+            v-model:selected-rating="selectedRating"
+            v-model:price-range="priceRange"
+            :categories="categories"
+            :brands="brands"
+            @clear-filters="clearFilters"
+          />
         </aside>
 
         <!-- Main Content -->
@@ -182,6 +124,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import SidebarFilter from '@/components/product/SidebarFilter.vue';
 
 interface Product {
   id: number;
@@ -425,45 +368,9 @@ const clearFilters = () => {
   background-color: #f8f9fa;
 }
 
-.filter-sidebar {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  position: sticky;
-  top: 20px;
-  max-height: calc(100vh - 40px);
-  overflow-y: auto;
-}
-
-.filter-title {
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
-  color: #495057;
-}
-
-.filter-section {
-  border-bottom: 1px solid #e9ecef;
-  padding-bottom: 1rem;
-}
-
-.filter-section:last-of-type {
-  border-bottom: none;
-}
-
-.price-inputs input {
-  font-size: 0.875rem;
-}
-
 .stars {
   color: #ffc107;
   font-size: 0.85rem;
-}
-
-.form-check-label {
-  font-size: 0.875rem;
-  cursor: pointer;
 }
 
 .product-card {
@@ -587,11 +494,6 @@ const clearFilters = () => {
 }
 
 @media (max-width: 768px) {
-  .filter-sidebar {
-    position: static;
-    margin-bottom: 2rem;
-  }
-  
   .shop-view {
     padding: 1rem 0;
   }

@@ -4,86 +4,17 @@
       <div class="row">
         <!-- Sidebar Filter -->
         <aside class="col-lg-3 col-md-4 mb-4">
-          <div class="filter-sidebar">
-            <h5 class="mb-3">Filters</h5>
-
-            <!-- Category Filter -->
-            <div class="filter-section mb-4">
-              <h6 class="filter-title">Category</h6>
-              <select v-model="selectedCategory" class="form-select form-select-sm">
-                <option value="">All Categories</option>
-                <option v-for="category in categories" :key="category" :value="category">
-                  {{ category }}
-                </option>
-              </select>
-            </div>
-
-            <!-- Price Filter -->
-            <div class="filter-section mb-4">
-              <h6 class="filter-title">Price</h6>
-              <div class="price-inputs">
-                <input
-                  v-model.number="priceRange.min"
-                  type="number"
-                  class="form-control form-control-sm mb-2"
-                  placeholder="Min"
-                />
-                <input
-                  v-model.number="priceRange.max"
-                  type="number"
-                  class="form-control form-control-sm"
-                  placeholder="Max"
-                />
-              </div>
-            </div>
-
-            <!-- Brand Filter -->
-            <div class="filter-section mb-4">
-              <h6 class="filter-title">Brand</h6>
-              <select v-model="selectedBrand" class="form-select form-select-sm">
-                <option value="">All Brands</option>
-                <option v-for="brand in brands" :key="brand" :value="brand">
-                  {{ brand }}
-                </option>
-              </select>
-            </div>
-
-            <!-- Rating Filter -->
-            <div class="filter-section mb-4">
-              <h6 class="filter-title">Rating</h6>
-              <div class="form-check" v-for="rating in [5, 4, 3, 2, 1]" :key="rating">
-                <input
-                  class="form-check-input"
-                  type="radio"
-                  :id="`rating-${rating}`"
-                  :value="rating"
-                  v-model="selectedRating"
-                />
-                <label class="form-check-label" :for="`rating-${rating}`">
-                  <span class="stars">{{ '★'.repeat(rating) }}{{ '☆'.repeat(5 - rating) }}</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Availability Filter -->
-            <div class="filter-section mb-4">
-              <h6 class="filter-title">Availability</h6>
-              <div class="form-check">
-                <input
-                  class="form-check-input"
-                  type="checkbox"
-                  id="inStock"
-                  v-model="showInStockOnly"
-                />
-                <label class="form-check-label" for="inStock"> In Stock Only </label>
-              </div>
-            </div>
-
-            <!-- Clear Filters -->
-            <button @click="clearFilters" class="btn btn-outline-secondary btn-sm w-100">
-              Clear Filters
-            </button>
-          </div>
+          <SidebarFilter
+            v-model:selected-category="selectedCategory"
+            v-model:selected-brand="selectedBrand"
+            v-model:selected-rating="selectedRating"
+            v-model:price-range="priceRange"
+            v-model:show-in-stock-only="showInStockOnly"
+            :categories="categories"
+            :brands="brands"
+            :show-availability="true"
+            @clear-filters="clearFilters"
+          />
         </aside>
 
         <!-- Main Content -->
@@ -201,6 +132,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import SidebarFilter from '@/components/product/SidebarFilter.vue';
 
 interface Product {
   id: number
@@ -222,7 +154,7 @@ interface Product {
 const products = ref<Product[]>([])
 const selectedCategory = ref<string>('')
 const selectedBrand = ref<string>('')
-const selectedRating = ref<number | null>(null)
+const selectedRating = ref<number>(0)
 const priceRange = ref({ min: 0, max: 1000 })
 const sortBy = ref<string>('newest')
 const currentPage = ref<number>(1)
@@ -431,8 +363,8 @@ const filteredProducts = computed(() => {
   result = result.filter((p) => p.price >= priceRange.value.min && p.price <= priceRange.value.max)
 
   // Rating filter
-  if (selectedRating.value) {
-    result = result.filter((p) => p.rating >= selectedRating.value!)
+  if (selectedRating.value > 0) {
+    result = result.filter((p) => p.rating >= selectedRating.value)
   }
 
   // Stock filter
@@ -509,7 +441,7 @@ const changePage = (page: number) => {
 const clearFilters = () => {
   selectedCategory.value = ''
   selectedBrand.value = ''
-  selectedRating.value = null
+  selectedRating.value = 0
   priceRange.value = { min: 0, max: 1000 }
   sortBy.value = 'newest'
   currentPage.value = 1
@@ -535,43 +467,9 @@ export default {
   color: #212529;
 }
 
-.filter-sidebar {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  position: sticky;
-  top: 80px;
-}
-
-.filter-title {
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
-  color: #495057;
-}
-
-.filter-section {
-  border-bottom: 1px solid #e9ecef;
-  padding-bottom: 1rem;
-}
-
-.filter-section:last-of-type {
-  border-bottom: none;
-}
-
-.price-inputs input {
-  font-size: 0.875rem;
-}
-
 .stars {
   color: #ffc107;
   font-size: 0.85rem;
-}
-
-.form-check-label {
-  font-size: 0.875rem;
-  cursor: pointer;
 }
 
 .product-card {
@@ -703,11 +601,6 @@ export default {
 }
 
 @media (max-width: 768px) {
-  .filter-sidebar {
-    position: static;
-    margin-bottom: 2rem;
-  }
-
   .new-arrival-view {
     padding: 1rem 0;
   }
