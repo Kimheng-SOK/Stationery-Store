@@ -28,7 +28,7 @@ const navItems = [
   // { label: 'Reviews', icon: 'bi-star-half', to: '/admin/reviews' },
   // { label: 'Shipping', icon: 'bi-truck', to: '/admin/shipping' },
   // { label: 'Reports', icon: 'bi-bar-chart-line', to: '/admin/reports' },
-  // { label: 'Top Statistics', icon: 'bi-graph-up-arrow', to: '/admin/statistics' },
+  // { label: 'Top   Statistics', icon: 'bi-graph-up-arrow', to: '/admin/statistics' },
   { label: 'Team', icon: 'bi-people-fill', to: '/admin/teams' },
 ]
 </script>

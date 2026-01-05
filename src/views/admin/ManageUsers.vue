@@ -21,43 +21,44 @@
     </div>
 
     <!-- Table Section -->
-    <div class="table-responsive border-top">
-      <table class="table table-sm table-borderless align-middle">
-        <thead class="table-light mb-2">
-          <tr class="border-bottom">
-            <th class="text-uppercase text-muted small fw-semibold">Name</th>
-            <th class="text-uppercase text-muted small fw-semibold">Phone Number</th>
-            <th class="text-uppercase text-muted small fw-semibold">Email Address</th>
-            <th class="text-uppercase text-muted small fw-semibold">Member Since</th>
-            <th class="text-uppercase text-muted small fw-semibold">Purchased Items</th>
-            <th class="text-uppercase text-muted small fw-semibold">Reward Point</th>
-            <th class="text-uppercase text-muted small fw-semibold">Actions</th>
+    <div class="table-responsive border-top rounded-2 border bg-white">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr class="table-light">
+            <th class="px-2 py-3 text-uppercase text-muted small fw-semibold">Name</th>
+            <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Phone Number</th>
+            <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Email Address</th>
+            <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Member Since</th>
+            <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Purchased Items</th>
+            <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Reward Point</th>
+            <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Actions</th>
           </tr>
         </thead>
-        <tbody class="mb-2 table-group-divider">
+        <tbody>
           <tr
             v-for="customer in displayedCustomers"
             :key="customer.id"
-            class="user-row border-bottom hover-bg-light"
+            class="user-row border-bottom hover-bg-light align-middle"
+            style="cursor: pointer"
           >
-            <td class="small">
+            <td class="px-2 py-3">
               <div class="d-flex align-items-center gap-3">
                 <img
                   :src="customer.avatar"
                   :alt="customer.name"
                   class="rounded-circle"
-                  style="width: 30px; height: 30px; object-fit: cover"
+                  style="width: 40px; height: 40px; object-fit: cover"
                 />
-                <span class="fw-semibold">{{ customer.name }}</span>
+                <span class="fw-medium text-dark text-sm mb-0">{{ customer.name }}</span>
               </div>
             </td>
-            <td class="small">{{ customer.phone }}</td>
-            <td class="small">{{ customer.email }}</td>
-            <td class="small">{{ customer.memberSince }}</td>
-            <td class="small">
-              <span class="text-danger">{{ customer.purchasedItems }} Items</span>
+            <td class="px-4 py-3 text-dark small">{{ customer.phone }}</td>
+            <td class="px-4 py-3 text-dark small">{{ customer.email }}</td>
+            <td class="px-4 py-3 text-dark small">{{ customer.memberSince }}</td>
+            <td class="px-4 py-3 text-dark small">
+              <span class="px-4 py-3 text-danger">{{ customer.purchasedItems }} Items</span>
             </td>
-            <td class="small">{{ customer.rewardPoints }}</td>
+            <td class="px-4 py-3 text-dark small">{{ customer.rewardPoints }}</td>
             <td class="small">
               <button class="btn btn-sm btn-outline-danger">View Profile</button>
             </td>
@@ -67,32 +68,32 @@
     </div>
 
     <!-- Pagination -->
-    <div class="d-flex justify-content-end align-items-center mt-auto gap-2 pt-2 border-top">
+    <div class="d-flex justify-content-center align-items-center mt-4 gap-2 pt-2 border-top">
       <button
-        class="btn btn-link btn-sm text-decoration-none text-muted"
-        :disabled="currentPage === 1"
         @click="previousPage"
+        :disabled="currentPage === 1"
+        class="btn btn-sm btn-outline-secondary"
       >
-        Prev
+        <i class="bi bi-caret-left-fill"></i>
+        <span class="ms-0.5">PREV</span>
       </button>
-      <nav aria-label="Page navigation">
-        <ul class="pagination pagination-sm mb-0">
-          <li v-for="page in totalPages" :key="page" class="page-item">
-            <button
-              :class="['page-link', { active: page === currentPage }]"
-              @click="goToPage(page)"
-            >
-              {{ page }}
-            </button>
-          </li>
-        </ul>
-      </nav>
+      <div class="d-flex align-items-center gap-1">
+        <button
+          v-for="page in totalPages"
+          :key="page"
+          @click="goToPage(page)"
+          :class="['btn btn-sm', currentPage === page ? 'btn-primary' : 'btn-outline-secondary']"
+        >
+          {{ page }}
+        </button>
+      </div>
       <button
-        class="btn btn-link btn-sm text-decoration-none text-muted"
-        :disabled="currentPage === totalPages"
         @click="nextPage"
+        :disabled="currentPage === totalPages"
+        class="btn btn-sm btn-outline-secondary"
       >
-        Next
+        <span class="ms-0.5">NEXT</span>
+        <i class="bi bi-caret-right-fill"></i>
       </button>
     </div>
   </div>
@@ -106,18 +107,8 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { customerDataService } from '@/stores/customerData'
-
-export interface Customer {
-  id: string
-  name: string
-  phone: string
-  email: string
-  memberSince: string
-  purchasedItems: number
-  rewardPoints: number
-  avatar: string
-}
+import type { Customer } from '@/types/customer'
+import { customerDataService } from '@/stores/customerService'
 
 const customers = ref<Customer[]>([])
 const searchQuery = ref('')

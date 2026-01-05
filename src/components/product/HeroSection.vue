@@ -1,28 +1,33 @@
 <template>
   <section class="hero-section">
-    <div id="heroCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="3000">
+    <div
+      v-if="slides.length"
+      id="heroCarousel"
+      class="carousel slide carousel-fade"
+      data-bs-ride="carousel"
+      data-bs-interval="3000"
+    >
       <!-- Background Slides -->
       <div class="carousel-inner">
-        <div class="carousel-item active">
-          <img :src="slide1" class="d-block w-100" alt="Slide 1">
-        </div>
-        <div class="carousel-item">
-          <img :src="slide2" class="d-block w-100" alt="Slide 2">
-        </div>
-        <div class="carousel-item">
-          <img :src="slide3" class="d-block w-100" alt="Slide 3">
-        </div>
-        <div class="carousel-item">
-          <img :src="slide4" class="d-block w-100" alt="Slide 4">
+        <div
+          v-for="(slide, index) in slides"
+          :key="slide.id ?? index"
+          :class="['carousel-item', { active: index === 0 }]"
+        >
+          <img :src="slide.image" class="d-block w-100" :alt="`Slide ${index + 1}`">
         </div>
       </div>
 
       <!-- Indicators -->
       <div class="carousel-indicators">
-        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
-        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
-        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
-        <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="3"></button>
+        <button
+          v-for="(slide, index) in slides"
+          :key="`indicator-${slide.id ?? index}`"
+          type="button"
+          data-bs-target="#heroCarousel"
+          :data-bs-slide-to="index"
+          :class="{ active: index === 0 }"
+        ></button>
       </div>
     </div>
 
@@ -49,18 +54,13 @@
   </section>
 </template>
 
-<script>
-export default {
-  name: 'HeroSection',
-  data() {
-    return {
-      slide1: '/images/heroSection/1.jpg',
-      slide2: '/images/heroSection/2.jpg',
-      slide3: '/images/heroSection/3.jpg',
-      slide4: '/images/heroSection/4.jpg'
-    }
-  }
-}
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useHeroSectionStore } from '@/stores/heroSection'
+
+const heroStore = useHeroSectionStore()
+
+const slides = computed(() => heroStore.heroSlides)
 </script>
 
 <style scoped>
@@ -116,15 +116,15 @@ export default {
   .hero-section {
     height: 400px;
   }
-  
+
   .carousel-item {
     height: 400px;
   }
-  
+
   .carousel-item img {
     height: 400px;
   }
-  
+
   .display-4 {
     font-size: 2rem;
   }

@@ -4,26 +4,20 @@
     <!-- Review Box -->
     <div class="modal-box bg-white rounded p-4 p-md-5 position-relative">
       <!-- Close Button -->
-      <button
-        class="btn-close position-absolute top-0 end-0 m-3"
-        @click="handleNotNow">
-      </button>
+      <button class="btn-close position-absolute top-0 end-0 m-3" @click="handleNotNow"></button>
 
       <!-- Title -->
-      <h2 class="text-center fw-semibold mb-4 title">
-        Review
-      </h2>
+      <h2 class="text-center fw-semibold mb-4 title">Review</h2>
 
       <!-- User Info -->
       <div class="text-center mb-4">
         <div
-          class="avatar text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center fw-semibold">
+          class="avatar text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center fw-semibold"
+        >
           {{ userName.charAt(0) }}
         </div>
         <h3 class="fs-5 fw-semibold mb-2">{{ userName }}</h3>
-        <p class="text-muted small mb-0">
-          Rate the care provided {{ serviceDate }}
-        </p>
+        <p class="text-muted small mb-0">Rate the care provided {{ serviceDate }}</p>
       </div>
 
       <!-- Star Rating -->
@@ -46,15 +40,14 @@
         v-model="comments"
         class="form-control mb-4"
         placeholder="Additional Comments..."
-        rows="4">
+        rows="4"
+      >
       </textarea>
 
       <!-- Buttons -->
       <div class="row g-2">
         <div class="col-6">
-          <button
-            class="btn btn-outline-dark w-100 btn-theme"
-            @click="handleNotNow">
+          <button class="btn btn-outline-dark w-100 btn-theme" @click="handleNotNow">
             Not Now
           </button>
         </div>
@@ -62,7 +55,8 @@
           <button
             class="btn btn-dark w-100 btn-theme"
             @click="handleSubmit"
-            :disabled="isSubmitting">
+            :disabled="isSubmitting"
+          >
             {{ isSubmitting ? 'Submitting...' : 'Submit Review' }}
           </button>
         </div>
@@ -71,15 +65,15 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 export default {
   name: 'ReviewForm',
 
   props: {
-    userName: String,
-    serviceDate: String,
+    userName: { type: String, default: 'Guest User' },
+    serviceDate: { type: String, default: 'today' },
     delay: { type: Number, default: 6000 },
-    apiUrl: { type: String, required: true }
+    apiUrl: { type: String, required: true },
   },
 
   data() {
@@ -89,7 +83,7 @@ export default {
       hoveredRating: 0,
       comments: '',
       isSubmitting: false,
-      timer: null
+      timer: null as number | null,
     }
   },
 
@@ -100,7 +94,7 @@ export default {
   },
 
   beforeUnmount() {
-    clearTimeout(this.timer)
+    if (this.timer) clearTimeout(this.timer)
   },
 
   methods: {
@@ -117,14 +111,14 @@ export default {
         serviceDate: this.serviceDate,
         rating: this.rating,
         comments: this.comments.trim(),
-        submittedAt: new Date().toISOString()
+        submittedAt: new Date().toISOString(),
       }
 
       try {
         const res = await fetch(this.apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(reviewData)
+          body: JSON.stringify(reviewData),
         })
 
         if (res.ok) {
@@ -147,8 +141,8 @@ export default {
     handleNotNow() {
       this.isVisible = false
       this.$emit('close')
-    }
-  }
+    },
+  },
 }
 </script>
 
@@ -157,7 +151,7 @@ export default {
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -168,7 +162,7 @@ export default {
 .modal-box {
   width: 90%;
   max-width: 500px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   animation: slideUp 0.3s ease;
 }
 
