@@ -30,24 +30,30 @@
 
           <!-- Products Grid -->
           <div v-if="paginatedProducts.length > 0" class="row g-4 mb-4">
-            <div 
-              v-for="product in paginatedProducts" 
+            <div
+              v-for="product in paginatedProducts"
               :key="product.id"
               class="col-lg-4 col-md-6 col-sm-6"
             >
               <div class="product-card">
+                <!-- Product Image & Badges -->
                 <div class="product-image-container">
-                  <img 
-                    :src="product.image" 
-                    :alt="product.name"
-                    class="product-image"
-                  >
+                  <img :src="product.image" :alt="product.name" class="product-image">
+
+                  <!-- Badge -->
+                  <div class="product-badge-container">
+                    <span v-if="product.isNew" class="badge bg-success">NEW</span>
+                    <span v-if="product.discount" class="badge bg-danger ms-1">-{{ product.discount }}%</span>
+                  </div>
+
                   <div class="product-overlay">
                     <button class="btn btn-light btn-sm">
                       <i class="bi bi-eye"></i> Quick View
                     </button>
                   </div>
                 </div>
+
+                <!-- Product Info -->
                 <div class="product-info">
                   <h6 class="product-title">{{ product.name }}</h6>
                   <div class="product-rating mb-2">
@@ -95,8 +101,8 @@
                   Previous
                 </a>
               </li>
-              <li 
-                v-for="page in totalPages" 
+              <li
+                v-for="page in totalPages"
                 :key="page"
                 class="page-item"
                 :class="{ active: currentPage === page }"
@@ -119,256 +125,100 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import SidebarFilter from '@/components/product/SidebarFilter.vue';
-import SortBar from '@/components/product/SortBar.vue';
+import { ref, computed } from 'vue'
+import SidebarFilter from '@/components/product/SidebarFilter.vue'
+import SortBar from '@/components/product/SortBar.vue'
+import { products as fakeProducts, categories as fakeCategories } from '@/data/products'
 
 interface Product {
-  id: number;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  rating: number;
-  reviewCount: number;
-  image: string;
-  category: string;
-  brand: string;
+  id: number
+  name: string
+  price: number
+  originalPrice?: number
+  rating: number
+  reviewCount: number
+  image: string
+  category: string
+  brand: string
+  isNew?: boolean
+  discount?: number
 }
 
-// State
-const products = ref<Product[]>([]);
-const selectedCategory = ref<string>('');
-const selectedBrand = ref<string>('');
-const selectedRating = ref<number>(0);
-const priceRange = ref({ min: 0, max: 1000 });
-const sortBy = ref<string>('default');
-const currentPage = ref<number>(1);
-const itemsPerPage = 9;
+// --- STATE ---
+const products = ref<Product[]>(
+  fakeProducts.map(p => ({
+    ...p,
+    image: p.image.replace(/^\/public/, ''),
+    category: (p.category || '')
+      .replace(/NoteBooks/i, 'NoteBook')
+      .replace(/Pens& Pencils|Pens & Pencil|Pens and Pencils/i, 'Pens & Pencils')
+      .replace(/Office Supplices/i, 'Office Supplies'),
+  }))
+)
 
-// Mock categories and brands
-const categories = ['NoteBook', 'Pens & Pencils', 'Office Supplies', 'Sticky Notes', 'Art Supplies'];
-const brands = ['Premium Brand', 'Creative Co', 'Office Pro', 'Artisan'];
+const selectedCategory = ref<string>('')
+const selectedBrand = ref<string>('')
+const selectedRating = ref<number>(0)
+const priceRange = ref({ min: 0, max: 1000 })
+const sortBy = ref<string>('default')
+const currentPage = ref<number>(1)
+const itemsPerPage = 9
 
-// Initialize mock data with placeholder images
-onMounted(() => {
-  products.value = [
-    {
-      id: 1,
-      name: 'Premium Leather Journal',
-      price: 45.00,
-      originalPrice: 55.00,
-      rating: 5,
-      reviewCount: 738,
-      image: '/public/images/notebooks/book1.jpg',
-      category: 'NoteBook',
-      brand: 'Premium Brand'
-    },
-    {
-      id: 2,
-      name: 'Premium Pen Collection',
-      price: 35.00,
-      originalPrice: 45.00,
-      rating: 4,
-      reviewCount: 634,
-      image: '/public/images/pens&pencils/pen1.jpg',
-      category: 'Pens & Pencils',
-      brand: 'Creative Co'
-    },
-    {
-      id: 3,
-      name: 'Bamboo Desk Organizer',
-      price: 65.00,
-      rating: 5,
-      reviewCount: 145,
-      image: '/public/images/officeSupplies/office1.jpg',
-      category: 'Office Supplices',
-      brand: 'Office Pro'
-    },
-    {
-      id: 4,
-      name: 'Colorful Sticky Notes Set',
-      price: 15.00,
-      originalPrice: 25.00,
-      rating: 4,
-      reviewCount: 423,
-      image: '/public/images/notebooks/book2.jpg',
-      category: 'Sticky Notes',
-      brand: 'Creative Co'
-    },
-    {
-      id: 5,
-      name: 'Professional Pen Set 2024',
-      price: 28.00,
-      rating: 5,
-      reviewCount: 267,
-      image: '/public/images/notebooks/book3.jpg',
-      category: 'Pens & Pencils',
-      brand: 'Artisan'
-    },
-    {
-      id: 6,
-      name: 'Gel Pens Set - All Colors',
-      price: 22.00,
-      originalPrice: 30.00,
-      rating: 4,
-      reviewCount: 512,
-      image: '/public/images/notebooks/book4.jpg',
-      category: 'Pens & Pencil',
-      brand: 'Creative Co'
-    },
-    {
-      id: 7,
-      name: 'Watercolor Paint Set',
-      price: 42.00,
-      rating: 5,
-      reviewCount: 891,
-      image: '/public/images/notebooks/book5.jpg',
-      category: 'Art Supplies',
-      brand: 'Artisan'
-    },
-    {
-      id: 8,
-      name: 'Desk Calendar 2025',
-      price: 18.00,
-      rating: 4,
-      reviewCount: 234,
-      image: '/public/images/notebooks/book6.jpg',
-      category: 'Office Supplices',
-      brand: 'Office Pro'
-    },
-    {
-      id: 9,
-      name: 'Highlighter Set - Pastel',
-      price: 12.00,
-      originalPrice: 18.00,
-      rating: 5,
-      reviewCount: 567,
-      image: '/public/images/notebooks/book7.jpg',
-      category: 'Pens and Pencils',
-      brand: 'Creative Co'
-    },
+// Sidebar options
+const categories = fakeCategories.map(c => c.name)
+const brands = [...new Set(products.value.map(p => p.brand))]
 
-    {
-    id: 10,
-    name: 'Notebook Set - Premium',
-    price: 32.00,
-    rating: 4,
-    reviewCount: 189,
-    image: '/public/images/notebooks/book8.jpg',
-    category: 'NoteBook',
-    brand: 'Premium Brand'
-    },
-    {
-    id: 11,
-    name: 'Desk Lamp Modern',
-    price: 55.00,
-    originalPrice: 70.00,
-    rating: 5,
-    reviewCount: 334,
-    image: '/public/images/notebooks/book9.jpg',
-    category: 'Office Supplies',
-    brand: 'Office Pro'
-    },
-    {
-    id: 12,
-    name: 'Marker Set - Vibrant',
-    price: 19.00,
-    rating: 4,
-    reviewCount: 456,
-    image: '/public/images/notebooks/book10.jpg',
-    category: 'Pens & Pencils',
-    brand: 'Creative Co'
-    }
-    
-  ];
-});
-
-// Computed properties
+// --- COMPUTED FILTER + SORT ---
 const filteredProducts = computed(() => {
-  let result = products.value;
+  let result = products.value
 
-  // Category filter
-  if (selectedCategory.value) {
-    result = result.filter(p => p.category === selectedCategory.value);
-  }
+  if (selectedCategory.value) result = result.filter(p => p.category === selectedCategory.value)
+  if (selectedBrand.value) result = result.filter(p => p.brand === selectedBrand.value)
+  result = result.filter(p => p.price >= priceRange.value.min && p.price <= priceRange.value.max)
+  if (selectedRating.value > 0) result = result.filter(p => p.rating === selectedRating.value)
 
-  // Brand filter
-  if (selectedBrand.value) {
-    result = result.filter(p => p.brand === selectedBrand.value);
-  }
-
-  // Price filter
-  result = result.filter(p => 
-    p.price >= priceRange.value.min && p.price <= priceRange.value.max
-  );
-
-  // Rating filter
-  if (selectedRating.value > 0) {
-    result = result.filter(p => p.rating === selectedRating.value);
-  }
-
-  // Sorting
   switch (sortBy.value) {
-    case 'price-asc':
-      result.sort((a, b) => a.price - b.price);
-      break;
-    case 'price-desc':
-      result.sort((a, b) => b.price - a.price);
-      break;
-    case 'rating':
-      result.sort((a, b) => b.rating - a.rating);
-      break;
-    case 'newest':
-      result.sort((a, b) => b.id - a.id);
-      break;
+    case 'price-asc': result.sort((a, b) => a.price - b.price); break
+    case 'price-desc': result.sort((a, b) => b.price - a.price); break
+    case 'rating': result.sort((a, b) => b.rating - a.rating); break
+    case 'popular': result.sort((a, b) => (b.rating * b.reviewCount) - (a.rating * a.reviewCount)); break
+    case 'newest': result.sort((a, b) => new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime()); break
   }
 
-  return result;
-});
+  return result
+})
 
-const totalPages = computed(() => 
-  Math.ceil(filteredProducts.value.length / itemsPerPage)
-);
-
+const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage))
 const paginatedProducts = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return filteredProducts.value.slice(start, end);
-});
+  const start = (currentPage.value - 1) * itemsPerPage
+  return filteredProducts.value.slice(start, start + itemsPerPage)
+})
 
-// Methods
-const renderStars = (rating: number): string => {
-  return '★'.repeat(rating) + '☆'.repeat(5 - rating);
-};
+// --- METHODS ---
+const renderStars = (rating: number): string =>
+  '★'.repeat(rating) + '☆'.repeat(5 - rating)
 
 const changePage = (page: number) => {
   if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    currentPage.value = page
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
-};
+}
 
 const clearFilters = () => {
-  selectedCategory.value = '';
-  selectedBrand.value = '';
-  selectedRating.value = 0;
-  priceRange.value = { min: 0, max: 1000 };
-  sortBy.value = 'default';
-  currentPage.value = 1;
-};
+  selectedCategory.value = ''
+  selectedBrand.value = ''
+  selectedRating.value = 0
+  priceRange.value = { min: 0, max: 1000 }
+  sortBy.value = 'default'
+  currentPage.value = 1
+}
 </script>
 
 <style scoped>
-.shop-view {
-  padding: 2rem 0;
-  min-height: calc(100vh - 300px);
-  background-color: #f8f9fa;
-}
+.shop-view { padding: 2rem 0; min-height: calc(100vh - 300px); background-color: #f8f9fa; }
 
-.stars {
-  color: #ffc107;
-  font-size: 0.85rem;
-}
+.stars { color: #ffc107; font-size: 0.85rem; }
 
 .product-card {
   background: white;
@@ -378,11 +228,7 @@ const clearFilters = () => {
   height: 100%;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
-
-.product-card:hover {
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-  transform: translateY(-4px);
-}
+.product-card:hover { box-shadow: 0 8px 16px rgba(0,0,0,0.1); transform: translateY(-4px); }
 
 .product-image-container {
   position: relative;
@@ -400,10 +246,7 @@ const clearFilters = () => {
   object-fit: cover;
   transition: transform 0.3s ease;
 }
-
-.product-card:hover .product-image {
-  transform: scale(1.08);
-}
+.product-card:hover .product-image { transform: scale(1.08); }
 
 .product-overlay {
   position: absolute;
@@ -416,87 +259,40 @@ const clearFilters = () => {
   align-items: center;
   justify-content: center;
   opacity: 0;
+  z-index: 20; /* less than badge */
   transition: opacity 0.3s ease;
 }
+.product-card:hover .product-overlay { opacity: 1; }
 
-.product-card:hover .product-overlay {
-  opacity: 1;
-}
-
-.product-info {
-  padding: 1rem;
-}
-
-.product-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #212529;
-  min-height: 2.4em;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.product-rating {
+.product-badge-container {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 30; /* above overlay */
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  gap: 5px;
+}
+.product-badge-container .badge {
+  font-size: 0.7rem;
+  padding: 0.35em 0.65em;
+  font-weight: 600;
 }
 
-.rating-count {
-  font-size: 0.8rem;
-  color: #6c757d;
-}
+.product-info { padding: 1rem; }
+.product-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; color: #212529; min-height: 2.4em; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.product-rating { display: flex; align-items: center; gap: 0.5rem; }
+.rating-count { font-size: 0.8rem; color: #6c757d; }
+.product-price { font-size: 1.25rem; font-weight: 700; color: #198754; }
+.product-original-price { font-size: 0.85rem; color: #6c757d; text-decoration: line-through; margin-left: 0.5rem; }
 
-.product-price {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #198754;
-}
-
-.product-original-price {
-  font-size: 0.85rem;
-  color: #6c757d;
-  text-decoration: line-through;
-  margin-left: 0.5rem;
-}
-
-.pagination {
-  margin-top: 2rem;
-}
-
-.no-products {
-  background: white;
-  border-radius: 8px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-}
-
-.page-link {
-  color: #495057;
-  border-color: #dee2e6;
-}
-
-.page-link:hover {
-  color: #198754;
-  background-color: #e9ecef;
-  border-color: #dee2e6;
-}
-
-.page-item.active .page-link {
-  background-color: #198754;
-  border-color: #198754;
-}
+.pagination { margin-top: 2rem; }
+.no-products { background: white; border-radius: 8px; padding: 2rem; margin-bottom: 2rem; }
+.page-link { color: #495057; border-color: #dee2e6; }
+.page-link:hover { color: #198754; background-color: #e9ecef; border-color: #dee2e6; }
+.page-item.active .page-link { background-color: #198754; border-color: #198754; }
 
 @media (max-width: 768px) {
-  .shop-view {
-    padding: 1rem 0;
-  }
-
-  .product-card {
-    margin-bottom: 1rem;
-  }
+  .shop-view { padding: 1rem 0; }
+  .product-card { margin-bottom: 1rem; }
 }
 </style>
