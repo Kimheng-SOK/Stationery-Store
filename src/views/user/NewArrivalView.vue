@@ -26,25 +26,11 @@
           </div>
 
           <!-- Sort Bar -->
-          <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-            <div class="text-muted small">
-              Showing {{ paginatedProducts.length }} of {{ filteredProducts.length }} products
-            </div>
-            <div class="d-flex align-items-center gap-2">
-              <span class="text-muted small">Sort by:</span>
-              <select
-                v-model="sortBy"
-                class="form-select form-select-sm"
-                style="width: auto; min-width: 150px"
-              >
-                <option value="newest">Newest First</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="rating">Highest Rated</option>
-                <option value="popular">Most Popular</option>
-              </select>
-            </div>
-          </div>
+          <SortBar
+            v-model:sortBy="sortBy"
+            :shown-count="paginatedProducts.length"
+            :total-count="filteredProducts.length"
+          />
 
           <!-- Products Grid -->
           <div class="row g-4 mb-4">
@@ -133,6 +119,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import SidebarFilter from '@/components/product/SidebarFilter.vue';
+import SortBar from '@/components/product/SortBar.vue';
 
 interface Product {
   id: number

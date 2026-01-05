@@ -18,18 +18,14 @@
         <!-- Main Content -->
         <main class="col-lg-9 col-md-8">
           <!-- Page Header -->
-          <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-            <h3 class="mb-0">All Products</h3>
-            <div class="d-flex align-items-center gap-2">
-              <span class="text-muted small">Sort by:</span>
-              <select v-model="sortBy" class="form-select form-select-sm" style="width: auto; min-width: 150px;">
-                <option value="default">Best Match</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="rating">Rating</option>
-                <option value="newest">Newest</option>
-              </select>
-            </div>
+          <div class="mb-4">
+            <h3 class="mb-3">All Products</h3>
+
+            <SortBar
+              v-model:sortBy="sortBy"
+              :shown-count="paginatedProducts.length"
+              :total-count="filteredProducts.length"
+            />
           </div>
 
           <!-- Products Grid -->
@@ -125,6 +121,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import SidebarFilter from '@/components/product/SidebarFilter.vue';
+import SortBar from '@/components/product/SortBar.vue';
 
 interface Product {
   id: number;
