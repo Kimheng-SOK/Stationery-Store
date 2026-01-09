@@ -1,78 +1,91 @@
 <template>
-  <div class="login-bg d-flex align-items-center justify-content-center min-vh-100">
-    <div class="card shadow-lg rounded-4 overflow-hidden w-100" style="max-width: 800px">
-      <div class="row g-0 align-items-stretch">
-        <div class="col-lg-6 d-flex align-items-center justify-content-center bg-light">
-          <img
-            src="../../assets/image/pfp.png"
-            alt="Access Image"
-            class="img-fluid w-100 h-100 object-fit-cover"
-            style="object-fit: cover"
-          />
-        </div>
-        <div class="col-12 col-lg-6 d-flex align-items-center justify-content-center p-4 p-md-5">
-          <div class="w-100" style="max-width: 340px">
-            <div class="text-center mb-4">
-              <h1 class="fw-bold text-dark mb-1" style="font-size: 2.2rem">Welcome Back</h1>
-              <p class="text-secondary mb-0">Create your account to start shopping</p>
-            </div>
-            <form class="mb-3">
-              <div class="mb-3">
-                <input
-                  type="email"
-                  placeholder="Email"
-                  v-model="email"
-                  class="form-control form-control-lg rounded-3 border-2 border-secondary"
-                  required
-                />
-              </div>
-              <div class="mb-3 position-relative">
-                <input
-                  placeholder="Password"
-                  :type="showPassword ? 'text' : 'password'"
-                  v-model="password"
-                  class="form-control form-control-lg rounded-3 border-2 border-secondary"
-                  required
-                />
-                <i
-                  class="bi position-absolute end-0 top-50 translate-middle-y me-3 text-secondary cursor-pointer"
-                  :class="showPassword ? 'bi-eye-slash' : 'bi-eye'"
-                  @click="togglePassword"
-                  aria-hidden="true"
-                  style="right: 16px; font-size: 1.3rem"
-                ></i>
-              </div>
-            </form>
-            <button
-              @click="handSignin()"
-              class="btn btn-primary w-100 py-3 fw-bold fs-5 rounded-3 mb-3"
-            >
-              Sign In
-            </button>
-            <router-link to="/signup" class="d-block text-center mb-2 text-secondary">
-              <small>
-                Don't have account?
-                <span class="text-primary fw-semibold text-decoration-underline">Sign Up</span>
-              </small>
-            </router-link>
-            <hr class="w-100 mx-auto border border-secondary mb-3" />
-            <div class="d-flex justify-content-center gap-3 mb-2">
-              <button
-                class="btn border-0 shadow-sm rounded-circle d-flex align-items-center justify-content-center bg-white social-btn"
-                style="width: 48px; height: 48px"
-                aria-label="Sign in with Google"
-              >
-                <i class="bi bi-google fs-4 text-danger"></i>
-              </button>
-              <button
-                class="btn border-0 shadow-sm rounded-circle d-flex align-items-center justify-content-center bg-white social-btn"
-                style="width: 48px; height: 48px"
-                aria-label="Sign in with Facebook"
-              >
-                <i class="bi bi-facebook fs-4 text-primary"></i>
-              </button>
-            </div>
+  <div class="d-flex flex-column flex-lg-row w-100 min-vh-100">
+
+    <div class="w-100 d-flex justify-content-center align-items-center" style="height: 16rem; height: 20rem; height: 100vh;">
+      <img
+        src="../assets/image/pfp.png"
+        alt="Access Image"
+        class="w-100 h-100"
+        style="object-fit: cover;"
+      >
+    </div>
+
+
+    <div class="w-100 d-flex justify-content-center align-items-center p-3 p-sm-4 p-lg-5">
+      <div class="text-center w-100 " style="max-width: 85%;">
+        <h1 class="fs-2 fs-sm-1 fw-bold text-dark">Welcome Back</h1>
+        <h1 class="fs-5 fs-sm-4 mt-2" style="color: var(--main-color1); font-family: 'Quicksand', sans-serif;">Create your account to start shopping</h1>
+
+        <form>
+          <div class="mb-3 mb-sm-4 mb-lg-5">
+            <input
+              type="email"
+              placeholder="Email"
+              v-model="email"
+              class="form-control fs-5 fs-sm-4 px-3 px-sm-4 px-lg-5"
+              style="border: 1.5px solid var(--main-color1); height: 3rem; color: var(--main-color1); font-family: 'Quicksand', sans-serif;"
+              required
+            />
           </div>
+
+          <div class="position-relative mb-2">
+            <input
+              placeholder="Password"
+              :type="showPassword ? 'text' : 'password'"
+              v-model="password"
+              class="form-control fs-5 fs-sm-4 px-3 px-sm-4 px-lg-5"
+              style="border: 1.5px solid var(--main-color1); height: 3rem; color: var(--main-color1); font-family: 'Quicksand', sans-serif;"
+              required
+            />
+            <i
+              class="fa position-absolute top-50 translate-middle-y end-0 me-3 me-sm-4 me-lg-5"
+              style="color: var(--main-color1); cursor: pointer;"
+              :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"
+              @click="togglePassword"
+              aria-hidden="true"
+            ></i>
+          </div>
+
+          <router-link to="/forgotpassword" class="text-decoration-none">
+            <p class="small fs-sm-6 text-start mb-4" style="color: var(--main-color1); font-family: 'Quicksand', sans-serif;">
+              Forget Password?
+            </p>
+          </router-link>
+        </form>
+
+        <div class="">
+          <button
+            @click="handSignin()"
+            class="btn w-100 text-white fw-bold fs-4 fs-sm-3 px-3 px-sm-4 px-lg-5 rounded-3"
+            style="background-color: var(--main-color2); height: 3.5rem;"
+          >
+            Sign In
+          </button>
+        </div>
+
+
+        <router-link to="/signup" class="text-decoration-none">
+          <p class="small fs-sm-6 mt-2" style="color: var(--main-color1); font-family: 'Quicksand', sans-serif;">
+            Don't have account?
+            <span class="fw-semibold" style="color: var(--main-color2);">Sign Up</span>
+          </p>
+        </router-link>
+
+        <hr class="mx-auto my-4 my-sm-5" style="max-width: 70%; border: 1.2px solid var(--main-color1);">
+
+        <div class="d-flex justify-content-center gap-3 gap-sm-4 gap-lg-5 mt-3 mt-sm-4">
+          <img
+            :src="assets.google"
+            alt=""
+            class="border rounded-3 p-2 p-sm-3"
+            style="width: 3rem; height: 3rem; border-color: var(--main-color1) !important; cursor: pointer;"
+          >
+          <img
+            :src="assets.facebook"
+            alt=""
+            class="border rounded-3 p-2 p-sm-3"
+            style="width: 3rem; height: 3rem; border-color: var(--main-color1) !important; cursor: pointer;"
+          >
         </div>
       </div>
     </div>
@@ -80,7 +93,8 @@
 </template>
 
 <script lang="ts">
-// removed missing assets module; using direct image paths in the template instead
+import { assets } from '../assets/assets'
+
 export default {
   name: 'SignIn',
   data() {
@@ -112,18 +126,16 @@ export default {
 }
 </script>
 
-<style>
-.login-bg {
-  background: linear-gradient(120deg, #e0e7ff 0%, #f8fafc 100%);
+<style scoped>
+
+@media (min-width: 576px) {
+  .fs-sm-1 { font-size: 2.5rem !important; }
+  .fs-sm-3 { font-size: 1.75rem !important; }
+  .fs-sm-4 { font-size: 1.25rem !important; }
+  .fs-sm-6 { font-size: 1rem !important; }
 }
-.social-btn:hover {
-  background: #f1f5f9 !important;
-  box-shadow: 0 2px 8px rgba(30, 41, 59, 0.1);
-}
-body {
-  font-family: 'Inter', sans-serif;
-}
-.font-quicksand {
-  font-family: 'Quicksand', sans-serif;
+
+@media (min-width: 992px) {
+  .p-lg-5 { padding: 4rem !important; }
 }
 </style>
