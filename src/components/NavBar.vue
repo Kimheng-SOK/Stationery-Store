@@ -1,6 +1,6 @@
 <template>
   <!-- ORIGINAL NAVBAR – untouched on desktop -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3 sticky-top">
     <div class="container-fluid px-4" style="max-width: 1400px; margin: 0 auto">
       <!-- Logo (still an image) -->
       <router-link to="/" class="navbar-brand d-flex align-items-center">
