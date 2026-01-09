@@ -1,12 +1,18 @@
 import { createRouter, createWebHistory } from 'vue-router'
-
+import SignIn from '@/views/auth/Login.vue'
+import SignUp from '@/views/auth/Register.vue'
 import adminRoutes from './admin'
 import userRoutes from './user' // if any
 const requiresAdmin = true
 
 const router = createRouter({
   history: createWebHistory(),
-  routes: [...userRoutes, ...adminRoutes],
+  routes: [
+    ...userRoutes,
+    ...adminRoutes,
+    { path: '/signin', name: 'SignIn', component: SignIn },
+    { path: '/signup', name: 'SignUp', component: SignUp },
+  ],
 })
 
 // // Optional navigation guard

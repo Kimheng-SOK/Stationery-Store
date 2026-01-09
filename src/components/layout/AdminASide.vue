@@ -28,7 +28,7 @@ const navItems = [
   // { label: 'Reviews', icon: 'bi-star-half', to: '/admin/reviews' },
   // { label: 'Shipping', icon: 'bi-truck', to: '/admin/shipping' },
   // { label: 'Reports', icon: 'bi-bar-chart-line', to: '/admin/reports' },
-  // { label: 'Top Statistics', icon: 'bi-graph-up-arrow', to: '/admin/statistics' },
+  // { label: 'Top   Statistics', icon: 'bi-graph-up-arrow', to: '/admin/statistics' },
   { label: 'Team', icon: 'bi-people-fill', to: '/admin/teams' },
 ]
 </script>
@@ -55,9 +55,12 @@ const navItems = [
     opacity 0.2s,
     color 0.2s;
 }
+
 .nav-link:hover {
-  opacity: 0.9;
+  color: #ff4f5a;
+  opacity: 1;
 }
+
 @media (max-width: 768px) {
   aside.bg-dark {
     width: 100% !important;

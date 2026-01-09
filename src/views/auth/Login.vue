@@ -96,35 +96,33 @@
 import { assets } from '../assets/assets'
 
 export default {
+  name: 'SignIn',
   data() {
     return {
-      assets: assets,
       message: '',
       email: '',
-      password : '',
-      showPassword : false
+      password: '',
+      showPassword: false,
     }
   },
 
   methods: {
-
-    togglePassword () {
-      this.showPassword= !this.showPassword;
+    togglePassword() {
+      this.showPassword = !this.showPassword
     },
 
     handSignin() {
       if (!this.email || !this.password) {
-        alert("Fill the Form");
+        alert('Fill the Form')
         return
       }
 
-      if(this.email && this.password) {
-        alert("Sign In Successfully!!!");
+      if (this.email && this.password) {
+        alert('Sign In Successfully!!!')
         this.$router.push('/signup')
       }
-    }
-  }
-
+    },
+  },
 }
 </script>
 

@@ -126,9 +126,9 @@
 import { assets } from '../assets/assets'
 
 export default {
+  name: 'SignUp',
   data() {
     return {
-      assets: assets,
       username: '',
       email: '',
       password: '',
@@ -140,31 +140,27 @@ export default {
 
   methods: {
     togglePassword() {
-      this.showPassword = !this.showPassword;
+      this.showPassword = !this.showPassword
     },
 
     toggleConfirmPassword() {
-      this.showConfirmPassword = !this.showConfirmPassword;
+      this.showConfirmPassword = !this.showConfirmPassword
     },
 
     handleSignUp() {
-
-      if(!this.username || !this.email || !this.password || !this.confirmPassword){
-        alert("Please Fill the Form")
+      if (!this.username || !this.email || !this.password || !this.confirmPassword) {
+        alert('Please Fill the Form')
         return
       }
-      if(this.password !== this.confirmPassword){
-        alert("The Password is not Matching")
-         return
+      if (this.password !== this.confirmPassword) {
+        alert('The Password is not Matching')
+        return
       }
 
-
-      alert("Sign up Successfully!!!")
-        this.$router.push('/signin')
-
+      alert('Sign up Successfully!!!')
+      this.$router.push('/signin')
     },
-
-  }
+  },
 }
 </script>
 
