@@ -1,105 +1,109 @@
 <template>
-  <div class="d-flex flex-column flex-lg-row w-100 min-vh-100">
-
-    <div class="w-100 d-flex justify-content-center align-items-center" style="height: 16rem; height: 20rem; height: 100vh;">
+  <div class="login-container d-flex min-vh-100">
+    <!-- Left Side - Image -->
+    <div class="login-image-section d-none d-lg-flex">
       <img
-        src="../assets/image/pfp.png"
+        src="@/assets/image/pfp.png"
         alt="Access Image"
-        class="w-100 h-100"
-        style="object-fit: cover;"
       >
     </div>
 
+    <!-- Right Side - Form -->
+    <div class="login-form-section d-flex justify-content-center align-items-center">
+      <div class="login-form-wrapper">
+        <div class="text-center mb-5">
+          <h1 class="login-title fw-bold mb-2">Welcome Back</h1>
+          <p class="login-subtitle">Sign in to continue shopping</p>
+        </div>
 
-    <div class="w-100 d-flex justify-content-center align-items-center p-3 p-sm-4 p-lg-5">
-      <div class="text-center w-100 " style="max-width: 85%;">
-        <h1 class="fs-2 fs-sm-1 fw-bold text-dark">Welcome Back</h1>
-        <h1 class="fs-5 fs-sm-4 mt-2" style="color: var(--main-color1); font-family: 'Quicksand', sans-serif;">Create your account to start shopping</h1>
-
-        <form>
-          <div class="mb-3 mb-sm-4 mb-lg-5">
-            <input
-              type="email"
-              placeholder="Email"
-              v-model="email"
-              class="form-control fs-5 fs-sm-4 px-3 px-sm-4 px-lg-5"
-              style="border: 1.5px solid var(--main-color1); height: 3rem; color: var(--main-color1); font-family: 'Quicksand', sans-serif;"
-              required
-            />
+        <form @submit.prevent="handSignin" class="login-form">
+          <!-- Email Input -->
+          <div class="form-group mb-4">
+            <label class="form-label">Email Address</label>
+            <div class="input-group-custom">
+              <span class="input-icon">
+                <i class="fas fa-envelope"></i>
+              </span>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                v-model="email"
+                class="form-control form-control-custom"
+                required
+              />
+            </div>
           </div>
 
-          <div class="position-relative mb-2">
-            <input
-              placeholder="Password"
-              :type="showPassword ? 'text' : 'password'"
-              v-model="password"
-              class="form-control fs-5 fs-sm-4 px-3 px-sm-4 px-lg-5"
-              style="border: 1.5px solid var(--main-color1); height: 3rem; color: var(--main-color1); font-family: 'Quicksand', sans-serif;"
-              required
-            />
-            <i
-              class="fa position-absolute top-50 translate-middle-y end-0 me-3 me-sm-4 me-lg-5"
-              style="color: var(--main-color1); cursor: pointer;"
-              :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"
-              @click="togglePassword"
-              aria-hidden="true"
-            ></i>
+          <!-- Password Input -->
+          <div class="form-group mb-3">
+            <label class="form-label">Password</label>
+            <div class="input-group-custom">
+              <span class="input-icon">
+                <i class="fas fa-lock"></i>
+              </span>
+              <input
+                placeholder="Enter your password"
+                :type="showPassword ? 'text' : 'password'"
+                v-model="password"
+                class="form-control form-control-custom"
+                required
+              />
+              <span class="input-icon-right" @click="togglePassword">
+                <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </span>
+            </div>
           </div>
 
-          <router-link to="/forgotpassword" class="text-decoration-none">
-            <p class="small fs-sm-6 text-start mb-4" style="color: var(--main-color1); font-family: 'Quicksand', sans-serif;">
-              Forget Password?
-            </p>
-          </router-link>
-        </form>
+          <!-- Forgot Password -->
+          <div class="text-end mb-4">
+            <router-link to="/forgotpassword" class="forgot-password-link">
+              Forgot Password?
+            </router-link>
+          </div>
 
-        <div class="">
-          <button
-            @click="handSignin()"
-            class="btn w-100 text-white fw-bold fs-4 fs-sm-3 px-3 px-sm-4 px-lg-5 rounded-3"
-            style="background-color: var(--main-color2); height: 3.5rem;"
-          >
-            Sign In
+          <!-- Sign In Button -->
+          <button type="submit" class="btn btn-signin w-100 mb-4">
+            <span class="btn-text">Sign In</span>
+            <i class="fas fa-arrow-right ms-2"></i>
           </button>
-        </div>
 
+          <!-- Sign Up Link -->
+          <div class="text-center">
+            <p class="signup-text">
+              Don't have an account?
+              <router-link to="/signup" class="signup-link">
+                Sign Up
+              </router-link>
+            </p>
+          </div>
 
-        <router-link to="/signup" class="text-decoration-none">
-          <p class="small fs-sm-6 mt-2" style="color: var(--main-color1); font-family: 'Quicksand', sans-serif;">
-            Don't have account?
-            <span class="fw-semibold" style="color: var(--main-color2);">Sign Up</span>
-          </p>
-        </router-link>
+          <!-- Divider -->
+          <div class="divider my-4">
+            <span class="divider-text">Or continue with</span>
+          </div>
 
-        <hr class="mx-auto my-4 my-sm-5" style="max-width: 70%; border: 1.2px solid var(--main-color1);">
-
-        <div class="d-flex justify-content-center gap-3 gap-sm-4 gap-lg-5 mt-3 mt-sm-4">
-          <img
-            :src="assets.google"
-            alt=""
-            class="border rounded-3 p-2 p-sm-3"
-            style="width: 3rem; height: 3rem; border-color: var(--main-color1) !important; cursor: pointer;"
-          >
-          <img
-            :src="assets.facebook"
-            alt=""
-            class="border rounded-3 p-2 p-sm-3"
-            style="width: 3rem; height: 3rem; border-color: var(--main-color1) !important; cursor: pointer;"
-          >
-        </div>
+          <!-- Social Login -->
+          <div class="social-login d-flex gap-3">
+            <button type="button" class="btn btn-social flex-fill">
+              <i class="fab fa-google me-2"></i>
+              Google
+            </button>
+            <button type="button" class="btn btn-social flex-fill">
+              <i class="fab fa-facebook me-2"></i>
+              Facebook
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { assets } from '../assets/assets'
-
 export default {
   name: 'SignIn',
   data() {
     return {
-      message: '',
       email: '',
       password: '',
       showPassword: false,
@@ -113,29 +117,325 @@ export default {
 
     handSignin() {
       if (!this.email || !this.password) {
-        alert('Fill the Form')
+        alert('Please fill in all fields')
         return
       }
 
-      if (this.email && this.password) {
-        alert('Sign In Successfully!!!')
-        this.$router.push('/signup')
-      }
+      // TODO: Implement actual authentication
+      alert('Sign In Successfully!!!')
+      this.$router.push('/')
     },
   },
 }
 </script>
 
 <style scoped>
-
-@media (min-width: 576px) {
-  .fs-sm-1 { font-size: 2.5rem !important; }
-  .fs-sm-3 { font-size: 1.75rem !important; }
-  .fs-sm-4 { font-size: 1.25rem !important; }
-  .fs-sm-6 { font-size: 1rem !important; }
+.login-container {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  overflow: hidden;
 }
 
-@media (min-width: 992px) {
-  .p-lg-5 { padding: 4rem !important; }
+/* Left Side - Image Section */
+.login-image-section {
+  flex: 0 0 50%;
+  max-width: 50%;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+}
+
+.login-image-section img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Right Side - Form Section */
+.login-form-section {
+  flex: 0 0 50%;
+  max-width: 50%;
+  height: 100vh;
+  padding: 2rem;
+  background: white;
+  overflow-y: auto;
+}
+
+.login-form-wrapper {
+  width: 100%;
+  max-width: 450px;
+  padding: 2rem;
+}
+
+.login-title {
+  font-size: 2rem;
+  color: #1a1a1a;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.login-subtitle {
+  color: #6c757d;
+  font-size: 1rem;
+  font-family: 'Quicksand', sans-serif;
+}
+
+/* Form Elements */
+.form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.input-group-custom {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-control-custom {
+  width: 100%;
+  height: 3.2rem;
+  padding-left: 3rem;
+  padding-right: 3rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  font-family: 'Quicksand', sans-serif;
+  outline: none;
+}
+
+.form-control-custom:focus {
+  border-color: var(--main-color2, #007bff);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.1);
+  outline: none;
+}
+
+.input-icon {
+  position: absolute;
+  left: 1rem;
+  color: #6c757d;
+  z-index: 10;
+  pointer-events: none;
+  font-size: 1rem;
+}
+
+.input-icon-right {
+  position: absolute;
+  right: 1rem;
+  color: #6c757d;
+  cursor: pointer;
+  z-index: 10;
+  transition: color 0.3s ease;
+  font-size: 1rem;
+  padding: 0.5rem;
+}
+
+.input-icon-right:hover {
+  color: var(--main-color2, #007bff);
+}
+
+.input-icon-right:active {
+  transform: scale(0.95);
+}
+
+/* Forgot Password Link */
+.forgot-password-link {
+  color: var(--main-color2, #007bff);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.forgot-password-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+/* Sign In Button */
+.btn-signin {
+  height: 3.5rem;
+  background: linear-gradient(135deg, var(--main-color2, #007bff) 0%, #0056b3 100%);
+  border: none;
+  border-radius: 0.75rem;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.btn-signin:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
+}
+
+.btn-signin:active {
+  transform: translateY(0);
+}
+
+.btn-signin .btn-text {
+  flex: 1;
+  text-align: center;
+}
+
+/* Sign Up Link */
+.signup-text {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin: 0;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.signup-link {
+  color: var(--main-color2, #007bff);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.signup-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+/* Divider */
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.divider-text {
+  position: relative;
+  background: white;
+  padding: 0 1rem;
+  color: #6c757d;
+  font-size: 0.85rem;
+  font-family: 'Quicksand', sans-serif;
+}
+
+/* Social Login */
+.social-login {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-social {
+  height: 3rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 0.75rem;
+  background: white;
+  color: #495057;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.btn-social i {
+  font-size: 1.2rem;
+}
+
+.btn-social:hover {
+  border-color: var(--main-color2, #007bff);
+  color: var(--main-color2, #007bff);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-social:active {
+  transform: translateY(0);
+}
+
+/* Responsive Styles */
+@media (max-width: 991.98px) {
+  .login-form-section {
+    flex: 1;
+    max-width: 100%;
+    height: auto;
+    min-height: 100vh;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .login-container {
+    flex-direction: column;
+  }
+
+  .login-image-section {
+    display: none !important;
+  }
+
+  .login-form-section {
+    padding: 1.5rem;
+    flex: 1;
+    max-width: 100%;
+  }
+
+  .login-form-wrapper {
+    padding: 1rem;
+  }
+
+  .login-title {
+    font-size: 1.75rem;
+  }
+
+  .login-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .form-label {
+    font-size: 0.85rem;
+  }
+
+  .form-control-custom {
+    height: 2.8rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-signin {
+    height: 3rem;
+    font-size: 1rem;
+  }
+
+  .signup-text {
+    font-size: 0.85rem;
+  }
+
+  .divider {
+    margin: 1.5rem 0;
+  }
+
+  .social-login {
+    flex-direction: column;
+  }
+
+  .btn-social {
+    width: 100%;
+  }
 }
 </style>

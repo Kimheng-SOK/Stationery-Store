@@ -1,127 +1,110 @@
 <template>
-  <div class="d-flex flex-column flex-lg-row w-100 min-vh-100">
-
+  <div class="login-container d-flex min-vh-100">
     <!-- Left Side - Image -->
-    <div class="w-100 d-flex justify-content-center align-items-center" style="height: 100vh;">
+    <div class="login-image-section d-none d-lg-flex">
       <img
-        src="../assets/image/pfp.png"
+        src="@/assets/image/pfp.png"
         alt="Access Image"
-        class="w-100 h-100"
-        style="object-fit: cover;"
       >
     </div>
 
     <!-- Right Side - Form -->
-    <div class="w-100 d-flex justify-content-center align-items-center p-3">
-      <div class="text-center w-100" style="max-width: 85%;">
+    <div class="login-form-section d-flex justify-content-center align-items-center">
+      <div class="login-form-wrapper">
 
         <!-- Step 1: Enter Email -->
         <div v-if="step === 1">
-          <div class="text-center mb-4">
-            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                 style="width: 80px; height: 80px; background-color: rgba(102, 126, 234, 0.1);">
-              <i class="fa fa-lock fs-1" style="color: #667eea;"></i>
+          <div class="text-center mb-5">
+            <div class="icon-circle mb-3">
+              <i class="fas fa-lock"></i>
             </div>
+            <h1 class="login-title fw-bold mb-2">Forgot Password?</h1>
+            <p class="login-subtitle">Enter your email and we'll send you a verification code</p>
           </div>
 
-          <h1 class="fs-2 fs-sm-1 fw-bold text-dark">Forgot Password?</h1>
-          <h1 class="fs-5 fs-sm-4 mt-2" style="color: var(--main-color1); font-family: 'Quicksand', sans-serif;">
-            Enter your email and we'll send you a verification code
-          </h1>
-
-          <form @submit.prevent="sendVerificationCode" class="pt-3 pt-sm-4 py-3">
-            <div class="mb-3 mb-sm-4 mb-lg-5">
-              <input
-                type="email"
-                placeholder="Email"
-                v-model="email"
-                class="form-control fs-5 fs-sm-4 px-3 px-sm-4 px-lg-5"
-                style="border: 1.5px solid var(--main-color1); height: 3rem; color: var(--main-color1); font-family: 'Quicksand', sans-serif;"
-                required
-              />
+          <form @submit.prevent="sendVerificationCode" class="login-form">
+            <div class="form-group mb-4">
+              <label class="form-label">Email Address</label>
+              <div class="input-group-custom">
+                <span class="input-icon">
+                  <i class="fas fa-envelope"></i>
+                </span>
+                <input
+                  type="email"
+                  placeholder="Enter your email"
+                  v-model="email"
+                  class="form-control form-control-custom"
+                  required
+                />
+              </div>
             </div>
 
-            <button
-              type="submit"
-              class="btn w-100 text-white fw-bold fs-4 fs-sm-3 px-3 px-sm-4 px-lg-5 rounded-3 mb-3"
-              style="background-color: var(--main-color2); height: 3.5rem;"
-            >
-              Send Verification Code
+            <button type="submit" class="btn btn-signin w-100 mb-3">
+              <span class="btn-text">Send Verification Code</span>
+              <i class="fas fa-arrow-right ms-2"></i>
             </button>
 
             <router-link to="/signin" class="text-decoration-none">
-              <button
-                type="button"
-                class="btn w-100 btn-outline-secondary fw-semibold fs-5 rounded-3"
-                style="height: 3.5rem;"
-              >
-                <i class="fa fa-arrow-left me-2"></i>
+              <button type="button" class="btn btn-back w-100">
+                <i class="fas fa-arrow-left me-2"></i>
                 Back to Sign In
               </button>
             </router-link>
           </form>
 
-          <hr class="mx-auto my-4 my-sm-5" style="max-width: 70%; border: 1.2px solid var(--main-color1);">
+          <div class="divider my-4">
+            <span class="divider-text">Or continue with</span>
+          </div>
 
-          <div class="d-flex justify-content-center gap-3 gap-sm-4 gap-lg-5 mt-3 mt-sm-4">
-            <img
-              :src="assets.google"
-              alt=""
-              class="border rounded-3 p-3"
-              style="width: 3.75rem; height: 3.75rem; border-color: var(--main-color1) !important; cursor: pointer;"
-            >
-            <img
-              :src="assets.facebook"
-              alt=""
-              class="border rounded-3 p-3"
-              style="width: 3.75rem; height: 3.75rem; border-color: var(--main-color1) !important; cursor: pointer;"
-            >
+          <div class="social-login d-flex gap-3">
+            <button type="button" class="btn btn-social flex-fill">
+              <i class="fab fa-google me-2"></i>
+              Google
+            </button>
+            <button type="button" class="btn btn-social flex-fill">
+              <i class="fab fa-facebook me-2"></i>
+              Facebook
+            </button>
           </div>
         </div>
 
         <!-- Step 2: Enter Verification Code -->
         <div v-if="step === 2">
-          <div class="text-center mb-4">
-            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                 style="width: 80px; height: 80px; background-color: rgba(102, 126, 234, 0.1);">
-              <i class="fa fa-envelope fs-1" style="color: #667eea;"></i>
+          <div class="text-center mb-5">
+            <div class="icon-circle mb-3">
+              <i class="fas fa-envelope"></i>
             </div>
+            <h1 class="login-title fw-bold mb-2">Check Your Email</h1>
+            <p class="login-subtitle">
+              We sent a verification code to<br>
+              <strong>{{ email }}</strong>
+            </p>
           </div>
 
-          <h1 class="fs-2 fs-sm-1 fw-bold text-dark">Check Your Email</h1>
-          <h1 class="fs-5 fs-sm-4 mt-2" style="color: var(--main-color1); font-family: 'Quicksand', sans-serif;">
-            We sent a verification code to<br>
-            <strong>{{ email }}</strong>
-          </h1>
-
-          <form @submit.prevent="verifyCode" class="pt-3 pt-sm-4 py-3">
-            <div class="mb-3 mb-sm-4 mb-lg-5">
+          <form @submit.prevent="verifyCode" class="login-form">
+            <div class="form-group mb-4">
+              <label class="form-label">Verification Code</label>
               <input
                 type="text"
                 placeholder="Enter 6-digit code"
                 v-model="verificationCode"
-                class="form-control fs-3 text-center px-3 px-sm-4 px-lg-5"
-                style="border: 1.5px solid var(--main-color1); height: 3.5rem; color: var(--main-color1); font-family: 'Quicksand', sans-serif; letter-spacing: 0.5em;"
+                class="form-control form-control-code"
                 maxlength="6"
                 required
               />
             </div>
 
-            <button
-              type="submit"
-              class="btn w-100 text-white fw-bold fs-4 fs-sm-3 px-3 px-sm-4 px-lg-5 rounded-3 mb-3"
-              style="background-color: var(--main-color2); height: 3.5rem;"
-            >
-              Verify Code
+            <button type="submit" class="btn btn-signin w-100 mb-4">
+              <span class="btn-text">Verify Code</span>
+              <i class="fas fa-arrow-right ms-2"></i>
             </button>
 
             <div class="text-center">
-              <p class="text-muted small mb-2" style="font-family: 'Quicksand', sans-serif;">Didn't receive the code?</p>
+              <p class="resend-text mb-2">Didn't receive the code?</p>
               <button
                 type="button"
                 @click="resendCode"
-                class="btn btn-link text-decoration-none fw-semibold p-0"
-                style="color: var(--main-color2);"
+                class="btn-resend"
                 :disabled="resendTimer > 0"
               >
                 {{ resendTimer > 0 ? `Resend in ${resendTimer}s` : 'Resend Code' }}
@@ -132,124 +115,124 @@
 
         <!-- Step 3: Reset Password -->
         <div v-if="step === 3">
-          <div class="text-center mb-4">
-            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                 style="width: 80px; height: 80px; background-color: rgba(102, 126, 234, 0.1);">
-              <i class="fa fa-key fs-1" style="color: #667eea;"></i>
+          <div class="text-center mb-5">
+            <div class="icon-circle mb-3">
+              <i class="fas fa-key"></i>
             </div>
+            <h1 class="login-title fw-bold mb-2">Set New Password</h1>
+            <p class="login-subtitle">Your new password must be different from previously used passwords</p>
           </div>
 
-          <h1 class="fs-2 fs-sm-1 fw-bold text-dark">Set New Password</h1>
-          <h1 class="fs-5 fs-sm-4 mt-2" style="color: var(--main-color1); font-family: 'Quicksand', sans-serif;">
-            Your new password must be different from previously used passwords
-          </h1>
-
-          <form @submit.prevent="resetPassword" class="pt-3 pt-sm-4 py-3">
-            <div class="position-relative mb-3 mb-sm-4 mb-lg-5">
-              <input
-                :type="showPassword ? 'text' : 'password'"
-                placeholder="New Password"
-                v-model="newPassword"
-                class="form-control fs-5 fs-sm-4 px-3 px-sm-4 px-lg-5"
-                style="border: 1.5px solid var(--main-color1); height: 3rem; color: var(--main-color1); font-family: 'Quicksand', sans-serif;"
-                required
-              />
-              <i
-                class="fa position-absolute top-50 translate-middle-y end-0 me-3 me-sm-4 me-lg-5"
-                style="color: var(--main-color1); cursor: pointer;"
-                :class="showPassword ? 'fa-eye-slash' : 'fa-eye'"
-                @click="showPassword = !showPassword"
-                aria-hidden="true"
-              ></i>
+          <form @submit.prevent="resetPassword" class="login-form">
+            <div class="form-group mb-4">
+              <label class="form-label">New Password</label>
+              <div class="input-group-custom">
+                <span class="input-icon">
+                  <i class="fas fa-lock"></i>
+                </span>
+                <input
+                  placeholder="Enter new password"
+                  :type="showPassword ? 'text' : 'password'"
+                  v-model="newPassword"
+                  class="form-control form-control-custom"
+                  required
+                />
+                <span class="input-icon-right" @click="showPassword = !showPassword">
+                  <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                </span>
+              </div>
             </div>
 
-            <div class="position-relative mb-3 mb-sm-4 mb-lg-5">
-              <input
-                :type="showConfirmPassword ? 'text' : 'password'"
-                placeholder="Confirm Password"
-                v-model="confirmPassword"
-                class="form-control fs-5 fs-sm-4 px-3 px-sm-4 px-lg-5"
-                style="border: 1.5px solid var(--main-color1); height: 3rem; color: var(--main-color1); font-family: 'Quicksand', sans-serif;"
-                required
-              />
-              <i
-                class="fa position-absolute top-50 translate-middle-y end-0 me-3 me-sm-4 me-lg-5"
-                style="color: var(--main-color1); cursor: pointer;"
-                :class="showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'"
-                @click="showConfirmPassword = !showConfirmPassword"
-                aria-hidden="true"
-              ></i>
+            <div class="form-group mb-4">
+              <label class="form-label">Confirm Password</label>
+              <div class="input-group-custom">
+                <span class="input-icon">
+                  <i class="fas fa-lock"></i>
+                </span>
+                <input
+                  placeholder="Confirm new password"
+                  :type="showConfirmPassword ? 'text' : 'password'"
+                  v-model="confirmPassword"
+                  class="form-control form-control-custom"
+                  required
+                />
+                <span class="input-icon-right" @click="showConfirmPassword = !showConfirmPassword">
+                  <i :class="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                </span>
+              </div>
             </div>
 
-            <!-- Password Requirements -->
-            <div class="mb-4 p-3 rounded-3 text-start" style="background-color: #f8f9fa;">
-              <p class="small fw-semibold mb-2" style="font-family: 'Quicksand', sans-serif;">Password must contain:</p>
-              <ul class="small mb-0 ps-3" style="font-family: 'Quicksand', sans-serif;">
-                <li :class="newPassword.length >= 8 ? 'text-success' : 'text-muted'">At least 8 characters</li>
-                <li :class="/[A-Z]/.test(newPassword) ? 'text-success' : 'text-muted'">One uppercase letter</li>
-                <li :class="/[a-z]/.test(newPassword) ? 'text-success' : 'text-muted'">One lowercase letter</li>
-                <li :class="/[0-9]/.test(newPassword) ? 'text-success' : 'text-muted'">One number</li>
+            <div class="password-requirements mb-4">
+              <p class="requirements-title">Password must contain:</p>
+              <ul class="requirements-list">
+                <li :class="newPassword.length >= 8 ? 'valid' : ''">
+                  <i :class="newPassword.length >= 8 ? 'fas fa-check-circle' : 'far fa-circle'"></i>
+                  At least 8 characters
+                </li>
+                <li :class="/[A-Z]/.test(newPassword) ? 'valid' : ''">
+                  <i :class="/[A-Z]/.test(newPassword) ? 'fas fa-check-circle' : 'far fa-circle'"></i>
+                  One uppercase letter
+                </li>
+                <li :class="/[a-z]/.test(newPassword) ? 'valid' : ''">
+                  <i :class="/[a-z]/.test(newPassword) ? 'fas fa-check-circle' : 'far fa-circle'"></i>
+                  One lowercase letter
+                </li>
+                <li :class="/[0-9]/.test(newPassword) ? 'valid' : ''">
+                  <i :class="/[0-9]/.test(newPassword) ? 'fas fa-check-circle' : 'far fa-circle'"></i>
+                  One number
+                </li>
               </ul>
             </div>
 
-            <button
-              type="submit"
-              class="btn w-100 text-white fw-bold fs-4 fs-sm-3 px-3 px-sm-4 px-lg-5 rounded-3"
-              style="background-color: var(--main-color2); height: 3.5rem;"
-            >
-              Reset Password
+            <button type="submit" class="btn btn-signin w-100">
+              <span class="btn-text">Reset Password</span>
+              <i class="fas fa-arrow-right ms-2"></i>
             </button>
           </form>
         </div>
 
         <!-- Step 4: Success -->
         <div v-if="step === 4">
-          <div class="text-center mb-4">
-            <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                 style="width: 80px; height: 80px; background-color: rgba(40, 167, 69, 0.1);">
-              <i class="fa fa-check fs-1 text-success"></i>
+          <div class="text-center mb-5">
+            <div class="icon-circle success mb-3">
+              <i class="fas fa-check"></i>
             </div>
+            <h1 class="login-title fw-bold mb-2">Password Reset!</h1>
+            <p class="login-subtitle">
+              Your password has been successfully reset.<br>
+              You can now sign in with your new password
+            </p>
           </div>
 
-          <h1 class="fs-2 fs-sm-1 fw-bold text-dark">Password Reset!</h1>
-          <h1 class="fs-5 fs-sm-4 mt-2" style="color: var(--main-color1); font-family: 'Quicksand', sans-serif;">
-            Your password has been successfully reset.<br>
-            You can now sign in with your new password
-          </h1>
-
-          <div class="py-3">
+          <div class="login-form">
             <router-link to="/signin" class="text-decoration-none">
-              <button
-                type="button"
-                class="btn w-100 text-white fw-bold fs-4 fs-sm-3 px-3 px-sm-4 px-lg-5 rounded-3"
-                style="background-color: var(--main-color2); height: 3.5rem;"
-              >
-                Continue to Sign In
+              <button type="button" class="btn btn-signin w-100">
+                <span class="btn-text">Continue to Sign In</span>
+                <i class="fas fa-arrow-right ms-2"></i>
               </button>
             </router-link>
           </div>
         </div>
 
-        <!-- Footer Text -->
-        <p class="small mt-4" style="color: var(--main-color1); font-family: 'Quicksand', sans-serif;">
-          Don't have an account?
-          <router-link to="/signup" class="text-decoration-none">
-            <span class="fw-semibold" style="color: var(--main-color2);">Sign Up</span>
-          </router-link>
-        </p>
-
+        <!-- Footer -->
+        <div class="text-center mt-4">
+          <p class="signup-text">
+            Don't have an account?
+            <router-link to="/signup" class="signup-link">
+              Sign Up
+            </router-link>
+          </p>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { assets } from '../assets/assets'
-
 export default {
+  name: 'ForgotPassword',
   data() {
     return {
-      assets: assets,
       step: 1,
       email: '',
       verificationCode: '',
@@ -258,42 +241,40 @@ export default {
       showPassword: false,
       showConfirmPassword: false,
       resendTimer: 0,
-      correctCode: '123456' // In real app, this comes from backend
+      correctCode: '123456'
     }
   },
 
   methods: {
     sendVerificationCode() {
-      if(!this.email){
+      if (!this.email) {
         alert("Please enter your email")
         return
       }
 
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      if(!emailPattern.test(this.email)){
+      if (!emailPattern.test(this.email)) {
         alert("Please enter a valid email address")
         return
       }
 
-      // Simulate sending code (in real app, call API here)
       alert(`Verification code sent to ${this.email}`)
       this.step = 2
       this.startResendTimer()
     },
 
     verifyCode() {
-      if(!this.verificationCode){
+      if (!this.verificationCode) {
         alert("Please enter the verification code")
         return
       }
 
-      if(this.verificationCode.length !== 6){
+      if (this.verificationCode.length !== 6) {
         alert("Verification code must be 6 digits")
         return
       }
 
-      // In real app, verify with backend
-      if(this.verificationCode === this.correctCode){
+      if (this.verificationCode === this.correctCode) {
         this.step = 3
       } else {
         alert("Invalid verification code. Please try again.")
@@ -301,30 +282,28 @@ export default {
     },
 
     resetPassword() {
-      if(!this.newPassword || !this.confirmPassword){
+      if (!this.newPassword || !this.confirmPassword) {
         alert("Please fill in both password fields")
         return
       }
 
-      if(this.newPassword.length < 8){
+      if (this.newPassword.length < 8) {
         alert("Password must be at least 8 characters long")
         return
       }
 
-      if(this.newPassword !== this.confirmPassword){
+      if (this.newPassword !== this.confirmPassword) {
         alert("Passwords do not match")
         return
       }
 
-      // Password strength validation
-      if(!/[A-Z]/.test(this.newPassword) ||
-         !/[a-z]/.test(this.newPassword) ||
-         !/[0-9]/.test(this.newPassword)){
+      if (!/[A-Z]/.test(this.newPassword) ||
+          !/[a-z]/.test(this.newPassword) ||
+          !/[0-9]/.test(this.newPassword)) {
         alert("Password must contain uppercase, lowercase, and number")
         return
       }
 
-      // In real app, send new password to backend
       this.step = 4
     },
 
@@ -337,7 +316,7 @@ export default {
       this.resendTimer = 60
       const interval = setInterval(() => {
         this.resendTimer--
-        if(this.resendTimer <= 0){
+        if (this.resendTimer <= 0) {
           clearInterval(interval)
         }
       }, 1000)
@@ -347,30 +326,447 @@ export default {
 </script>
 
 <style scoped>
-/* Additional responsive adjustments if needed */
-@media (min-width: 576px) {
-  .fs-sm-1 { font-size: 2.5rem !important; }
-  .fs-sm-3 { font-size: 1.75rem !important; }
-  .fs-sm-4 { font-size: 1.25rem !important; }
-  .fs-sm-6 { font-size: 1rem !important; }
+.login-container {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  overflow: hidden;
 }
 
-@media (min-width: 992px) {
-  .p-lg-5 { padding: 4rem !important; }
+/* Left Side - Image Section */
+.login-image-section {
+  flex: 0 0 50%;
+  max-width: 50%;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
 }
 
-.btn:hover:not(:disabled) {
-  transform: translateY(-2px);
+.login-image-section img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Right Side - Form Section */
+.login-form-section {
+  flex: 0 0 50%;
+  max-width: 50%;
+  height: 100vh;
+  padding: 2rem;
+  background: white;
+  overflow-y: auto;
+}
+
+.login-form-wrapper {
+  width: 100%;
+  max-width: 450px;
+  padding: 2rem;
+}
+
+/* Icon Circle */
+.icon-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(0, 123, 255, 0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.icon-circle i {
+  font-size: 2rem;
+  color: var(--main-color2, #007bff);
+}
+
+.icon-circle.success {
+  background: rgba(40, 167, 69, 0.1);
+}
+
+.icon-circle.success i {
+  color: #28a745;
+}
+
+.login-title {
+  font-size: 2rem;
+  color: #1a1a1a;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.login-subtitle {
+  color: #6c757d;
+  font-size: 1rem;
+  font-family: 'Quicksand', sans-serif;
+  line-height: 1.5;
+}
+
+/* Form Elements */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  font-family: 'Quicksand', sans-serif;
+  display: block;
+}
+
+.input-group-custom {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-control-custom {
+  width: 100%;
+  height: 3.2rem;
+  padding-left: 3rem;
+  padding-right: 3rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 0.75rem;
+  font-size: 1rem;
   transition: all 0.3s ease;
+  font-family: 'Quicksand', sans-serif;
+  outline: none;
 }
 
-.form-control:focus {
-  border-color: var(--main-color2);
-  box-shadow: 0 0 0 0.25rem rgba(20, 27, 62, 0.25);
+.form-control-code {
+  width: 100%;
+  height: 3.5rem;
+  padding: 0 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 0.75rem;
+  font-size: 1.2rem;
+  text-align: center;
+  letter-spacing: 0.5em;
+  transition: all 0.3s ease;
+  font-family: 'Quicksand', sans-serif;
+  outline: none;
 }
 
-.btn:disabled {
+.form-control-custom:focus,
+.form-control-code:focus {
+  border-color: var(--main-color2, #007bff);
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.1);
+  outline: none;
+}
+
+.input-icon {
+  position: absolute;
+  left: 1rem;
+  color: #6c757d;
+  z-index: 10;
+  pointer-events: none;
+  font-size: 1rem;
+}
+
+.input-icon-right {
+  position: absolute;
+  right: 1rem;
+  color: #6c757d;
+  cursor: pointer;
+  z-index: 10;
+  transition: color 0.3s ease;
+  font-size: 1rem;
+  padding: 0.5rem;
+}
+
+.input-icon-right:hover {
+  color: var(--main-color2, #007bff);
+}
+
+.input-icon-right:active {
+  transform: scale(0.95);
+}
+
+/* Password Requirements */
+.password-requirements {
+  background: #f8f9fa;
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.requirements-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.requirements-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: 0.85rem;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.requirements-list li {
+  color: #6c757d;
+  margin-bottom: 0.25rem;
+}
+
+.requirements-list li.valid {
+  color: #28a745;
+}
+
+.requirements-list li i {
+  margin-right: 0.5rem;
+  font-size: 0.75rem;
+}
+
+/* Buttons */
+.btn-signin {
+  height: 3.5rem;
+  background: linear-gradient(135deg, var(--main-color2, #007bff) 0%, #0056b3 100%);
+  border: none;
+  border-radius: 0.75rem;
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.btn-signin:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
+}
+
+.btn-signin:active {
+  transform: translateY(0);
+}
+
+.btn-signin .btn-text {
+  flex: 1;
+  text-align: center;
+}
+
+.btn-back {
+  height: 3rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 0.75rem;
+  background: white;
+  color: #495057;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.btn-back:hover {
+  border-color: #6c757d;
+  color: #6c757d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Resend Code */
+.resend-text {
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.btn-resend {
+  background: none;
+  border: none;
+  color: var(--main-color2, #007bff);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+  font-family: 'Quicksand', sans-serif;
+  transition: color 0.3s ease;
+}
+
+.btn-resend:hover:not(:disabled) {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.btn-resend:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Sign Up Link */
+.signup-text {
+  color: #6c757d;
+  font-size: 0.9rem;
+  margin: 0;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.signup-link {
+  color: var(--main-color2, #007bff);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.signup-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+/* Divider */
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.divider-text {
+  position: relative;
+  background: white;
+  padding: 0 1rem;
+  color: #6c757d;
+  font-size: 0.85rem;
+  font-family: 'Quicksand', sans-serif;
+}
+
+/* Social Login */
+.social-login {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-social {
+  height: 3rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 0.75rem;
+  background: white;
+  color: #495057;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.btn-social i {
+  font-size: 1.2rem;
+}
+
+.btn-social:hover {
+  border-color: var(--main-color2, #007bff);
+  color: var(--main-color2, #007bff);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.btn-social:active {
+  transform: translateY(0);
+}
+
+/* Responsive Styles */
+@media (max-width: 991.98px) {
+  .login-form-section {
+    flex: 1;
+    max-width: 100%;
+    height: auto;
+    min-height: 100vh;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .login-container {
+    flex-direction: column;
+  }
+
+  .login-image-section {
+    display: none !important;
+  }
+
+  .login-form-section {
+    padding: 1.5rem;
+    flex: 1;
+    max-width: 100%;
+  }
+
+  .login-form-wrapper {
+    padding: 1rem;
+  }
+
+  .login-title {
+    font-size: 1.75rem;
+  }
+
+  .login-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .icon-circle {
+    width: 60px;
+    height: 60px;
+  }
+
+  .icon-circle i {
+    font-size: 1.5rem;
+  }
+
+  .form-label {
+    font-size: 0.85rem;
+  }
+
+  .form-control-custom {
+    height: 2.8rem;
+    font-size: 0.9rem;
+  }
+
+  .form-control-code {
+    height: 3rem;
+    font-size: 1.25rem;
+  }
+
+  .btn-signin {
+    height: 3rem;
+    font-size: 1rem;
+  }
+
+  .btn-back {
+    height: 2.5rem;
+    font-size: 0.9rem;
+  }
+
+  .signup-text {
+    font-size: 0.85rem;
+  }
+
+  .divider {
+    margin: 1.5rem 0;
+  }
+
+  .social-login {
+    flex-direction: column;
+  }
+
+  .btn-social {
+    width: 100%;
+  }
 }
 </style>

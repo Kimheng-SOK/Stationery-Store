@@ -1,9 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import ForgotPassword from '@/views/auth/ForgotPassword.vue'
 import SignIn from '@/views/auth/Login.vue'
 import SignUp from '@/views/auth/Register.vue'
 import adminRoutes from './admin'
 import userRoutes from './user' // if any
-const requiresAdmin = true
+// const requiresAdmin = true
 
 const router = createRouter({
   history: createWebHistory(),
@@ -12,6 +13,7 @@ const router = createRouter({
     ...adminRoutes,
     { path: '/signin', name: 'SignIn', component: SignIn },
     { path: '/signup', name: 'SignUp', component: SignUp },
+    { path: '/forgotpassword', name: 'ForgotPassword', component: ForgotPassword },
   ],
 })
 
