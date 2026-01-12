@@ -6,8 +6,8 @@
         :key="item.id"
         :to="item.route"
         class="nav-link"
-        :class="{ 'text-danger': item.id === 'logout' }"
-        @click="item.id === 'logout' ? handleLogout() : null"
+        :class="{ 'logout-link': item.id === 'logout' }"
+        @click="item.id === 'logout' ? handleLogout($event) : null"
       >
         <img :src="item.icon" :alt="item.label" class="nav-icon" />
         <span>{{ item.label }}</span>
@@ -42,9 +42,9 @@ const menuItems = ref<MenuItem[]>([
   { id: 'logout', label: 'Logout', icon: '/images/icons/logout.jpg', route: '#' }
 ]);
 
-const handleLogout = () => {
+const handleLogout = (event: Event) => {
+  event.preventDefault();
   if (confirm('Are you sure you want to logout?')) {
-    
     localStorage.removeItem('user');
     router.push('/login');
   }
@@ -84,18 +84,26 @@ const handleLogout = () => {
   color: #212529;
 }
 
-.nav-link.router-link-active {
+.nav-link.router-link-active:not(.logout-link) {
   background-color: #0d6efd;
   color: white;
 }
 
-.nav-link.router-link-active .nav-icon {
+.nav-link.router-link-active:not(.logout-link) .nav-icon {
   filter: brightness(0) invert(1);
 }
 
-.nav-link.text-danger:hover {
+.logout-link {
+  color: #dc3545;
+}
+
+.logout-link:hover {
   background-color: #dc3545;
   color: white;
+}
+
+.logout-link:hover .nav-icon {
+  filter: brightness(0) invert(1);
 }
 
 @media (max-width: 768px) {
