@@ -1,3 +1,5 @@
+export type BadgeType = 'new' | 'hot' | 'popular' | 'instock' | 'discount'
+
 export interface Product {
   id: number
   name: string
@@ -14,6 +16,8 @@ export interface Product {
   stock: number
   rating: number
   image: string
+  description?: string
+  badges?: BadgeType[]
 }
 
 export interface Category {

@@ -33,8 +33,6 @@
           <div v-for="product in popularProducts" :key="product.id" class="product-slide">
             <ProductCard
               :product="product"
-              :badge="{ text: 'POPULAR', type: 'warning' }"
-              @quick-view="handleQuickView(product)"
               @add-to-cart="handleAddToCart(product)"
             />
           </div>
@@ -75,16 +73,8 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import ProductCard from '../product/ProductCard.vue'
-
-interface Product {
-  id: number
-  name: string
-  price: number
-  originalPrice?: number
-  rating: number
-  reviewCount: number
-  image: string
-}
+import { products } from '@/data/products'
+import type { Product } from '@/types/product'
 
 const popularProducts = ref<Product[]>([])
 const sliderRef = ref<HTMLElement | null>(null)
@@ -94,78 +84,22 @@ const scrollLeft = ref(0)
 const currentDot = ref(0)
 
 onMounted(() => {
-  popularProducts.value = [
-    {
-      id: 101,
-      name: 'Premium Leather Notebook',
-      price: 24.99,
-      originalPrice: 34.99,
-      rating: 5,
-      reviewCount: 1523,
-      image: '/public/images/notebooks/book3.jpg',
-    },
-    {
-      id: 102,
-      name: 'Executive Journal',
-      price: 24.99,
-      originalPrice: 34.99,
-      rating: 4,
-      reviewCount: 1234,
-      image: '/public/images/notebooks/book4.jpg',
-    },
-    {
-      id: 103,
-      name: 'Designer Notebook',
-      price: 24.99,
-      rating: 5,
-      reviewCount: 987,
-      image: '/public/images/notebooks/book5.jpg',
-    },
-    {
-      id: 104,
-      name: 'Classic Planner',
-      price: 24.99,
-      originalPrice: 34.99,
-      rating: 4,
-      reviewCount: 856,
-      image: '/public/images/notebooks/book6.jpg',
-    },
-    {
-      id: 105,
-      name: 'Gel Pens Collection',
-      price: 22.0,
-      originalPrice: 30.0,
-      rating: 5,
-      reviewCount: 756,
-      image: '/public/images/notebooks/book7.jpg',
-    },
-    {
-      id: 106,
-      name: 'Watercolor Paint Set',
-      price: 42.0,
-      rating: 5,
-      reviewCount: 645,
-      image: '/public/images/notebooks/book8.jpg',
-    },
-    {
-      id: 107,
-      name: 'Modern Desk Lamp',
-      price: 55.0,
-      originalPrice: 70.0,
-      rating: 4,
-      reviewCount: 534,
-      image: '/public/images/notebooks/book9.jpg',
-    },
-    {
-      id: 108,
-      name: 'Highlighter Set',
-      price: 12.0,
-      originalPrice: 18.0,
-      rating: 5,
-      reviewCount: 423,
-      image: '/public/images/notebooks/book10.jpg',
-    },
-  ]
+  // Filter products with 'popular' or 'hot' badges
+  const filteredProducts = products
+    .filter(p => p.badges?.some(badge => badge === 'popular' || badge === 'hot'))
+    // Sort by popularity score (rating * reviewCount) descending
+    .sort((a, b) => {
+      const scoreA = a.rating * (a.reviewCount || 0)
+      const scoreB = b.rating * (b.reviewCount || 0)
+      return scoreB - scoreA
+    })
+    // Map to fix image paths
+    .map(p => ({
+      ...p,
+      image: p.image.replace(/^\/public/, '')
+    }))
+
+  popularProducts.value = filteredProducts
 
   if (sliderRef.value) {
     sliderRef.value.addEventListener('scroll', updateCurrentDot)
@@ -225,7 +159,9 @@ const startDrag = (e: MouseEvent | TouchEvent) => {
   isDragging.value = true
   sliderRef.value.style.cursor = 'grabbing'
 
-  const pageX = e instanceof MouseEvent ? e.pageX : e.touches[0].pageX
+  const pageX = e instanceof MouseEvent ? e.pageX : e.touches[0]?.pageX
+  if (pageX === undefined) return
+
   startX.value = pageX - sliderRef.value.offsetLeft
   scrollLeft.value = sliderRef.value.scrollLeft
 }
@@ -235,7 +171,9 @@ const drag = (e: MouseEvent | TouchEvent) => {
 
   e.preventDefault()
 
-  const pageX = e instanceof MouseEvent ? e.pageX : e.touches[0].pageX
+  const pageX = e instanceof MouseEvent ? e.pageX : e.touches[0]?.pageX
+  if (pageX === undefined) return
+
   const x = pageX - sliderRef.value.offsetLeft
   const walk = (x - startX.value) * 2
   sliderRef.value.scrollLeft = scrollLeft.value - walk
@@ -246,10 +184,6 @@ const stopDrag = () => {
   if (sliderRef.value) {
     sliderRef.value.style.cursor = 'grab'
   }
-}
-
-const handleQuickView = (product: Product) => {
-  console.log('Quick view:', product)
 }
 
 const handleAddToCart = (product: Product) => {

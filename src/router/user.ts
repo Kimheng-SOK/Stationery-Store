@@ -6,6 +6,9 @@ import PopularProduct from '@/components/product/PopularProduct.vue'
 import HomePageView from '@/views/user/HomePageView.vue'
 import Privacy from '@/views/user/Privacy.vue'
 import TermCondition from '@/views/user/TermCondition.vue'
+import CartView from '@/views/user/CartPage.vue'
+import EmptyProduct from '@/views/user/EmptyProduct.vue'
+import ProductDetailView from '@/views/user/ProductDetailView.vue'
 
 export default [
   {
@@ -25,6 +28,9 @@ export default [
       { path: '/home', name: 'HomePageView', component: HomePageView},
       { path: '/privacy', name: 'Privacy', component:Privacy},
       { path: '/TermCondition', name: 'TermCondition', component: TermCondition},
+      { path: '/cart', name: 'Cart', component: CartView},
+      { path: '/empty-product', name: 'EmptyProduct', component: EmptyProduct},
+      { path: '/product/:id', name: 'ProductDetail', component: ProductDetailView}
     ],
   },
 ]
