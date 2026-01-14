@@ -15,9 +15,12 @@
 
       <!-- User Section using Bootstrap utilities -->
       <div class="d-flex align-items-center bg-opacity-75 px-3 py-2 gap-3 shadow-sm">
+        <span class="text-white fw-semibold me-2">{{ authStore.user?.username || 'Admin' }}</span>
         <span
+          @click="handleLogout"
           class="text-danger fw-semibold me-2 logout-text text-decoration-underline-hover"
           tabindex="0"
+          style="cursor: pointer"
           >Logout</span
         >
         <button
@@ -47,9 +50,11 @@
 </template>
 
 <script lang="ts">
-// @ts-ignore: no declaration file for .vue SFC; add proper shims (e.g. src/shims-vue.d.ts) to fix this properly
+// @ts-expect-error: no declaration file for .vue SFC; add proper shims (e.g. src/shims-vue.d.ts) to fix this properly
 import SearchBar from '../SearchBar.vue'
-import { RouterLink } from 'vue-router'
+// import { RouterLink } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'NavBar',
@@ -57,6 +62,20 @@ export default {
   props: {
     CartNum: { type: Number, default: 1 },
   },
+  setup() {
+    const authStore = useAuthStore()
+    const router = useRouter()
+
+    const handleLogout = () => {
+      authStore.logout()
+      router.push('/signin')
+    }
+
+    return {
+      authStore,
+      handleLogout
+    }
+  }
 }
 </script>
 

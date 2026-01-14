@@ -3,27 +3,69 @@ import ForgotPassword from '@/views/auth/ForgotPassword.vue'
 import SignIn from '@/views/auth/Login.vue'
 import SignUp from '@/views/auth/Register.vue'
 import adminRoutes from './admin'
-import userRoutes from './user' // if any
-// const requiresAdmin = true
+import userRoutes from './user'
+import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    ...userRoutes,
+    // Auth routes FIRST (no layout, standalone pages)
+    {
+      path: '/signin',
+      name: 'SignIn',
+      component: SignIn,
+      meta: { requiresGuest: true }
+    },
+    {
+      path: '/signup',
+      name: 'SignUp',
+      component: SignUp,
+      meta: { requiresGuest: true }
+    },
+    {
+      path: '/forgotpassword',
+      name: 'ForgotPassword',
+      component: ForgotPassword,
+      meta: { requiresGuest: true }
+    },
+    // Then other routes with layouts
     ...adminRoutes,
-    { path: '/signin', name: 'SignIn', component: SignIn },
-    { path: '/signup', name: 'SignUp', component: SignUp },
-    { path: '/forgotpassword', name: 'ForgotPassword', component: ForgotPassword },
+    ...userRoutes,
   ],
 })
 
-// // Optional navigation guard
-// router.beforeEach((to, from, next) => {
-//   if (to.meta.requiresAdmin) {
-//     const token = localStorage.getItem('admin_token')
-//     if (!token) return next('/admin/login')
-//   }
-//   next()
-// })
+// Navigation guard
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  authStore.initializeAuth()
+
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+  const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin)
+  const requiresGuest = to.matched.some(record => record.meta.requiresGuest)
+
+  // If route requires authentication
+  if (requiresAuth && !authStore.isAuthenticated) {
+    next('/signin')
+    return
+  }
+
+  // If route requires admin role
+  if (requiresAdmin && !authStore.isAdmin) {
+    next('/signin')
+    return
+  }
+
+  // If route requires guest (already logged in)
+  if (requiresGuest && authStore.isAuthenticated) {
+    if (authStore.isAdmin) {
+      next('/admin')
+    } else {
+      next('/')
+    }
+    return
+  }
+
+  next()
+})
 
 export default router

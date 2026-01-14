@@ -13,7 +13,7 @@ export default [
   {
     path: '/admin',
     component: AdminLayout,
-    meta: { requiresAdmin: true },
+    meta: { requiresAuth: true, requiresAdmin: true },
     children: [
       { path: '', redirect: '/admin/dashboard' },
       { path: 'dashboard', name: 'AdminDashboard', component: Dashboard },

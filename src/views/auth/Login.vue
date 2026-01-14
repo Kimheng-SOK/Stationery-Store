@@ -62,9 +62,10 @@
           </div>
 
           <!-- Sign In Button -->
-          <button type="submit" class="btn btn-signin w-100 mb-4">
-            <span class="btn-text">Sign In</span>
-            <i class="fas fa-arrow-right ms-2"></i>
+          <button type="submit" class="btn btn-signin w-100 mb-4" :disabled="isLoading">
+            <span class="btn-text">{{ isLoading ? 'Signing In...' : 'Sign In' }}</span>
+            <i class="fas fa-arrow-right ms-2" v-if="!isLoading"></i>
+            <span class="spinner-border spinner-border-sm ms-2" v-if="isLoading"></span>
           </button>
 
           <!-- Sign Up Link -->
@@ -100,32 +101,85 @@
 </template>
 
 <script lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { authenticateUser } from '@/data/users'
+
 export default {
   name: 'SignIn',
-  data() {
-    return {
-      email: '',
-      password: '',
-      showPassword: false,
+  setup() {
+    const router = useRouter()
+    const authStore = useAuthStore()
+
+    const email = ref('')
+    const password = ref('')
+    const showPassword = ref(false)
+    const isLoading = ref(false)
+
+    const togglePassword = () => {
+      showPassword.value = !showPassword.value
     }
-  },
 
-  methods: {
-    togglePassword() {
-      this.showPassword = !this.showPassword
-    },
-
-    handSignin() {
-      if (!this.email || !this.password) {
+    const handSignin = async () => {
+      if (!email.value || !password.value) {
         alert('Please fill in all fields')
         return
       }
 
-      // TODO: Implement actual authentication
-      alert('Sign In Successfully!!!')
-      this.$router.push('/')
-    },
-  },
+      isLoading.value = true
+
+      try {
+        // Authenticate user with actual credentials
+        const user = authenticateUser(email.value, password.value)
+
+        if (!user) {
+          alert('Invalid email or password')
+          isLoading.value = false
+          return
+        }
+
+        // Create user data for auth store
+        const userData = {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          fullName: user.fullName,
+          role: user.role,
+          password: user.password,
+          createdAt: user.createdAt
+        }
+
+        // Login with auth store (token would come from backend API)
+        const token = `jwt-token-${user.id}-${Date.now()}`
+        authStore.login(token, userData, user.role)
+
+        // Show success message
+        alert(`Welcome back, ${user.fullName}!`)
+
+        // Redirect based on role
+        if (user.role === 'admin') {
+          router.push('/admin')
+        } else {
+          router.push('/')
+        }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        alert('Login failed. Please try again.')
+      } finally {
+        isLoading.value = false
+      }
+    }
+
+    return {
+      email,
+      password,
+      showPassword,
+      isLoading,
+      togglePassword,
+      handSignin
+    }
+  }
 }
 </script>
 
