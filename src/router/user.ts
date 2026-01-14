@@ -29,7 +29,7 @@ export default [
       { path: '/home', name: 'HomePageView', component: HomePageView},
       { path: '/privacy', name: 'Privacy', component:Privacy},
       { path: '/TermCondition', name: 'TermCondition', component: TermCondition},
-      { path: '/checkout', name: 'Checkout', component: Checkout
+      { path: '/checkout', name: 'Checkout', component: Checkout },
       { path: '/cart', name: 'Cart', component: CartView},
       { path: '/empty-product', name: 'EmptyProduct', component: EmptyProduct},
       { path: '/product/:id', name: 'ProductDetail', component: ProductDetailView}
