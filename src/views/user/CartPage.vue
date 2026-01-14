@@ -177,56 +177,10 @@
 
 <script lang="ts" setup>
 import { ref, computed } from 'vue'
-import { assets } from '../assets/assets'
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-
-const cartItems = ref([
-  {
-    image: assets.book_details,
-    name: 'Brand Name - Product name,',
-    description: 'its specifications and all other details of it',
-    price: 3.80,
-    originalPrice: 0.00,
-    quantity: 1,
-    sku: '890142503192​6',
-    delivery: '4 Jun 2025',
-    badge: 'Xmas'
-  },
-  {
-    image: assets.book_details,
-    name: 'Brand Name - Product name,',
-    description: 'its specifications and all other details of other...',
-    price: 3.80,
-    originalPrice: 0.00,
-    quantity: 1,
-    sku: '890142503192​6',
-    delivery: '4 Jun 2025',
-    badge: null
-  },
-  {
-    image: assets.book_details,
-    name: 'Brand Name - Product name,',
-    description: 'its specifications and all other details of it',
-    price: 3.80,
-    originalPrice: 0.00,
-    quantity: 1,
-    sku: '890142503192​6',
-    delivery: '4 Jun 2025',
-    badge: null
-  },
-  {
-    image: assets.book_details,
-    name: 'Brand Name - Product name,',
-    description: 'its specifications and all other details of it',
-    price: 3.80,
-    originalPrice: 0.00,
-    quantity: 1,
-    sku: '890142503192​6',
-    delivery: '4 Jun 2025',
-    badge: 'Sold out'
-  }
-])
+// import { assets } from '../assets/assets'
+// import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/js/bootstrap.bundle.min.js';
+import { cartItems } from '@/data/cartItems'
 
 const couponCode = ref('')
 const deliverTogether = ref(false)
@@ -244,17 +198,24 @@ const grandTotal = computed(() => {
 })
 
 const increaseItemQuantity = (index: number) => {
-  cartItems.value[index].quantity++;
+  const item = cartItems.value?.[index];
+  if (item) {
+    item.quantity++;
+  }
 }
 
 const decreaseItemQuantity = (index: number) => {
-  if (cartItems.value[index].quantity > 1) {
-    cartItems.value[index].quantity--;
+  const item = cartItems.value?.[index];
+  if (item && item.quantity > 1) {
+    item.quantity--;
   }
 }
 
 const removeItem = (index: number) => {
-  cartItems.value.splice(index, 1)
+  if (!Array.isArray(cartItems.value)) return;
+  if (index >= 0 && index < cartItems.value.length) {
+    cartItems.value.splice(index, 1)
+  }
 }
 </script>
 

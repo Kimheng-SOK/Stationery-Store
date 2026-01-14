@@ -28,6 +28,7 @@ export const products: Product[] = [
     stock: 100,
     sku: 'SKU001',
     addedDate: '2024-12-01',
+    badges: ['new', 'popular', 'discount'],
   },
   {
     id: 2,
@@ -45,6 +46,7 @@ export const products: Product[] = [
     stock: 200,
     sku: 'SKU002',
     addedDate: '2024-12-02',
+    badges: ['new', 'discount', 'hot'],
   },
   {
     id: 3,
@@ -62,6 +64,7 @@ export const products: Product[] = [
     stock: 150,
     sku: 'SKU003',
     addedDate: '2024-12-03',
+    badges: ['new', 'discount'],
   },
   {
     id: 4,
@@ -77,6 +80,7 @@ export const products: Product[] = [
     stock: 80,
     sku: 'SKU004',
     addedDate: '2024-12-04',
+    badges: ['new', 'instock'],
   },
   {
     id: 5,
@@ -92,6 +96,7 @@ export const products: Product[] = [
     stock: 120,
     sku: 'SKU005',
     addedDate: '2024-11-28',
+    badges: ['new', 'popular'],
   },
   {
     id: 6,
@@ -109,6 +114,7 @@ export const products: Product[] = [
     stock: 150,
     sku: 'SKU006',
     addedDate: '2024-11-29',
+    badges: ['new', 'discount', 'popular'],
   },
   {
     id: 7,
@@ -124,6 +130,7 @@ export const products: Product[] = [
     stock: 100,
     sku: 'SKU007',
     addedDate: '2024-11-30',
+    badges: ['new', 'hot', 'popular'],
   },
   {
     id: 8,
@@ -139,6 +146,7 @@ export const products: Product[] = [
     stock: 0,
     sku: 'SKU008',
     addedDate: '2024-11-27',
+    badges: ['new'],
   },
   {
     id: 9,
@@ -156,6 +164,7 @@ export const products: Product[] = [
     stock: 250,
     sku: 'SKU009',
     addedDate: '2024-11-26',
+    badges: ['new', 'discount', 'hot'],
   },
   {
     id: 10,
@@ -171,6 +180,7 @@ export const products: Product[] = [
     stock: 90,
     sku: 'SKU010',
     addedDate: '2024-11-25',
+    badges: ['new'],
   },
   {
     id: 11,
@@ -188,6 +198,7 @@ export const products: Product[] = [
     stock: 60,
     sku: 'SKU011',
     addedDate: '2024-11-24',
+    badges: ['new', 'discount', 'popular'],
   },
   {
     id: 12,
@@ -203,5 +214,6 @@ export const products: Product[] = [
     stock: 180,
     sku: 'SKU012',
     addedDate: '2024-11-23',
+    badges: ['new', 'instock'],
   },
 ]

@@ -44,8 +44,6 @@
 
         <div class="col-lg-7">
           <h3 class="mb-4">Checkout</h3>
-
-
           <div class="checkout-section mb-4">
             <div class="section-header d-flex align-items-center mb-3">
               <i class="bi bi-person-circle me-2 fs-5"></i>
@@ -54,9 +52,9 @@
             <div class="section-content">
               <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
-                <input 
-                  type="email" 
-                  class="form-control" 
+                <input
+                  type="email"
+                  class="form-control"
                   id="email"
                   v-model="formData.email"
                   placeholder="your@email.com"
@@ -66,9 +64,9 @@
               <div class="row g-3">
                 <div class="col-md-6">
                   <label for="firstName" class="form-label">First Name</label>
-                  <input 
-                    type="text" 
-                    class="form-control" 
+                  <input
+                    type="text"
+                    class="form-control"
                     id="firstName"
                     v-model="formData.firstName"
                     required
@@ -76,9 +74,9 @@
                 </div>
                 <div class="col-md-6">
                   <label for="lastName" class="form-label">Last Name</label>
-                  <input 
-                    type="text" 
-                    class="form-control" 
+                  <input
+                    type="text"
+                    class="form-control"
                     id="lastName"
                     v-model="formData.lastName"
                     required
@@ -87,9 +85,9 @@
               </div>
               <div class="mt-3">
                 <label for="phone" class="form-label">Phone</label>
-                <input 
-                  type="tel" 
-                  class="form-control" 
+                <input
+                  type="tel"
+                  class="form-control"
                   id="phone"
                   v-model="formData.phone"
                   placeholder="+855100000000"
@@ -108,9 +106,9 @@
             <div class="section-content">
               <div class="mb-3">
                 <label for="street" class="form-label">Street Address</label>
-                <input 
-                  type="text" 
-                  class="form-control" 
+                <input
+                  type="text"
+                  class="form-control"
                   id="street"
                   v-model="formData.street"
                   required
@@ -119,9 +117,9 @@
               <div class="row g-3">
                 <div class="col-md-4">
                   <label for="city" class="form-label">City</label>
-                  <input 
-                    type="text" 
-                    class="form-control" 
+                  <input
+                    type="text"
+                    class="form-control"
                     id="city"
                     v-model="formData.city"
                     placeholder="122 Main st"
@@ -130,9 +128,9 @@
                 </div>
                 <div class="col-md-4">
                   <label for="state" class="form-label">State</label>
-                  <input 
-                    type="text" 
-                    class="form-control" 
+                  <input
+                    type="text"
+                    class="form-control"
                     id="state"
                     v-model="formData.state"
                     required
@@ -140,9 +138,9 @@
                 </div>
                 <div class="col-md-4">
                   <label for="zipCode" class="form-label">Zip Code</label>
-                  <input 
-                    type="text" 
-                    class="form-control" 
+                  <input
+                    type="text"
+                    class="form-control"
                     id="zipCode"
                     v-model="formData.zipCode"
                     required
@@ -153,8 +151,8 @@
           </div>
 
 
-          <button 
-            class="btn btn-success btn-lg w-100" 
+          <button
+            class="btn btn-success btn-lg w-100"
             @click="placeOrder"
             :disabled="!isFormValid || isProcessing"
           >
@@ -171,10 +169,10 @@
         <div class="col-lg-5">
           <div class="order-summary">
             <h5 class="mb-4">Order Summary</h5>
-            
+
             <div class="cart-items mb-4">
-              <div 
-                v-for="item in cartItems" 
+              <div
+                v-for="item in cartItems"
                 :key="item.id"
                 class="cart-item d-flex mb-3"
               >
@@ -212,10 +210,10 @@
       </div>
     </div>
 
-    <div 
-      class="modal fade" 
-      id="successModal" 
-      tabindex="-1" 
+    <div
+      class="modal fade"
+      id="successModal"
+      tabindex="-1"
       ref="successModalRef"
     >
       <div class="modal-dialog modal-dialog-centered">
@@ -325,7 +323,7 @@ const placeOrder = async () => {
   setTimeout(() => {
     orderId.value = 'ORD' + Math.random().toString(36).substr(2, 9).toUpperCase();
     isProcessing.value = false;
-    
+
 
     alert(`Order Placed Successfully! Order ID: ${orderId.value}`);
     router.push('/');

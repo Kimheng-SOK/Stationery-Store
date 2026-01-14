@@ -35,13 +35,35 @@
         </div>
 
         <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
-          <!-- Account Icon -->
-          <router-link to="/signin" class="btn btn-link p-2 text-white border-0">
-            <i class="bi bi-person-circle fs-4"></i>
-          </router-link>
+          <!-- Account Icon - Show different based on auth state -->
+          <template v-if="authStore.isAuthenticated">
+            <div class="dropdown">
+              <button
+                class="btn btn-link p-2 text-white border-0 dropdown-toggle"
+                type="button"
+                id="userDropdown"
+                data-bs-toggle="dropdown"
+              >
+                <i class="bi bi-person-circle fs-4"></i>
+                <span class="ms-2">{{ authStore.user?.username || 'User' }}</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><router-link to="/profile" class="dropdown-item">Profile</router-link></li>
+                <li><router-link to="/orders" class="dropdown-item">My Orders</router-link></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a @click="handleLogout" class="dropdown-item text-danger" style="cursor: pointer">Logout</a></li>
+              </ul>
+            </div>
+          </template>
+          <template v-else>
+            <router-link to="/signin" class="btn btn-link p-2 text-white border-0">
+              <i class="bi bi-person-circle fs-4"></i>
+              <span class="ms-2 d-none d-md-inline">Sign In</span>
+            </router-link>
+          </template>
 
           <!-- Cart Icon -->
-          <button class="btn btn-link p-2 text-white border-0 position-relative">
+          <router-link to="/cart" class="btn btn-link p-2 text-white border-0 position-relative">
             <i class="bi bi-cart3 fs-4"></i>
             <span
               class="position-absolute badge rounded-pill bg-danger"
@@ -56,16 +78,23 @@
             >
               {{ CartNum }}
             </span>
-          </button>
+          </router-link>
         </div>
       </div>
 
       <!-- Mobile Right Icons: Account → Cart → Hamburger -->
       <div class="d-flex align-items-center gap-3 d-lg-none">
         <!-- Account -->
-        <button class="btn btn-link p-2 text-white border-0">
-          <i class="bi bi-person-circle"></i>
-        </button>
+        <template v-if="authStore.isAuthenticated">
+          <button @click="handleLogout" class="btn btn-link p-2 text-danger border-0">
+            <i class="bi bi-box-arrow-right"></i>
+          </button>
+        </template>
+        <template v-else>
+          <router-link to="/signin" class="btn btn-link p-2 text-white border-0">
+            <i class="bi bi-person-circle"></i>
+          </router-link>
+        </template>
 
         <!-- Cart -->
         <button class="btn btn-link p-2 text-white border-0 position-relative">
@@ -138,14 +167,29 @@
         <router-link to="/hots" class="px-4 py-3 text-white text-decoration-none hover-bg"
           >Hots</router-link
         >
+
+        <template v-if="authStore.isAuthenticated">
+          <hr class="border-secondary mx-3">
+          <router-link to="/profile" class="px-4 py-3 text-white text-decoration-none hover-bg"
+            >Profile</router-link
+          >
+          <router-link to="/orders" class="px-4 py-3 text-white text-decoration-none hover-bg"
+            >My Orders</router-link
+          >
+          <a @click="handleLogout" class="px-4 py-3 text-danger text-decoration-none hover-bg" style="cursor: pointer"
+            >Logout</a
+          >
+        </template>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-// @ts-ignore: no declaration file for .vue SFC; add proper shims (e.g. src/shims-vue.d.ts) to fix this properly
+// @ts-expect-error: no declaration file for .vue SFC; add proper shims (e.g. src/shims-vue.d.ts) to fix this properly
 import SearchBar from '../components/SearchBar.vue'
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
 
 export default {
   name: 'NavBar',
@@ -153,6 +197,20 @@ export default {
   props: {
     CartNum: { type: Number, default: 1 },
   },
+  setup() {
+    const authStore = useAuthStore()
+    const router = useRouter()
+
+    const handleLogout = () => {
+      authStore.logout()
+      router.push('/signin')
+    }
+
+    return {
+      authStore,
+      handleLogout
+    }
+  }
 }
 </script>
 
