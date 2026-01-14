@@ -4,88 +4,17 @@
       <div class="row">
         <!-- Sidebar Filter -->
         <aside class="col-lg-3 col-md-4 mb-4">
-          <div class="filter-sidebar">
-            <h5 class="mb-3">Filters</h5>
-            
-            <!-- Category Filter -->
-            <div class="filter-section mb-4">
-              <h6 class="filter-title">Category</h6>
-              <select v-model="selectedCategory" class="form-select form-select-sm">
-                <option value="">All Categories</option>
-                <option v-for="category in categories" :key="category" :value="category">
-                  {{ category }}
-                </option>
-              </select>
-            </div>
-
-            <!-- Price Filter -->
-            <div class="filter-section mb-4">
-              <h6 class="filter-title">Price</h6>
-              <div class="price-inputs">
-                <input 
-                  v-model.number="priceRange.min" 
-                  type="number" 
-                  class="form-control form-control-sm mb-2" 
-                  placeholder="Min"
-                >
-                <input 
-                  v-model.number="priceRange.max" 
-                  type="number" 
-                  class="form-control form-control-sm" 
-                  placeholder="Max"
-                >
-              </div>
-            </div>
-
-            <!-- Brand Filter -->
-            <div class="filter-section mb-4">
-              <h6 class="filter-title">Brand</h6>
-              <select v-model="selectedBrand" class="form-select form-select-sm">
-                <option value="">All Brands</option>
-                <option v-for="brand in brands" :key="brand" :value="brand">
-                  {{ brand }}
-                </option>
-              </select>
-            </div>
-
-            <!-- Rating Filter -->
-            <div class="filter-section mb-4">
-              <h6 class="filter-title">Rating</h6>
-              <div class="form-check" v-for="rating in [5, 4, 3, 2, 1]" :key="rating">
-                <input 
-                  class="form-check-input" 
-                  type="radio" 
-                  :id="`rating-${rating}`"
-                  :value="rating"
-                  v-model="selectedRating"
-                >
-                <label class="form-check-label" :for="`rating-${rating}`">
-                  <span class="stars">{{ '★'.repeat(rating) }}{{ '☆'.repeat(5 - rating) }}</span>
-                </label>
-              </div>
-            </div>
-
-            <!-- Availability Filter -->
-            <div class="filter-section mb-4">
-              <h6 class="filter-title">Availability</h6>
-              <div class="form-check">
-                <input 
-                  class="form-check-input" 
-                  type="checkbox" 
-                  id="inStock"
-                  v-model="showInStockOnly"
-                >
-                <label class="form-check-label" for="inStock">
-                  In Stock Only
-                </label>
-              </div>
-            </div>
-
-            <!-- Clear Filters -->
-            <button @click="clearFilters" class="btn btn-outline-secondary btn-sm w-100">
-              Clear Filters
-            </button>
-          </div>
+          <SidebarFilter
+            v-model:selected-category="selectedCategory"
+            v-model:selected-brand="selectedBrand"
+            v-model:selected-rating="selectedRating"
+            v-model:price-range="priceRange"
+            v-model:show-in-stock-only="showInStockOnly"
+            :categories="categories"
+            :brands="brands"
+            :show-availability="true"
+            @clear-filters="clearFilters"
+          />
         </aside>
 
         <!-- Main Content -->
@@ -97,26 +26,16 @@
           </div>
 
           <!-- Sort Bar -->
-          <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-            <div class="text-muted small">
-              Showing {{ paginatedProducts.length }} of {{ filteredProducts.length }} products
-            </div>
-            <div class="d-flex align-items-center gap-2">
-              <span class="text-muted small">Sort by:</span>
-              <select v-model="sortBy" class="form-select form-select-sm" style="width: auto; min-width: 150px;">
-                <option value="newest">Newest First</option>
-                <option value="price-asc">Price: Low to High</option>
-                <option value="price-desc">Price: High to Low</option>
-                <option value="rating">Highest Rated</option>
-                <option value="popular">Most Popular</option>
-              </select>
-            </div>
-          </div>
+          <SortBar
+            v-model:sortBy="sortBy"
+            :shown-count="paginatedProducts.length"
+            :total-count="filteredProducts.length"
+          />
 
           <!-- Products Grid -->
           <div class="row g-4 mb-4">
-            <div 
-              v-for="product in paginatedProducts" 
+            <div
+              v-for="product in paginatedProducts"
               :key="product.id"
               class="col-lg-4 col-md-6 col-sm-6"
             >
@@ -130,11 +49,7 @@
                 </div>
 
                 <div class="product-image-container">
-                  <img 
-                    :src="product.image" 
-                    :alt="product.name"
-                    class="product-image"
-                  >
+                  <img :src="product.image" :alt="product.name" class="product-image" />
                   <div class="product-overlay">
                     <button class="btn btn-light btn-sm">
                       <i class="bi bi-eye"></i> Quick View
@@ -165,7 +80,7 @@
 
           <!-- Empty State -->
           <div v-if="filteredProducts.length === 0" class="text-center py-5">
-            <i class="bi bi-box-seam" style="font-size: 4rem; color: #ccc;"></i>
+            <i class="bi bi-box-seam" style="font-size: 4rem; color: #ccc"></i>
             <h5 class="mt-3 text-muted">No products found</h5>
             <p class="text-muted">Try adjusting your filters</p>
           </div>
@@ -178,8 +93,8 @@
                   Previous
                 </a>
               </li>
-              <li 
-                v-for="page in displayPages" 
+              <li
+                v-for="page in displayPages"
                 :key="page"
                 class="page-item"
                 :class="{ active: currentPage === page }"
@@ -202,319 +117,146 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue'
+import SidebarFilter from '@/components/product/SidebarFilter.vue'
+import SortBar from '@/components/product/SortBar.vue'
 
-interface Product {
-  id: number;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  rating: number;
-  reviewCount: number;
-  image: string;
-  category: string;
-  brand: string;
-  isNew: boolean;
-  discount?: number;
-  inStock: boolean;
-  addedDate: string;
-}
+// Import fake data
+import { products as fakeProducts } from '@/data/products'
+import type { Product as ProductType } from '@/types/product'
 
 // State
-const products = ref<Product[]>([]);
-const selectedCategory = ref<string>('');
-const selectedBrand = ref<string>('');
-const selectedRating = ref<number | null>(null);
-const priceRange = ref({ min: 0, max: 1000 });
-const sortBy = ref<string>('newest');
-const currentPage = ref<number>(1);
-const showInStockOnly = ref<boolean>(false);
-const itemsPerPage = 9;
+const products = ref<ProductType[]>(fakeProducts.map(p => ({
+  ...p,
+  // Fix image paths
+  image: p.image.replace(/^\/public/, ''),
+  // Normalize categories
+  category: (p.category || '')
+    .replace(/NoteBooks/i, 'NoteBook')
+    .replace(/Pens& Pencils|Pens & Pencil|Pens and Pencils/i, 'Pens & Pencils')
+    .replace(/Office Supplices/i, 'Office Supplies'),
+  // Ensure reviewCount exists
+  reviewCount: p.reviewCount ?? 0,
+})))
+
+const selectedCategory = ref<string>('')
+const selectedBrand = ref<string>('')
+const selectedRating = ref<number>(0)
+const priceRange = ref({ min: 0, max: 1000 })
+const sortBy = ref<string>('newest')
+const currentPage = ref<number>(1)
+const showInStockOnly = ref<boolean>(false)
+const itemsPerPage = 9
 
 // Mock categories and brands
-const categories = ['NoteBooks', 'Pens & Pencils', 'Office Supplies', 'Sticky Notes', 'Art Supplies'];
-const brands = ['Premium Brand', 'Creative Co', 'Office Pro', 'Artisan'];
-
-// Initialize mock data
-onMounted(() => {
-  products.value = [
-    {
-      id: 1,
-      name: 'Premium Leather Journal',
-      price: 45.00,
-      originalPrice: 55.00,
-      rating: 5,
-      reviewCount: 738,
-      image: '/public/images/notebooks/book1.jpg',
-      category: 'NoteBooks',
-      brand: 'Premium Brand',
-      isNew: true,
-      discount: 18,
-      inStock: true,
-      addedDate: '2024-12-01'
-    },
-    {
-      id: 2,
-      name: 'Colorful Sticky Notes Set',
-      price: 15.00,
-      originalPrice: 25.00,
-      rating: 4,
-      reviewCount: 423,
-      image: '/public/images/stickyNote/stick1.jpg',
-      category: 'Sticky Notes',
-      brand: 'Creative Co',
-      isNew: true,
-      discount: 40,
-      inStock: true,
-      addedDate: '2024-12-02'
-    },
-    {
-      id: 3,
-      name: 'Premium Pen Collection',
-      price: 35.00,
-      originalPrice: 45.00,
-      rating: 4,
-      reviewCount: 634,
-      image: '/public/images/pens&pencils/pen1.jpg',
-      category: 'Pens & Pencils',
-      brand: 'Creative Co',
-      isNew: true,
-      discount: 22,
-      inStock: true,
-      addedDate: '2024-12-03'
-    },
-    {
-      id: 4,
-      name: 'Bamboo Desk Organizer',
-      price: 65.00,
-      rating: 5,
-      reviewCount: 145,
-      image: '/public/images/officeSupplies/office1.jpg',
-      category: 'Office Supplies',
-      brand: 'Office Pro',
-      isNew: true,
-      inStock: true,
-      addedDate: '2024-12-04'
-    },
-    {
-      id: 5,
-      name: 'Professional Pen Set 2024',
-      price: 28.00,
-      rating: 5,
-      reviewCount: 267,
-      image: '/public/images/pens&pencil/pen3.jpg',
-      category: 'Pens& Pencils',
-      brand: 'Artisan',
-      isNew: true,
-      inStock: true,
-      addedDate: '2024-11-28'
-    },
-    {
-      id: 6,
-      name: 'Gel Pens Set - All Colors',
-      price: 22.00,
-      originalPrice: 30.00,
-      rating: 4,
-      reviewCount: 512,
-      image: '/public/images/pens&pencils/pen4.jpg',
-      category: 'Pens & Pencils',
-      brand: 'Creative Co',
-      isNew: true,
-      discount: 27,
-      inStock: true,
-      addedDate: '2024-11-29'
-    },
-    {
-      id: 7,
-      name: 'Watercolor Paint Set',
-      price: 42.00,
-      rating: 5,
-      reviewCount: 891,
-      image: '/public/images/artSupplies/art5.jpg',
-      category: 'Art Supplies',
-      brand: 'Artisan',
-      isNew: true,
-      inStock: true,
-      addedDate: '2024-11-30'
-    },
-    {
-      id: 8,
-      name: 'Desk Calendar 2025',
-      price: 18.00,
-      rating: 4,
-      reviewCount: 234,
-      image: '/public/images/officeSupplies/office4.jpg',
-      category: 'Office Supplies',
-      brand: 'Office Pro',
-      isNew: true,
-      inStock: false,
-      addedDate: '2024-11-27'
-    },
-    {
-      id: 9,
-      name: 'Highlighter Set - Pastel',
-      price: 12.00,
-      originalPrice: 18.00,
-      rating: 5,
-      reviewCount: 567,
-      image: '/public/images/pens&pencils/pen7.jpg',
-      category: 'Pens & Pencils',
-      brand: 'Creative Co',
-      isNew: true,
-      discount: 33,
-      inStock: true,
-      addedDate: '2024-11-26'
-    },
-    {
-      id: 10,
-      name: 'Executive Notebook Set',
-      price: 38.00,
-      rating: 4,
-      reviewCount: 189,
-      image: '/public/images/notebooks/book10.jpg',
-      category: 'NoteBooks',
-      brand: 'Premium Brand',
-      isNew: true,
-      inStock: true,
-      addedDate: '2024-11-25'
-    },
-    {
-      id: 11,
-      name: 'Modern Desk Lamp',
-      price: 55.00,
-      originalPrice: 70.00,
-      rating: 5,
-      reviewCount: 334,
-      image: '/public/images/notebooks/book1.jpg',
-      category: 'Office Supplies',
-      brand: 'Office Pro',
-      isNew: true,
-      discount: 21,
-      inStock: true,
-      addedDate: '2024-11-24'
-    },
-    {
-      id: 12,
-      name: 'Marker Set - Vibrant Colors',
-      price: 19.00,
-      rating: 4,
-      reviewCount: 456,
-      image: '/public/images/pens&pencils/pen10.jpg',
-      category: 'Pens',
-      brand: 'Creative Co',
-      isNew: true,
-      inStock: true,
-      addedDate: '2024-11-23'
-    }
-  ];
-});
+const categories = ['NoteBook', 'Pens & Pencils', 'Office Supplies', 'Sticky Notes', 'Art Supplies']
+const brands = ['Premium Brand', 'Creative Co', 'Office Pro', 'Artisan']
 
 // Computed properties
 const filteredProducts = computed(() => {
-  let result = products.value.filter(p => p.isNew);
+  let result = products.value.filter(p => p.isNew)
 
   // Category filter
   if (selectedCategory.value) {
-    result = result.filter(p => p.category === selectedCategory.value);
+    result = result.filter(p => p.category === selectedCategory.value)
   }
 
   // Brand filter
   if (selectedBrand.value) {
-    result = result.filter(p => p.brand === selectedBrand.value);
+    result = result.filter(p => p.brand === selectedBrand.value)
   }
 
   // Price filter
-  result = result.filter(p => 
-    p.price >= priceRange.value.min && p.price <= priceRange.value.max
-  );
+  result = result.filter(p => p.price >= priceRange.value.min && p.price <= priceRange.value.max)
 
   // Rating filter
-  if (selectedRating.value) {
-    result = result.filter(p => p.rating >= selectedRating.value!);
+  if (selectedRating.value > 0) {
+    result = result.filter(p => p.rating >= selectedRating.value)
   }
 
   // Stock filter
   if (showInStockOnly.value) {
-    result = result.filter(p => p.inStock);
+    result = result.filter(p => p.inStock)
   }
 
   // Sorting
   switch (sortBy.value) {
     case 'newest':
-      result.sort((a, b) => new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime());
-      break;
+      result.sort((a, b) => new Date(b.addedDate).getTime() - new Date(a.addedDate).getTime())
+      break
     case 'price-asc':
-      result.sort((a, b) => a.price - b.price);
-      break;
+      result.sort((a, b) => a.price - b.price)
+      break
     case 'price-desc':
-      result.sort((a, b) => b.price - a.price);
-      break;
+      result.sort((a, b) => b.price - a.price)
+      break
     case 'rating':
-      result.sort((a, b) => b.rating - a.rating);
-      break;
+      result.sort((a, b) => b.rating - a.rating)
+      break
     case 'popular':
-      result.sort((a, b) => b.reviewCount - a.reviewCount);
-      break;
+      result.sort((a, b) => b.reviewCount - a.reviewCount)
+      break
   }
 
-  return result;
-});
+  return result
+})
 
-const totalPages = computed(() => 
-  Math.ceil(filteredProducts.value.length / itemsPerPage)
-);
+const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage))
 
 const displayPages = computed(() => {
-  const pages = [];
-  const maxPagesToShow = 5;
-  
+  const pages = []
+  const maxPagesToShow = 5
+
   if (totalPages.value <= maxPagesToShow) {
-    for (let i = 1; i <= totalPages.value; i++) {
-      pages.push(i);
-    }
+    for (let i = 1; i <= totalPages.value; i++) pages.push(i)
   } else {
-    let startPage = Math.max(1, currentPage.value - 2);
-    const endPage = Math.min(totalPages.value, startPage + maxPagesToShow - 1);
-    
+    let startPage = Math.max(1, currentPage.value - 2)
+    const endPage = Math.min(totalPages.value, startPage + maxPagesToShow - 1)
+
     if (endPage - startPage < maxPagesToShow - 1) {
-      startPage = Math.max(1, endPage - maxPagesToShow + 1);
+      startPage = Math.max(1, endPage - maxPagesToShow + 1)
     }
-    
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
+
+    for (let i = startPage; i <= endPage; i++) pages.push(i)
   }
-  
-  return pages;
-});
+
+  return pages
+})
 
 const paginatedProducts = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return filteredProducts.value.slice(start, end);
-});
+  const start = (currentPage.value - 1) * itemsPerPage
+  const end = start + itemsPerPage
+  return filteredProducts.value.slice(start, end)
+})
 
 // Methods
 const renderStars = (rating: number): string => {
-  return '★'.repeat(rating) + '☆'.repeat(5 - rating);
-};
+  return '★'.repeat(rating) + '☆'.repeat(5 - rating)
+}
 
 const changePage = (page: number) => {
   if (page >= 1 && page <= totalPages.value) {
-    currentPage.value = page;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    currentPage.value = page
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
-};
+}
 
 const clearFilters = () => {
-  selectedCategory.value = '';
-  selectedBrand.value = '';
-  selectedRating.value = null;
-  priceRange.value = { min: 0, max: 1000 };
-  sortBy.value = 'newest';
-  currentPage.value = 1;
-  showInStockOnly.value = false;
-};
+  selectedCategory.value = ''
+  selectedBrand.value = ''
+  selectedRating.value = 0
+  priceRange.value = { min: 0, max: 1000 }
+  sortBy.value = 'newest'
+  currentPage.value = 1
+  showInStockOnly.value = false
+}
+</script>
+
+
+<script lang="ts">
+export default {
+  name: 'NewArrivalView',
+}
 </script>
 
 <style scoped>
@@ -529,43 +271,9 @@ const clearFilters = () => {
   color: #212529;
 }
 
-.filter-sidebar {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  position: sticky;
-  top: 80px;
-}
-
-.filter-title {
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  font-size: 0.9rem;
-  color: #495057;
-}
-
-.filter-section {
-  border-bottom: 1px solid #e9ecef;
-  padding-bottom: 1rem;
-}
-
-.filter-section:last-of-type {
-  border-bottom: none;
-}
-
-.price-inputs input {
-  font-size: 0.875rem;
-}
-
 .stars {
   color: #ffc107;
   font-size: 0.85rem;
-}
-
-.form-check-label {
-  font-size: 0.875rem;
-  cursor: pointer;
 }
 
 .product-card {
@@ -574,12 +282,12 @@ const clearFilters = () => {
   overflow: hidden;
   transition: all 0.3s ease;
   height: 100%;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   position: relative;
 }
 
 .product-card:hover {
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   transform: translateY(-4px);
 }
 
@@ -697,11 +405,6 @@ const clearFilters = () => {
 }
 
 @media (max-width: 768px) {
-  .filter-sidebar {
-    position: static;
-    margin-bottom: 2rem;
-  }
-  
   .new-arrival-view {
     padding: 1rem 0;
   }

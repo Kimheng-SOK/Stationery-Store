@@ -7,11 +7,7 @@
 
     <!-- Product Image -->
     <div class="product-image-container">
-      <img 
-        :src="product.image" 
-        :alt="product.name"
-        class="product-image"
-      >
+      <img :src="product.image" :alt="product.name" class="product-image" />
       <div class="product-overlay">
         <button class="btn btn-light btn-sm" @click="quickView">
           <i class="bi bi-eye"></i> Quick View
@@ -43,40 +39,40 @@
 
 <script setup lang="ts">
 interface Product {
-  id: number;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  rating: number;
-  reviewCount: number;
-  image: string;
+  id: number
+  name: string
+  price: number
+  originalPrice?: number
+  rating: number
+  reviewCount: number
+  image: string
 }
 
 interface Badge {
-  text: string;
-  type: 'success' | 'danger' | 'warning' | 'primary';
+  text: string
+  type: 'success' | 'danger' | 'warning' | 'primary'
 }
 
 interface Props {
-  product: Product;
-  badge?: Badge;
+  product: Product
+  badge?: Badge
 }
 
-defineProps<Props>();
+defineProps<Props>()
 
-const emit = defineEmits(['quick-view', 'add-to-cart']);
+const emit = defineEmits(['quick-view', 'add-to-cart'])
 
 const renderStars = (rating: number): string => {
-  return '★'.repeat(rating) + '☆'.repeat(5 - rating);
-};
+  return '★'.repeat(rating) + '☆'.repeat(5 - rating)
+}
 
 const quickView = () => {
-  emit('quick-view');
-};
+  emit('quick-view')
+}
 
 const addToCart = () => {
-  emit('add-to-cart');
-};
+  emit('add-to-cart')
+}
 </script>
 
 <style scoped>
@@ -86,12 +82,12 @@ const addToCart = () => {
   overflow: hidden;
   transition: all 0.3s ease;
   height: 100%;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   position: relative;
 }
 
 .product-card:hover {
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   transform: translateY(-4px);
 }
 

@@ -1,9 +1,9 @@
 <template>
   <!-- ORIGINAL NAVBAR – untouched on desktop -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3 sticky-top">
     <div class="container-fluid px-4" style="max-width: 1400px; margin: 0 auto">
       <!-- Logo (still an image) -->
-      <a class="navbar-brand d-flex align-items-center" href="#">
+      <router-link to="/" class="navbar-brand d-flex align-items-center">
         <img
           src="/logo.png"
           alt="logo"
@@ -11,15 +11,23 @@
           style="width: 40px; height: 40px"
         />
         <span class="fw-semibold fs-5">StationeryBox</span>
-      </a>
+      </router-link>
 
       <!-- Desktop content – exactly as original -->
       <div class="collapse navbar-collapse" id="navbarContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-          <li class="nav-item"><a class="nav-link px-3" href="#">Shop All</a></li>
-          <li class="nav-item"><a class="nav-link px-3" href="#">New Arrival</a></li>
-          <li class="nav-item"><a class="nav-link px-3" href="#">Categories</a></li>
-          <li class="nav-item"><a class="nav-link px-3" href="#">Hots</a></li>
+          <li class="nav-item">
+            <router-link to="/shop" class="nav-link px-3">Shop All</router-link>
+          </li>
+          <li class="nav-item">
+            <router-link to="/new-arrival" class="nav-link px-3">New Arrival</router-link>
+          </li>
+          <li class="nav-item">
+            <router-link to="/categories" class="nav-link px-3">Categories</router-link>
+          </li>
+          <li class="nav-item">
+            <router-link to="/hots" class="nav-link px-3">Hots</router-link>
+          </li>
         </ul>
 
         <div class="d-flex align-items-center flex-grow-1 mx-lg-3" style="max-width: 380px">
@@ -28,9 +36,9 @@
 
         <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
           <!-- Account Icon -->
-          <button class="btn btn-link p-2 text-white border-0">
+          <router-link to="/signin" class="btn btn-link p-2 text-white border-0">
             <i class="bi bi-person-circle fs-4"></i>
-          </button>
+          </router-link>
 
           <!-- Cart Icon -->
           <button class="btn btn-link p-2 text-white border-0 position-relative">
@@ -118,10 +126,18 @@
 
       <!-- Menu items -->
       <div class="d-flex flex-column">
-        <a href="#" class="px-4 py-3 text-white text-decoration-none hover-bg">Shop All</a>
-        <a href="#" class="px-4 py-3 text-white text-decoration-none hover-bg">New Arrival</a>
-        <a href="#" class="px-4 py-3 text-white text-decoration-none hover-bg">Categories</a>
-        <a href="#" class="px-4 py-3 text-white text-decoration-none hover-bg">Hots</a>
+        <router-link to="/shop" class="px-4 py-3 text-white text-decoration-none hover-bg"
+          >Shop All</router-link
+        >
+        <router-link to="/new-arrival" class="px-4 py-3 text-white text-decoration-none hover-bg"
+          >New Arrival</router-link
+        >
+        <router-link to="/categories" class="px-4 py-3 text-white text-decoration-none hover-bg"
+          >Categories</router-link
+        >
+        <router-link to="/hots" class="px-4 py-3 text-white text-decoration-none hover-bg"
+          >Hots</router-link
+        >
       </div>
     </div>
   </div>

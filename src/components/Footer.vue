@@ -55,10 +55,16 @@
           <div class="col-lg-2 col-md-6 col-6 mb-4 mb-lg-0">
             <h6 class="fw-bold text-dark mb-3" style="font-size: 15px">Shop</h6>
             <ul class="list-unstyled">
-              <li class="mb-2"><a href="#" class="footer-link">All Products</a></li>
-              <li class="mb-2"><a href="#" class="footer-link">New Arrival</a></li>
-              <li class="mb-2"><a href="#" class="footer-link">Categories</a></li>
-              <li class="mb-2"><a href="#" class="footer-link">Hots</a></li>
+              <li class="mb-2">
+                <router-link to="/shop" class="footer-link">All Products</router-link>
+              </li>
+              <li class="mb-2">
+                <router-link to="/new-arrival" class="footer-link">New Arrival</router-link>
+              </li>
+              <li class="mb-2">
+                <router-link to="/categories" class="footer-link">Categories</router-link>
+              </li>
+              <li class="mb-2"><router-link to="/hots" class="footer-link">Hots</router-link></li>
             </ul>
           </div>
 
@@ -123,9 +129,9 @@
           </div>
           <div class="col-md-6">
             <div class="d-flex gap-4 justify-content-center justify-content-md-end">
-              <a href="#" class="footer-bottom-link">Privacy Policy</a>
-              <a href="#" class="footer-bottom-link">Terms of Service</a>
-              <a href="#" class="footer-bottom-link">Returns</a>
+              <router-link to="/privacy" class="footer-bottom-link">Privacy Policy</router-link>
+              <router-link to="/terms" class="footer-bottom-link">Terms of Service</router-link>
+              <router-link to="#" class="footer-bottom-link">Returns</router-link>
             </div>
           </div>
         </div>
@@ -143,7 +149,7 @@
 }
 
 .footer-main {
-  background-color: #e7e2da;
+  background-color: #ffffff;
 }
 
 .social-icon {

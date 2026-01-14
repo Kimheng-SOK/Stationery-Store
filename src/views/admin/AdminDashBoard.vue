@@ -25,25 +25,15 @@
     </div>
 
     <!-- Chart Section -->
-    <div class="card shadow-sm border-0 rounded-4 mb-4 p-4">
-      <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-        <h2 class="h5 mb-0">Products Sell Analysis</h2>
-        <div
-          class="d-flex align-items-center gap-2 px-3 py-1 border rounded-pill bg-white small fw-semibold text-secondary"
-          style="cursor: pointer"
-        >
-          <span>This Year</span>
-          <i class="bi bi-chevron-down"></i>
-        </div>
-      </div>
-      <apexchart type="bar" height="280" :options="chartOptions" :series="chartSeries" />
-    </div>
+    <ChartSection :dataset="dataset" />
 
     <!-- Popular Products -->
     <div class="card shadow-sm border-0 rounded-4 mb-4 p-4">
       <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
         <h2 class="h5 mb-0">Popular Product</h2>
-        <a href="#" class="text-danger fw-semibold small text-decoration-none">View All</a>
+        <router-link to="/admin/products" class="text-danger fw-semibold small text-decoration-none"
+          >View All</router-link
+        >
       </div>
       <div class="row g-3">
         <div class="col-12 col-md-6 col-xl-3" v-for="(prod, i) in products" :key="i">
@@ -53,18 +43,18 @@
               style="height: 180px"
             >
               <img
-                :src="prod.img"
+                :src="prod.image"
                 :alt="prod.name"
                 class="img-fluid"
                 style="max-height: 120px; object-fit: contain"
               />
             </div>
             <div class="card-body">
-              <p class="text-danger text-uppercase small fw-bold mb-1">{{ prod.brand }}</p>
+              <p class="text-danger text-uppercase small fw-bold mb-1">{{ prod.category }}</p>
               <h3 class="h6 fw-semibold mb-2">{{ prod.name }}</h3>
-              <div v-if="prod.old" class="d-flex align-items-center gap-2">
+              <div v-if="prod.stock" class="d-flex align-items-center gap-2">
                 <span class="fw-bold">${{ prod.price }}</span>
-                <span class="text-decoration-line-through text-secondary">${{ prod.old }}</span>
+                <span class="text-decoration-line-through text-secondary">${{ prod.stock }}</span>
               </div>
               <div v-else class="fw-bold">${{ prod.price }}</div>
             </div>
@@ -77,7 +67,9 @@
     <div class="card shadow-sm border-0 rounded-4 mb-4 p-4" style="max-width: 575px">
       <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
         <h2 class="h5 mb-0">New Customers</h2>
-        <a href="#" class="text-danger fw-semibold small text-decoration-none">View All</a>
+        <router-link to="/admin/users" class="text-danger fw-semibold small text-decoration-none"
+          >View All</router-link
+        >
       </div>
       <div class="d-flex flex-column gap-3">
         <div
@@ -86,7 +78,7 @@
           class="d-flex align-items-center gap-3 p-2 rounded-3 bg-white shadow-sm customer-hover"
         >
           <img
-            :src="cus.img"
+            :src="cus.avatar"
             :alt="cus.name"
             class="rounded-circle"
             style="width: 40px; height: 40px; object-fit: cover"
@@ -103,91 +95,27 @@
 </template>
 
 <script setup lang="ts">
-import ApexCharts from 'vue3-apexcharts'
+import ChartSection from '../../components/common/ChartComponent.vue'
+import { dataset } from '@/data/chartData'
+import { products } from '@/data/products'
+import { customers } from '@/data/customers'
+
 const stats = [
   { icon: 'bi-people-fill', bg: 'bg-danger', value: '5,583', label: 'Customers' },
   { icon: 'bi-bag-check', bg: 'bg-primary', value: '539', label: 'Order' },
   { icon: 'bi-truck', bg: 'bg-pink', value: '105', label: 'Delivery Partners' },
   { icon: 'bi-currency-dollar', bg: 'bg-warning', value: '20,835', label: 'Revenue' },
 ]
-const chartBars = [84, 36, 50, 98, 58, 66, 71, 41, 58, 14, 41, 63]
-const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
-const chartSeries = [
-  {
-    name: 'Sales',
-    data: chartBars,
-  },
-]
-const chartOptions = {
-  chart: { toolbar: { show: false } },
-  plotOptions: { bar: { borderRadius: 6, columnWidth: '40%' } },
-  dataLabels: { enabled: false },
-  xaxis: { categories: months },
-  yaxis: { labels: { formatter: (val: number) => `$${val}` } },
-  colors: ['#4f80ff'],
-  grid: { borderColor: '#f2f2f2' },
-  tooltip: { y: { formatter: (val: number) => `$${val}` } },
-}
-const products = [
-  {
-    img: 'https://api.builder.io/api/v1/image/assets/TEMP/c9e15809575ecaf144fc9222abbe48a51d8c9c0f?width=260',
-    brand: 'By Refco Bags Ltd',
-    name: 'Women Tan Shoulder Bag Extra Spacious',
-    price: 70,
-  },
-  {
-    img: 'https://api.builder.io/api/v1/image/assets/TEMP/bfa853f06e86f57c7fde15e6b114ade53ee06c29?width=260',
-    brand: 'By Silverstart Mobile',
-    name: 'WH-CH510 Wireless Headphones',
-    price: 30,
-    old: 120,
-  },
-  {
-    img: 'https://api.builder.io/api/v1/image/assets/TEMP/e0920ab2de5a317a73e94d6e20e3f897585632ee?width=420',
-    brand: 'By Kitty Shop',
-    name: 'Multi Color Canvas Kids Fancy Shoes',
-    price: 60,
-  },
-  {
-    img: 'https://api.builder.io/api/v1/image/assets/TEMP/bdd81c4669d090b425b771f469814a2a90c56fd3?width=400',
-    brand: 'By Brand Factory',
-    name: 'Adidas PU Lace Up Mens Sports Shoes (Laceup)',
-    price: 120,
-  },
-]
-const customers = [
-  {
-    img: 'https://api.builder.io/api/v1/image/assets/TEMP/b5d49fee03d23f7d7ee89ba211888ab18de2b1a3?width=80',
-    name: 'Kigen pieterson',
-    email: 'kegenpet980@gmail.com',
-  },
-  {
-    img: 'https://api.builder.io/api/v1/image/assets/TEMP/b1152ef786a83052f412b2a8312aaedea015f3fe?width=80',
-    name: 'Brandon Walsh',
-    email: 'iambrandon90@hotmail.com',
-  },
-  {
-    img: 'https://api.builder.io/api/v1/image/assets/TEMP/c5290e6a2340feb161380ef0ef986cbc77054b56?width=80',
-    name: 'Sam Wilson',
-    email: 'samwilson@reppideducation.com',
-  },
-  {
-    img: 'https://api.builder.io/api/v1/image/assets/TEMP/25e0817195e7ab63dbb616c0af9e5da69d7eacfa?width=80',
-    name: 'Dean Mayer',
-    email: 'dmayer1987@gmail.com',
-  },
-  {
-    img: 'https://api.builder.io/api/v1/image/assets/TEMP/0e209ab00f7b497f56b9a75308d9e8962b194785?width=80',
-    name: 'Kagiso Morris',
-    email: 'kgmorrison@hotmail.com',
-  },
-]
 </script>
 
 <script lang="ts">
 import { defineComponent } from 'vue'
+import ApexCharts from 'vue3-apexcharts'
 export default defineComponent({
-  components: { apexchart: ApexCharts },
+  components: {
+    apexchart: ApexCharts,
+    ChartSection,
+  },
 })
 </script>
 
