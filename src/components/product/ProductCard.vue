@@ -1,23 +1,24 @@
 <template>
   <div class="product-card">
-    <!-- Badge -->
-    <div v-if="badge" class="product-badge">
-      <span :class="`badge bg-${badge.type}`">{{ badge.text }}</span>
+    <!-- Badges -->
+    <div v-if="product.badges && product.badges.length > 0" class="product-badges">
+      <span
+        v-for="badgeType in product.badges"
+        :key="badgeType"
+        :class="['badge', getBadgeClass(badgeType)]"
+      >
+        {{ getBadgeText(badgeType) }}
+      </span>
     </div>
 
     <!-- Product Image -->
-    <div class="product-image-container">
+    <div class="product-image-container" @click="viewDetails" style="cursor: pointer;">
       <img :src="product.image" :alt="product.name" class="product-image" />
-      <div class="product-overlay">
-        <button class="btn btn-light btn-sm" @click="quickView">
-          <i class="bi bi-eye"></i> Quick View
-        </button>
-      </div>
     </div>
 
     <!-- Product Info -->
     <div class="product-info">
-      <h6 class="product-title">{{ product.name }}</h6>
+      <h6 class="product-title" @click="viewDetails" style="cursor: pointer;">{{ product.name }}</h6>
       <div class="product-rating mb-2">
         <span class="stars">{{ renderStars(product.rating) }}</span>
         <span class="rating-count">({{ product.reviewCount }})</span>
@@ -38,40 +39,50 @@
 </template>
 
 <script setup lang="ts">
-interface Product {
-  id: number
-  name: string
-  price: number
-  originalPrice?: number
-  rating: number
-  reviewCount: number
-  image: string
-}
-
-interface Badge {
-  text: string
-  type: 'success' | 'danger' | 'warning' | 'primary'
-}
+import { useRouter } from 'vue-router'
+import type { Product, BadgeType } from '@/types/product'
 
 interface Props {
   product: Product
-  badge?: Badge
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 
-const emit = defineEmits(['quick-view', 'add-to-cart'])
+const emit = defineEmits(['add-to-cart'])
+const router = useRouter()
 
 const renderStars = (rating: number): string => {
   return '★'.repeat(rating) + '☆'.repeat(5 - rating)
 }
 
-const quickView = () => {
-  emit('quick-view')
+const getBadgeClass = (badgeType: BadgeType): string => {
+  const classes: Record<BadgeType, string> = {
+    'new': 'bg-success',
+    'hot': 'bg-danger',
+    'popular': 'bg-warning',
+    'instock': 'bg-info',
+    'discount': 'bg-primary'
+  }
+  return classes[badgeType] || 'bg-secondary'
+}
+
+const getBadgeText = (badgeType: BadgeType): string => {
+  const texts: Record<BadgeType, string> = {
+    'new': 'NEW',
+    'hot': 'HOT',
+    'popular': 'POPULAR',
+    'instock': 'IN STOCK',
+    'discount': props.product.discount ? `-${props.product.discount}%` : 'SALE'
+  }
+  return texts[badgeType] || badgeType.toUpperCase()
 }
 
 const addToCart = () => {
   emit('add-to-cart')
+}
+
+const viewDetails = () => {
+  router.push({ name: 'ProductDetail', params: { id: props.product.id } })
 }
 </script>
 
@@ -91,14 +102,18 @@ const addToCart = () => {
   transform: translateY(-4px);
 }
 
-.product-badge {
+.product-badges {
   position: absolute;
   top: 10px;
   left: 10px;
   z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  max-width: calc(100% - 20px);
 }
 
-.product-badge .badge {
+.product-badges .badge {
   font-size: 0.7rem;
   padding: 0.35em 0.65em;
   font-weight: 600;
@@ -123,24 +138,6 @@ const addToCart = () => {
 
 .product-card:hover .product-image {
   transform: scale(1.08);
-}
-
-.product-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.product-card:hover .product-overlay {
-  opacity: 1;
 }
 
 .product-info {
