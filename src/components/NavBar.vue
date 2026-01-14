@@ -63,7 +63,7 @@
           </template>
 
           <!-- Cart Icon -->
-          <button class="btn btn-link p-2 text-white border-0 position-relative">
+          <router-link to="/cart" class="btn btn-link p-2 text-white border-0 position-relative">
             <i class="bi bi-cart3 fs-4"></i>
             <span
               class="position-absolute badge rounded-pill bg-danger"
@@ -78,7 +78,7 @@
             >
               {{ CartNum }}
             </span>
-          </button>
+          </router-link>
         </div>
       </div>
 
