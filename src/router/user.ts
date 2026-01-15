@@ -11,6 +11,14 @@ import CartView from '@/views/user/CartPage.vue'
 import EmptyProduct from '@/views/user/EmptyProduct.vue'
 import ProductDetailView from '@/views/user/ProductDetailView.vue'
 
+import ProfileMain from '@/views/profile/ProfileMain.vue'
+import EditProfile from '@/views/profile/EditProfile.vue'
+import OrdersView from '@/views/profile/OrdersView.vue'
+import WishlistView from '@/views/profile/WishlistView.vue'
+import AddressView from '@/views/profile/AddressView.vue'
+import PaymentView from '@/views/profile/PaymentView.vue'
+import NotificationView from '@/views/profile/NotificationView.vue'
+import SettingsView from '@/views/profile/SettingView.vue'
 export default [
   {
     path: '/',
@@ -32,7 +40,16 @@ export default [
       { path: '/checkout', name: 'Checkout', component: Checkout },
       { path: '/cart', name: 'Cart', component: CartView},
       { path: '/empty-product', name: 'EmptyProduct', component: EmptyProduct},
-      { path: '/product/:id', name: 'ProductDetail', component: ProductDetailView}
+      { path: '/product/:id', name: 'ProductDetail', component: ProductDetailView},
+
+      { path: '/profile', name: 'Profile', component: ProfileMain },
+      { path: '/profile/edit', name: 'ProfileEdit', component: EditProfile },
+      { path: '/profile/orders', name: 'ProfileOrders', component: OrdersView },
+      { path: '/profile/wishlist', name: 'ProfileWishlist', component: WishlistView },
+      { path: '/profile/address', name: 'ProfileAddress', component: AddressView },
+      { path: '/profile/payment', name: 'ProfilePayment', component: PaymentView },
+      { path: '/profile/notification', name: 'ProfileNotification', component: NotificationView },
+      { path: '/profile/settings', name: 'ProfileSettings', component: SettingsView }
     ],
   },
 ]

@@ -70,6 +70,7 @@ const handleLogout = (event: Event) => {
   margin-bottom: 0.5rem;
   transition: all 0.3s ease;
   text-decoration: none;
+  position: relative;
 }
 
 .nav-icon {
@@ -77,24 +78,25 @@ const handleLogout = (event: Event) => {
   height: 24px;
   margin-right: 0.75rem;
   object-fit: contain;
+  transition: all 0.3s ease;
 }
 
 .nav-link:hover {
   background-color: #f8f9fa;
   color: #212529;
 }
-
 .nav-link.router-link-active:not(.logout-link) {
-  background-color: #0d6efd;
+  background-color: #141B3E;
   color: white;
 }
-
 .nav-link.router-link-active:not(.logout-link) .nav-icon {
-  filter: brightness(0) invert(1);
 }
 
 .logout-link {
   color: #dc3545;
+  margin-top: 1rem;
+  border-top: 1px solid #e9ecef;
+  padding-top: 1.5rem;
 }
 
 .logout-link:hover {
@@ -104,6 +106,11 @@ const handleLogout = (event: Event) => {
 
 .logout-link:hover .nav-icon {
   filter: brightness(0) invert(1);
+}
+
+.badge {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
 }
 
 @media (max-width: 768px) {
