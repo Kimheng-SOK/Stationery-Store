@@ -10,6 +10,7 @@ import Checkout from '@/views/user/CheckoutView.vue'
 import CartView from '@/views/user/CartPage.vue'
 import EmptyProduct from '@/views/user/EmptyProduct.vue'
 import ProductDetailView from '@/views/user/ProductDetailView.vue'
+import PopularPage from '@/views/user/PopularPage.vue'
 
 export default [
   {
@@ -25,7 +26,7 @@ export default [
       { path: '/shop', name: 'Shop', component: ShopView },
       { path: '/new-arrival', name: 'NewArrival', component: NewArrivalView },
       { path: '/categories', name: 'ShopByCategory', component: ShopByCategory },
-      { path: '/hots', name: 'PopularProduct', component: PopularProduct },
+      { path: '/hots', name: 'PopularProduct', component: PopularPage },
       { path: '/home', name: 'HomePageView', component: HomePageView},
       { path: '/privacy', name: 'Privacy', component:Privacy},
       { path: '/TermCondition', name: 'TermCondition', component: TermCondition},
