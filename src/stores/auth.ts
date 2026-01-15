@@ -1,55 +1,81 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { User } from '@/types/user'
+import { useAuthApi } from '@/composables/useAuthApi'
 
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref<string | null>(localStorage.getItem('token'))
+  const authApi = useAuthApi()
   const user = ref<User | null>(null)
-  const userRole = ref<'admin' | 'user' | null>(localStorage.getItem('userRole') as 'admin' | 'user' | null)
+  const isInitialized = ref(false)
 
-  const isAuthenticated = computed(() => !!token.value)
-  const isAdmin = computed(() => userRole.value === 'admin')
-  const isUser = computed(() => userRole.value === 'user')
+  const isAuthenticated = computed(() => !!user.value)
+  const isAdmin = computed(() => user.value?.role === 'admin')
+  const isUser = computed(() => user.value?.role === 'customer')
 
-  function login(authToken: string, userData: User, role: 'admin' | 'user') {
-    token.value = authToken
+  async function login(userData: User) {
     user.value = userData
-    userRole.value = role
-    localStorage.setItem('token', authToken)
-    localStorage.setItem('userRole', role)
-    localStorage.setItem('user', JSON.stringify(userData))
+    // Session is managed by cookies, no need to store token
   }
 
-  function logout() {
-    token.value = null
-    user.value = null
-    userRole.value = null
-    localStorage.removeItem('token')
-    localStorage.removeItem('userRole')
-    localStorage.removeItem('user')
+  async function logout() {
+    try {
+      await authApi.logout()
+    } catch (error) {
+      console.error('Logout error:', error)
+    } finally {
+      user.value = null
+    }
   }
 
-  function initializeAuth() {
-    const storedToken = localStorage.getItem('token')
-    const storedRole = localStorage.getItem('userRole') as 'admin' | 'user' | null
-    const storedUser = localStorage.getItem('user')
+  async function initializeAuth() {
+    if (isInitialized.value) return
+    
+    try {
+      const response = await authApi.getCurrentUser()
+      if (response?.user) {
+        user.value = {
+          id: response.user.id,
+          name: response.user.name,
+          email: response.user.email,
+          role: response.user.role === 'admin' ? 'admin' : 'user',
+          phone: response.user.phone,
+          avatar: response.user.avatar
+        }
+      }
+    } catch (error) {
+      // Not authenticated, clear user
+      user.value = null
+    } finally {
+      isInitialized.value = true
+    }
+  }
 
-    if (storedToken && storedRole && storedUser) {
-      token.value = storedToken
-      userRole.value = storedRole
-      user.value = JSON.parse(storedUser)
+  async function refreshUser() {
+    try {
+      const response = await authApi.getCurrentUser()
+      if (response?.user) {
+        user.value = {
+          id: response.user.id,
+          name: response.user.name,
+          email: response.user.email,
+          role: response.user.role === 'admin' ? 'admin' : 'user',
+          phone: response.user.phone,
+          avatar: response.user.avatar
+        }
+      }
+    } catch (error) {
+      user.value = null
     }
   }
 
   return {
-    token,
     user,
-    userRole,
     isAuthenticated,
     isAdmin,
     isUser,
     login,
     logout,
-    initializeAuth
+    initializeAuth,
+    refreshUser
   }
 })

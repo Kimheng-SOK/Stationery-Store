@@ -13,7 +13,7 @@ const pinia = createPinia()
 app.use(pinia)
 app.use(router)
 
-// Initialize auth state from localStorage
+// Initialize auth state (check session) - runs in background
 const authStore = useAuthStore()
 authStore.initializeAuth()
 
