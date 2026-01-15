@@ -2,10 +2,7 @@
   <div class="login-container d-flex min-vh-100">
     <!-- Left Side - Image -->
     <div class="login-image-section d-none d-lg-flex">
-      <img
-        src="@/assets/image/pfp.png"
-        alt="Access Image"
-      >
+      <img src="@/assets/image/pfp.png" alt="Access Image" />
     </div>
 
     <!-- Right Side - Form -->
@@ -16,104 +13,139 @@
           <p class="login-subtitle">Sign up to start your shopping journey</p>
         </div>
 
+        <!-- Error Message -->
+        <div v-if="errorMessage" class="alert alert-danger mb-4" role="alert">
+          <i class="bi bi-exclamation-circle me-2"></i>
+          {{ errorMessage }}
+        </div>
+
+        <!-- Success Message -->
+        <div v-if="successMessage" class="alert alert-success mb-4" role="alert">
+          <i class="bi bi-check-circle me-2"></i>
+          {{ successMessage }}
+        </div>
+
         <form @submit.prevent="handleSignUp" class="login-form">
-          <!-- Username Input -->
+          <!-- Name Input -->
           <div class="form-group mb-4">
-            <label class="form-label">Username</label>
+            <label class="form-label">Full Name <span class="text-danger">*</span></label>
             <div class="input-group-custom">
               <span class="input-icon">
-                <i class="fas fa-user"></i>
+                <i class="bi bi-person"></i>
               </span>
               <input
                 type="text"
-                placeholder="Enter your username"
-                v-model="username"
-                class="form-control form-control-custom"
+                placeholder="Enter your full name"
+                v-model="name"
+                :class="['form-control form-control-custom', { 'is-invalid': errors.name }]"
                 required
+                @blur="validateName"
               />
             </div>
+            <small v-if="errors.name" class="text-danger">{{ errors.name }}</small>
           </div>
 
           <!-- Email Input -->
           <div class="form-group mb-4">
-            <label class="form-label">Email Address</label>
+            <label class="form-label">Email Address <span class="text-danger">*</span></label>
             <div class="input-group-custom">
               <span class="input-icon">
-                <i class="fas fa-envelope"></i>
+                <i class="bi bi-envelope"></i>
               </span>
               <input
                 type="email"
                 placeholder="Enter your email"
                 v-model="email"
-                class="form-control form-control-custom"
+                :class="['form-control form-control-custom', { 'is-invalid': errors.email }]"
                 required
+                @blur="validateEmail"
+              />
+            </div>
+            <small v-if="errors.email" class="text-danger">{{ errors.email }}</small>
+          </div>
+
+          <!-- Phone Input -->
+          <div class="form-group mb-4">
+            <label class="form-label">Phone Number (Optional)</label>
+            <div class="input-group-custom">
+              <span class="input-icon">
+                <i class="bi bi-telephone"></i>
+              </span>
+              <input
+                type="tel"
+                placeholder="Enter your phone number"
+                v-model="phone"
+                class="form-control form-control-custom"
               />
             </div>
           </div>
 
           <!-- Password Input -->
           <div class="form-group mb-4">
-            <label class="form-label">Password</label>
+            <label class="form-label">Password <span class="text-danger">*</span></label>
             <div class="input-group-custom">
               <span class="input-icon">
-                <i class="fas fa-lock"></i>
+                <i class="bi bi-lock"></i>
               </span>
               <input
-                placeholder="Enter your password"
+                placeholder="Enter your password (min 6 characters)"
                 :type="showPassword ? 'text' : 'password'"
                 v-model="password"
-                class="form-control form-control-custom"
+                :class="['form-control form-control-custom', { 'is-invalid': errors.password }]"
                 required
+                @blur="validatePassword"
               />
               <span class="input-icon-right" @click="togglePassword">
-                <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
               </span>
             </div>
+            <small v-if="errors.password" class="text-danger">{{ errors.password }}</small>
           </div>
 
           <!-- Confirm Password Input -->
           <div class="form-group mb-4">
-            <label class="form-label">Confirm Password</label>
+            <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
             <div class="input-group-custom">
               <span class="input-icon">
-                <i class="fas fa-lock"></i>
+                <i class="bi bi-lock"></i>
               </span>
               <input
                 placeholder="Confirm your password"
                 :type="showConfirmPassword ? 'text' : 'password'"
                 v-model="confirmPassword"
-                class="form-control form-control-custom"
+                :class="['form-control form-control-custom', { 'is-invalid': errors.confirmPassword }]"
                 required
+                @blur="validateConfirmPassword"
               />
               <span class="input-icon-right" @click="toggleConfirmPassword">
-                <i :class="showConfirmPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                <i :class="showConfirmPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
               </span>
             </div>
+            <small v-if="errors.confirmPassword" class="text-danger">{{ errors.confirmPassword }}</small>
           </div>
 
           <!-- Terms and Privacy -->
           <div class="text-center mb-4">
             <p class="terms-text">
               By signing up you agree to our
-              <router-link to="/termCondition" class="terms-link">Terms of Service</router-link>
+              <router-link to="/TermCondition" class="terms-link">Terms of Service</router-link>
               and
               <router-link to="/privacy" class="terms-link">Privacy Policy</router-link>
             </p>
           </div>
 
           <!-- Sign Up Button -->
-          <button type="submit" class="btn btn-signin w-100 mb-4">
-            <span class="btn-text">Sign Up</span>
-            <i class="fas fa-arrow-right ms-2"></i>
+          <button type="submit" class="btn btn-signin w-100 mb-4" :disabled="isLoading">
+            <span class="btn-text">{{ isLoading ? 'Creating Account...' : 'Sign Up' }}</span>
+            <i class="bi bi-arrow-right ms-2" v-if="!isLoading"></i>
+            <span class="spinner-border spinner-border-sm ms-2" v-if="isLoading"></span>
           </button>
 
           <!-- Sign In Link -->
           <div class="text-center">
             <p class="signup-text">
               Already have an account?
-              <router-link to="/signin" class="signup-link">
-                Sign In
-              </router-link>
+              <router-link to="/signin" class="signup-link"> Sign In </router-link>
             </p>
           </div>
 
@@ -124,12 +156,12 @@
 
           <!-- Social Login -->
           <div class="social-login d-flex gap-3">
-            <button type="button" class="btn btn-social flex-fill">
-              <i class="fab fa-google me-2"></i>
+            <button type="button" class="btn btn-social flex-fill" disabled>
+              <i class="bi bi-google me-2"></i>
               Google
             </button>
-            <button type="button" class="btn btn-social flex-fill">
-              <i class="fab fa-facebook me-2"></i>
+            <button type="button" class="btn btn-social flex-fill" disabled>
+              <i class="bi bi-facebook me-2"></i>
               Facebook
             </button>
           </div>
@@ -139,44 +171,152 @@
   </div>
 </template>
 
-<script lang="ts">
-export default {
-  name: 'SignUp',
-  data() {
-    return {
-      username: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      showPassword: false,
-      showConfirmPassword: false,
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { useAuthApi } from '@/composables/useAuthApi'
+
+const router = useRouter()
+const authStore = useAuthStore()
+const authApi = useAuthApi()
+
+const name = ref('')
+const email = ref('')
+const phone = ref('')
+const password = ref('')
+const confirmPassword = ref('')
+const showPassword = ref(false)
+const showConfirmPassword = ref(false)
+const isLoading = ref(false)
+const errorMessage = ref('')
+const successMessage = ref('')
+const errors = ref<{
+  name?: string
+  email?: string
+  password?: string
+  confirmPassword?: string
+}>({})
+
+const togglePassword = () => {
+  showPassword.value = !showPassword.value
+}
+
+const toggleConfirmPassword = () => {
+  showConfirmPassword.value = !showConfirmPassword.value
+}
+
+const validateName = () => {
+  if (!name.value.trim()) {
+    errors.value.name = 'Name is required'
+    return false
+  }
+  if (name.value.trim().length < 2) {
+    errors.value.name = 'Name must be at least 2 characters'
+    return false
+  }
+  if (name.value.trim().length > 100) {
+    errors.value.name = 'Name cannot exceed 100 characters'
+    return false
+  }
+  delete errors.value.name
+  return true
+}
+
+const validateEmail = () => {
+  if (!email.value) {
+    errors.value.email = 'Email is required'
+    return false
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email.value)) {
+    errors.value.email = 'Please enter a valid email address'
+    return false
+  }
+  delete errors.value.email
+  return true
+}
+
+const validatePassword = () => {
+  if (!password.value) {
+    errors.value.password = 'Password is required'
+    return false
+  }
+  if (password.value.length < 6) {
+    errors.value.password = 'Password must be at least 6 characters'
+    return false
+  }
+  delete errors.value.password
+  return true
+}
+
+const validateConfirmPassword = () => {
+  if (!confirmPassword.value) {
+    errors.value.confirmPassword = 'Please confirm your password'
+    return false
+  }
+  if (password.value !== confirmPassword.value) {
+    errors.value.confirmPassword = 'Passwords do not match'
+    return false
+  }
+  delete errors.value.confirmPassword
+  return true
+}
+
+const handleSignUp = async () => {
+  // Clear previous messages
+  errorMessage.value = ''
+  successMessage.value = ''
+  errors.value = {}
+
+  // Validate all fields
+  const isNameValid = validateName()
+  const isEmailValid = validateEmail()
+  const isPasswordValid = validatePassword()
+  const isConfirmPasswordValid = validateConfirmPassword()
+
+  if (!isNameValid || !isEmailValid || !isPasswordValid || !isConfirmPasswordValid) {
+    errorMessage.value = 'Please fix the errors in the form'
+    return
+  }
+
+  isLoading.value = true
+
+  try {
+    const response = await authApi.signup({
+      name: name.value.trim(),
+      email: email.value.trim().toLowerCase(),
+      password: password.value,
+      phone: phone.value.trim() || undefined,
+    })
+
+    if (response?.user) {
+      // Update auth store
+      await authStore.login({
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        role: response.user.role === 'admin' ? 'admin' : 'user',
+        phone: response.user.phone,
+        avatar: response.user.avatar,
+      })
+
+      successMessage.value = `Welcome, ${response.user.name}! Account created successfully.`
+
+      // Redirect based on role
+      setTimeout(() => {
+        if (response.user.role === 'admin') {
+          router.push('/admin')
+        } else {
+          router.push('/')
+        }
+      }, 1500)
     }
-  },
-
-  methods: {
-    togglePassword() {
-      this.showPassword = !this.showPassword
-    },
-
-    toggleConfirmPassword() {
-      this.showConfirmPassword = !this.showConfirmPassword
-    },
-
-    handleSignUp() {
-      if (!this.username || !this.email || !this.password || !this.confirmPassword) {
-        alert('Please fill in all fields')
-        return
-      }
-      if (this.password !== this.confirmPassword) {
-        alert('Passwords do not match')
-        return
-      }
-
-      // TODO: Implement actual registration
-      alert('Sign up Successfully!!!')
-      this.$router.push('/signin')
-    },
-  },
+  } catch (error: any) {
+    errorMessage.value = error.message || authApi.error.value || 'Sign up failed. Please try again.'
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
 
@@ -272,6 +412,10 @@ export default {
   outline: none;
 }
 
+.form-control-custom.is-invalid {
+  border-color: #dc3545;
+}
+
 .input-icon {
   position: absolute;
   left: 1rem;
@@ -335,13 +479,18 @@ export default {
   font-family: 'Quicksand', sans-serif;
 }
 
-.btn-signin:hover {
+.btn-signin:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
 }
 
-.btn-signin:active {
+.btn-signin:active:not(:disabled) {
   transform: translateY(0);
+}
+
+.btn-signin:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .btn-signin .btn-text {
@@ -420,15 +569,20 @@ export default {
   font-size: 1.2rem;
 }
 
-.btn-social:hover {
+.btn-social:hover:not(:disabled) {
   border-color: var(--main-color2, #007bff);
   color: var(--main-color2, #007bff);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.btn-social:active {
+.btn-social:active:not(:disabled) {
   transform: translateY(0);
+}
+
+.btn-social:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Responsive Styles */
