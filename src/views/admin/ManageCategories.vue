@@ -7,25 +7,80 @@
       </div>
       <div class="categories-divider"></div>
 
+      <!-- Loading State -->
+      <div v-if="categoryApi.loading.value" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="categoryApi.error.value" class="alert alert-danger m-3">
+        <i class="bi bi-exclamation-circle"></i>
+        {{ categoryApi.error.value }}
+        <button @click="loadCategories" class="btn btn-sm btn-outline-danger ms-2">Retry</button>
+      </div>
+
       <!-- Category Cards -->
-      <div class="categories-list">
+      <div v-else class="categories-list">
         <div v-if="categories.length === 0" class="text-center py-5 text-muted">
           <p>No categories found. Click "Add New" to create one.</p>
         </div>
 
-        <div v-for="category in categories" :key="category.id" class="category-card">
+        <!-- Nested Category View -->
+        <div v-for="category in categories" :key="category._id || category.id" class="category-card">
           <div class="category-image-wrapper">
             <img
-              :src="category.image"
+              v-if="category.image"
+              :src="getCategoryImageUrl(category)"
               :alt="category.name"
               class="category-image"
             />
+            <div v-else class="category-image-placeholder">
+              <i class="bi bi-folder"></i>
+            </div>
           </div>
           <div class="category-content">
-            <h3 class="category-name">{{ category.name }}</h3>
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <h3 class="category-name mb-0">{{ category.name }}</h3>
+              <span
+                :class="[
+                  'badge',
+                  category.isActive ? 'bg-success' : 'bg-secondary',
+                  'badge-sm'
+                ]"
+              >
+                {{ category.isActive ? 'Active' : 'Inactive' }}
+              </span>
+              <span v-if="category.productCount !== undefined" class="badge bg-info badge-sm">
+                {{ category.productCount }} products
+              </span>
+            </div>
             <div class="category-subcategories">
               <p class="sub-label">Description</p>
-              <p class="category-description">{{ category.description || 'No description added' }}</p>
+              <p class="category-description">
+                {{ category.description || 'No description added' }}
+              </p>
+            </div>
+            <!-- Parent Category Info -->
+            <div v-if="category.parent" class="mt-2">
+              <p class="sub-label">Parent Category</p>
+              <p class="category-description small">
+                {{ getCategoryName(category.parent) }}
+              </p>
+            </div>
+            <!-- Children Categories -->
+            <div v-if="category.children && category.children.length > 0" class="mt-3">
+              <p class="sub-label">Subcategories ({{ category.children.length }})</p>
+              <div class="sub-tags">
+                <span
+                  v-for="child in category.children"
+                  :key="child._id || child.id"
+                  class="sub-tag"
+                >
+                  {{ child.name }}
+                </span>
+              </div>
             </div>
           </div>
           <div class="category-actions">
@@ -61,7 +116,7 @@
 
             <!-- Category Name -->
             <div class="mb-3">
-              <label class="form-label">Category Name</label>
+              <label class="form-label">Category Name <span class="text-danger">*</span></label>
               <input
                 v-model="formData.name"
                 type="text"
@@ -69,6 +124,22 @@
                 placeholder="e.g., Notebooks, Pens & Pencils"
               />
               <small v-if="errors.name" class="text-danger">{{ errors.name }}</small>
+            </div>
+
+            <!-- Parent Category -->
+            <div class="mb-3">
+              <label class="form-label">Parent Category (Optional)</label>
+              <select v-model="formData.parent" class="form-select">
+                <option value="">None (Top-level category)</option>
+                <option
+                  v-for="cat in availableParentCategories"
+                  :key="cat._id || cat.id"
+                  :value="cat._id || cat.id"
+                >
+                  {{ cat.name }}
+                </option>
+              </select>
+              <small class="text-muted">Select a parent category to create a nested category</small>
             </div>
 
             <!-- Description -->
@@ -80,6 +151,35 @@
                 rows="3"
                 placeholder="Enter category description (optional)"
               ></textarea>
+            </div>
+
+            <!-- Status -->
+            <div class="mb-3">
+              <label class="form-label">Status</label>
+              <div class="form-check form-switch">
+                <input
+                  v-model="formData.isActive"
+                  class="form-check-input"
+                  type="checkbox"
+                  id="isActive"
+                />
+                <label class="form-check-label" for="isActive">
+                  {{ formData.isActive ? 'Active' : 'Inactive' }}
+                </label>
+              </div>
+            </div>
+
+            <!-- Order -->
+            <div class="mb-3">
+              <label class="form-label">Display Order</label>
+              <input
+                v-model.number="formData.order"
+                type="number"
+                min="0"
+                class="form-control"
+                placeholder="0"
+              />
+              <small class="text-muted">Lower numbers appear first</small>
             </div>
 
             <!-- Category Image -->
@@ -124,12 +224,23 @@
           <div class="modal-body">
             <p>Are you sure you want to delete <strong>{{ categoryToDelete?.name }}</strong>?</p>
             <p class="text-muted small">This action cannot be undone.</p>
+            <div v-if="categoryToDelete?.productCount && categoryToDelete.productCount > 0" class="alert alert-warning mt-3">
+              <i class="bi bi-exclamation-triangle"></i>
+              This category has {{ categoryToDelete.productCount }} product(s). Please reassign or delete products first.
+            </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" @click="showDeleteModal = false">
               Cancel
             </button>
-            <button type="button" class="btn btn-danger" @click="deleteCategory">Delete</button>
+            <button
+              type="button"
+              class="btn btn-danger"
+              @click="deleteCategory"
+              :disabled="categoryToDelete?.productCount && categoryToDelete.productCount > 0"
+            >
+              Delete
+            </button>
           </div>
         </div>
       </div>
@@ -138,62 +249,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import FileUpload from '@/components/common/FileUpload.vue'
 import { useFormState } from '@/composables/useFormState'
+import { useCategoryApi, type Category } from '@/composables/useCategoryApi'
 
-interface Category {
-  id: number
-  name: string
-  description?: string
-  image: string
-}
+const categoryApi = useCategoryApi()
 
-// Sample data - in production, this would come from an API
-const initialCategories: Category[] = [
-  {
-    id: 1,
-    name: 'NoteBooks',
-    description: 'Wide range of premium notebooks for all purposes',
-    image: '/public/images/notebooks/book4.jpg',
-  },
-  {
-    id: 2,
-    name: 'Pens & Pencils',
-    description: 'Quality writing instruments for professionals and students',
-    image: '/public/images/pens&pencils/pen2.jpg',
-  },
-  {
-    id: 3,
-    name: 'Office Supplies',
-    description: 'Essential office equipment and accessories',
-    image: '/public/images/officeSupplies/office1.jpg',
-  },
-  {
-    id: 4,
-    name: 'Art Supplies',
-    description: 'Professional art materials for creative professionals',
-    image: '/public/images/artSupplies/art1.jpg',
-  },
-  {
-    id: 5,
-    name: 'Sticky Notes',
-    description: 'Colorful and practical sticky note collections',
-    image: '/public/images/stickyNote/stick1.jpg',
-  },
-]
-
-const categories = ref<Category[]>(initialCategories)
+const categories = ref<Category[]>([])
+const allCategories = ref<Category[]>([]) // For parent selection
 const showModal = ref(false)
 const showDeleteModal = ref(false)
 const editingCategory = ref<Category | null>(null)
 const categoryToDelete = ref<Category | null>(null)
 
 const initialFormData = {
-  id: 0,
   name: '',
   description: '',
   image: '',
+  parent: '',
+  isActive: true,
+  order: 0,
 }
 
 const {
@@ -208,6 +284,38 @@ const {
   clearErrors,
 } = useFormState(initialFormData)
 
+// Available parent categories (exclude current category if editing)
+const availableParentCategories = computed(() => {
+  if (!editingCategory.value) return allCategories.value
+  return allCategories.value.filter(
+    (cat) => (cat._id || cat.id) !== (editingCategory.value!._id || editingCategory.value!.id)
+  )
+})
+
+// Load categories from API
+const loadCategories = async () => {
+  try {
+    // Load nested structure for display
+    const response = await categoryApi.getCategories({
+      nested: true,
+      includeProducts: true,
+    })
+    if (response.success && response.data) {
+      categories.value = response.data.data || []
+    }
+
+    // Load flat list for parent selection
+    const flatResponse = await categoryApi.getCategories({
+      nested: false,
+    })
+    if (flatResponse.success && flatResponse.data) {
+      allCategories.value = flatResponse.data.data || []
+    }
+  } catch (error: any) {
+    showError(error.message || 'Failed to load categories')
+  }
+}
+
 const openAddModal = () => {
   editingCategory.value = null
   resetForm()
@@ -217,7 +325,18 @@ const openAddModal = () => {
 
 const editCategory = (category: Category) => {
   editingCategory.value = category
-  Object.assign(formData, category)
+  const parentId = typeof category.parent === 'object' && category.parent
+    ? category.parent._id
+    : category.parent || ''
+  
+  Object.assign(formData, {
+    name: category.name,
+    description: category.description || '',
+    image: category.image ? getCategoryImageUrl(category) : '',
+    parent: parentId,
+    isActive: category.isActive !== undefined ? category.isActive : true,
+    order: category.order || 0,
+  })
   clearErrors()
   showModal.value = true
 }
@@ -236,7 +355,6 @@ const confirmDelete = (category: Category) => {
 const saveCategory = async () => {
   const validationRules = {
     name: { required: true, minLength: 3, maxLength: 100 },
-    image: { required: true },
   }
 
   if (!validateForm(validationRules)) {
@@ -247,27 +365,34 @@ const saveCategory = async () => {
   isSubmitting.value = true
 
   try {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    const categoryData: any = {
+      name: formData.name,
+      description: formData.description || undefined,
+      parent: formData.parent || null,
+      isActive: formData.isActive,
+      order: formData.order || 0,
+    }
+
+    // Handle image if it's a data URL (convert to file or URL)
+    // For now, we'll send it as-is if it's a URL, or skip if it's a data URL
+    // In production, you'd want to upload the image separately or convert data URL to file
+    if (formData.image && !formData.image.startsWith('data:')) {
+      categoryData.image = formData.image
+    }
 
     if (editingCategory.value) {
-      const index = categories.value.findIndex((c) => c.id === editingCategory.value!.id)
-      if (index !== -1) {
-        categories.value[index] = { ...formData } as Category
-      }
+      const categoryId = editingCategory.value._id || editingCategory.value.id
+      await categoryApi.updateCategory(String(categoryId), categoryData)
       showSuccess('Category updated successfully')
     } else {
-      const newCategory: Category = {
-        ...formData,
-        id: Math.max(...categories.value.map((c) => c.id), 0) + 1,
-      } as Category
-      categories.value.unshift(newCategory)
+      await categoryApi.createCategory(categoryData)
       showSuccess('Category added successfully')
     }
 
     closeModal()
-  } catch (error) {
-    showError('Failed to save category')
+    loadCategories()
+  } catch (error: any) {
+    showError(error.message || 'Failed to save category')
   } finally {
     isSubmitting.value = false
   }
@@ -277,17 +402,37 @@ const deleteCategory = async () => {
   if (!categoryToDelete.value) return
 
   try {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 300))
-
-    categories.value = categories.value.filter((c) => c.id !== categoryToDelete.value!.id)
+    const categoryId = categoryToDelete.value._id || categoryToDelete.value.id
+    await categoryApi.deleteCategory(String(categoryId))
     showSuccess('Category deleted successfully')
     showDeleteModal.value = false
     categoryToDelete.value = null
-  } catch (error) {
-    showError('Failed to delete category')
+    loadCategories()
+  } catch (error: any) {
+    showError(error.message || 'Failed to delete category')
   }
 }
+
+// Helper functions
+const getCategoryName = (category: any): string => {
+  if (!category) return 'N/A'
+  if (typeof category === 'string') {
+    const cat = allCategories.value.find((c) => (c._id || c.id) === category)
+    return cat?.name || category
+  }
+  return category.name || 'N/A'
+}
+
+const getCategoryImageUrl = (category: Category): string => {
+  if (!category.image) return ''
+  if (category.image.startsWith('http')) return category.image
+  return `http://localhost:5000/uploads/categories/${category.image}`
+}
+
+// Initialize
+onMounted(() => {
+  loadCategories()
+})
 </script>
 
 <style scoped>
@@ -369,7 +514,6 @@ const deleteCategory = async () => {
   border-radius: 5px;
   border: 1px dashed #d3d3d3;
   background: #fff;
-
   position: relative;
   overflow: hidden;
   padding: 0;
@@ -384,6 +528,16 @@ const deleteCategory = async () => {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.category-image-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: #d3d3d3;
 }
 
 .category-content {
@@ -470,5 +624,10 @@ const deleteCategory = async () => {
   font-size: 14px;
   line-height: 1.5;
   margin: 0;
+}
+
+.badge-sm {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
 }
 </style>
