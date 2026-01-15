@@ -2,10 +2,7 @@
   <div class="login-container d-flex min-vh-100">
     <!-- Left Side - Image -->
     <div class="login-image-section d-none d-lg-flex">
-      <img
-        src="@/assets/image/pfp.png"
-        alt="Access Image"
-      >
+      <img src="@/assets/image/pfp.png" alt="Access Image" />
     </div>
 
     <!-- Right Side - Form -->
@@ -16,22 +13,36 @@
           <p class="login-subtitle">Sign in to continue shopping</p>
         </div>
 
-        <form @submit.prevent="handSignin" class="login-form">
+        <!-- Error Message -->
+        <div v-if="errorMessage" class="alert alert-danger mb-4" role="alert">
+          <i class="bi bi-exclamation-circle me-2"></i>
+          {{ errorMessage }}
+        </div>
+
+        <!-- Success Message -->
+        <div v-if="successMessage" class="alert alert-success mb-4" role="alert">
+          <i class="bi bi-check-circle me-2"></i>
+          {{ successMessage }}
+        </div>
+
+        <form @submit.prevent="handleSignin" class="login-form">
           <!-- Email Input -->
           <div class="form-group mb-4">
             <label class="form-label">Email Address</label>
             <div class="input-group-custom">
               <span class="input-icon">
-                <i class="fas fa-envelope"></i>
+                <i class="bi bi-envelope"></i>
               </span>
               <input
                 type="email"
                 placeholder="Enter your email"
                 v-model="email"
-                class="form-control form-control-custom"
+                :class="['form-control form-control-custom', { 'is-invalid': errors.email }]"
                 required
+                @blur="validateEmail"
               />
             </div>
+            <small v-if="errors.email" class="text-danger">{{ errors.email }}</small>
           </div>
 
           <!-- Password Input -->
@@ -39,19 +50,21 @@
             <label class="form-label">Password</label>
             <div class="input-group-custom">
               <span class="input-icon">
-                <i class="fas fa-lock"></i>
+                <i class="bi bi-lock"></i>
               </span>
               <input
                 placeholder="Enter your password"
                 :type="showPassword ? 'text' : 'password'"
                 v-model="password"
-                class="form-control form-control-custom"
+                :class="['form-control form-control-custom', { 'is-invalid': errors.password }]"
                 required
+                @blur="validatePassword"
               />
               <span class="input-icon-right" @click="togglePassword">
-                <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                <i :class="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
               </span>
             </div>
+            <small v-if="errors.password" class="text-danger">{{ errors.password }}</small>
           </div>
 
           <!-- Forgot Password -->
@@ -64,7 +77,7 @@
           <!-- Sign In Button -->
           <button type="submit" class="btn btn-signin w-100 mb-4" :disabled="isLoading">
             <span class="btn-text">{{ isLoading ? 'Signing In...' : 'Sign In' }}</span>
-            <i class="fas fa-arrow-right ms-2" v-if="!isLoading"></i>
+            <i class="bi bi-arrow-right ms-2" v-if="!isLoading"></i>
             <span class="spinner-border spinner-border-sm ms-2" v-if="isLoading"></span>
           </button>
 
@@ -72,9 +85,7 @@
           <div class="text-center">
             <p class="signup-text">
               Don't have an account?
-              <router-link to="/signup" class="signup-link">
-                Sign Up
-              </router-link>
+              <router-link to="/signup" class="signup-link"> Sign Up </router-link>
             </p>
           </div>
 
@@ -85,12 +96,12 @@
 
           <!-- Social Login -->
           <div class="social-login d-flex gap-3">
-            <button type="button" class="btn btn-social flex-fill">
-              <i class="fab fa-google me-2"></i>
+            <button type="button" class="btn btn-social flex-fill" disabled>
+              <i class="bi bi-google me-2"></i>
               Google
             </button>
-            <button type="button" class="btn btn-social flex-fill">
-              <i class="fab fa-facebook me-2"></i>
+            <button type="button" class="btn btn-social flex-fill" disabled>
+              <i class="bi bi-facebook me-2"></i>
               Facebook
             </button>
           </div>
@@ -100,85 +111,104 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { authenticateUser } from '@/data/users'
+import { useAuthApi } from '@/composables/useAuthApi'
 
-export default {
-  name: 'SignIn',
-  setup() {
-    const router = useRouter()
-    const authStore = useAuthStore()
+const router = useRouter()
+const authStore = useAuthStore()
+const authApi = useAuthApi()
 
-    const email = ref('')
-    const password = ref('')
-    const showPassword = ref(false)
-    const isLoading = ref(false)
+const email = ref('')
+const password = ref('')
+const showPassword = ref(false)
+const isLoading = ref(false)
+const errorMessage = ref('')
+const successMessage = ref('')
+const errors = ref<{ email?: string; password?: string }>({})
 
-    const togglePassword = () => {
-      showPassword.value = !showPassword.value
-    }
+const togglePassword = () => {
+  showPassword.value = !showPassword.value
+}
 
-    const handSignin = async () => {
-      if (!email.value || !password.value) {
-        alert('Please fill in all fields')
-        return
-      }
+const validateEmail = () => {
+  if (!email.value) {
+    errors.value.email = 'Email is required'
+    return false
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!emailRegex.test(email.value)) {
+    errors.value.email = 'Please enter a valid email address'
+    return false
+  }
+  delete errors.value.email
+  return true
+}
 
-      isLoading.value = true
+const validatePassword = () => {
+  if (!password.value) {
+    errors.value.password = 'Password is required'
+    return false
+  }
+  if (password.value.length < 6) {
+    errors.value.password = 'Password must be at least 6 characters'
+    return false
+  }
+  delete errors.value.password
+  return true
+}
 
-      try {
-        // Authenticate user with actual credentials
-        const user = authenticateUser(email.value, password.value)
+const handleSignin = async () => {
+  // Clear previous messages
+  errorMessage.value = ''
+  successMessage.value = ''
+  errors.value = {}
 
-        if (!user) {
-          alert('Invalid email or password')
-          isLoading.value = false
-          return
-        }
+  // Validate form
+  const isEmailValid = validateEmail()
+  const isPasswordValid = validatePassword()
 
-        // Create user data for auth store
-        const userData = {
-          id: user.id,
-          email: user.email,
-          username: user.username,
-          fullName: user.fullName,
-          role: user.role,
-          password: user.password,
-          createdAt: user.createdAt
-        }
+  if (!isEmailValid || !isPasswordValid) {
+    errorMessage.value = 'Please fix the errors in the form'
+    return
+  }
 
-        // Login with auth store (token would come from backend API)
-        const token = `jwt-token-${user.id}-${Date.now()}`
-        authStore.login(token, userData, user.role)
+  isLoading.value = true
 
-        // Show success message
-        alert(`Welcome back, ${user.fullName}!`)
+  try {
+    const response = await authApi.login({
+      email: email.value.trim().toLowerCase(),
+      password: password.value,
+    })
 
-        // Redirect based on role
-        if (user.role === 'admin') {
+    if (response?.user) {
+      // Update auth store
+      await authStore.login({
+        id: response.user.id,
+        name: response.user.name,
+        email: response.user.email,
+        role: response.user.role === 'admin' ? 'admin' : 'user',
+        phone: response.user.phone,
+        avatar: response.user.avatar,
+      })
+
+      successMessage.value = `Welcome back, ${response.user.name}!`
+
+      // Redirect based on role
+      setTimeout(() => {
+        if (response.user.role === 'admin') {
           router.push('/admin')
         } else {
           router.push('/')
         }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error) {
-        alert('Login failed. Please try again.')
-      } finally {
-        isLoading.value = false
-      }
+      }, 1000)
     }
-
-    return {
-      email,
-      password,
-      showPassword,
-      isLoading,
-      togglePassword,
-      handSignin
-    }
+  } catch (error: any) {
+    errorMessage.value = error.message || authApi.error.value || 'Login failed. Please try again.'
+  } finally {
+    isLoading.value = false
   }
 }
 </script>
@@ -270,6 +300,10 @@ export default {
   outline: none;
 }
 
+.form-control-custom.is-invalid {
+  border-color: #dc3545;
+}
+
 .input-icon {
   position: absolute;
   left: 1rem;
@@ -329,13 +363,18 @@ export default {
   font-family: 'Quicksand', sans-serif;
 }
 
-.btn-signin:hover {
+.btn-signin:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
 }
 
-.btn-signin:active {
+.btn-signin:active:not(:disabled) {
   transform: translateY(0);
+}
+
+.btn-signin:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .btn-signin .btn-text {
@@ -414,15 +453,20 @@ export default {
   font-size: 1.2rem;
 }
 
-.btn-social:hover {
+.btn-social:hover:not(:disabled) {
   border-color: var(--main-color2, #007bff);
   color: var(--main-color2, #007bff);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.btn-social:active {
+.btn-social:active:not(:disabled) {
   transform: translateY(0);
+}
+
+.btn-social:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Responsive Styles */
