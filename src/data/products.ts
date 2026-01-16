@@ -1,15 +1,16 @@
 import type { Product, Category } from '@/types/product'
 
 export const categories: Category[] = [
-  { id: 1, name: 'Notebooks' },
-  { id: 2, name: 'Pens' },
-  { id: 3, name: 'Pencils' },
-  { id: 4, name: 'Paper' },
-  { id: 5, name: 'Sticky Notes' },
-  { id: 6, name: 'Folders & Files' },
-  { id: 7, name: 'Markers & Highlighters' },
-  { id: 8, name: 'Desk Accessories' },
+  { id: 1, name: 'Notebooks', image: '/images/notebooks/book1.jpg' },
+  { id: 2, name: 'Pens', image: '/images/pens&pencils/pen1.jpg' },
+  { id: 3, name: 'Pencils', image: '/images/pens&pencils/pen3.jpg' },
+  { id: 4, name: 'Paper', image: '/images/notebooks/book10.jpg' },
+  { id: 5, name: 'Sticky Notes', image: '/images/stickyNote/stick1.jpg' },
+  { id: 6, name: 'Folders & Files', image: '/images/officeSupplies/office1.jpg' },
+  { id: 7, name: 'Markers & Highlighters', image: '/images/pens&pencils/pen7.jpg' },
+  { id: 8, name: 'Desk Accessories', image: '/images/officeSupplies/office4.jpg' },
 ]
+
 
 export const products: Product[] = [
   {

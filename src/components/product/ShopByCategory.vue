@@ -43,28 +43,15 @@ interface CategoryCard {
 
 const router = useRouter()
 
-// Map each category to a specific image
-const categoryImageMap: Record<string, string> = {
-  'Notebooks': '/images/notebooks/book1.jpg',
-  'Pens': '/images/pens&pencils/pen1.jpg',
-  'Pencils': '/images/pens&pencils/pen3.jpg',
-  'Paper': '/images/notebooks/book10.jpg',
-  'Sticky Notes': '/images/stickyNote/stick1.jpg',
-  'Folders & Files': '/images/officeSupplies/office1.jpg',
-  'Markers & Highlighters': '/images/pens&pencils/pen7.jpg',
-  'Desk Accessories': '/images/officeSupplies/office4.jpg',
-}
-
 /**
- * Build category cards using:
- * - categories list
- * - categoryImageMap for image
+ * Build category cards directly from categories data
+ * (images are now included in the categories array)
  */
 const categoryCards = computed<CategoryCard[]>(() =>
   categories.map(category => ({
     id: category.id,
     name: category.name,
-    image: categoryImageMap[category.name] || '/images/placeholder.jpg',
+    image: category.image,
     slug: category.name.toLowerCase().replace(/\s+/g, '-'),
   }))
 )
