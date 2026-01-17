@@ -52,44 +52,41 @@ interface CategoryWithImage {
 const router = useRouter()
 const categoriesWithImages = ref<CategoryWithImage[]>([])
 
-// Category to image mapping
-const categoryImageMap: Record<string, string> = {
-  'Notebooks': '/images/notebooks/book1.jpg',
-  'Pens': '/images/pens&pencils/pen1.jpg',
-  'Pencils': '/images/pens&pencils/pen3.jpg',
-  'Paper': '/images/notebooks/book10.jpg',
-  'Sticky Notes': '/images/stickyNote/stick1.jpg',
-  'Folders & Files': '/images/officeSupplies/office1.jpg',
-  'Markers & Highlighters': '/images/pens&pencils/pen7.jpg',
-  'Desk Accessories': '/images/officeSupplies/office4.jpg',
+// Helper function to normalize category names for matching
+const normalizeCategory = (categoryName: string): string => {
+  return categoryName
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+// Helper function to check if categories match
+const categoriesMatch = (cat1: string, cat2: string): boolean => {
+  const normalized1 = normalizeCategory(cat1)
+  const normalized2 = normalizeCategory(cat2)
+  
+  return normalized1.includes(normalized2) || normalized2.includes(normalized1)
 }
 
 onMounted(() => {
-  // Map categories with images and product counts
+  // Map categories with images from products and product counts
   categoriesWithImages.value = categories.map(category => {
-    // Count products in this category (normalize category names for matching)
+    // Find the first product that matches this category
+    const matchingProduct = products.find(product => 
+      product.category && categoriesMatch(product.category, category.name)
+    )
+    
+    // Count products in this category
     const productCount = products.filter(product => {
-      const normalizedProductCategory = (product.category || '')
-        .toLowerCase()
-        .replace(/&/g, 'and')
-        .replace(/\s+/g, ' ')
-        .trim()
-      
-      const normalizedCategoryName = category.name
-        .toLowerCase()
-        .replace(/&/g, 'and')
-        .replace(/\s+/g, ' ')
-        .trim()
-      
-      // Check if product category includes the category name or vice versa
-      return normalizedProductCategory.includes(normalizedCategoryName) ||
-             normalizedCategoryName.includes(normalizedProductCategory)
+      return product.category && categoriesMatch(product.category, category.name)
     }).length
 
     return {
       id: category.id,
       name: category.name,
-      image: categoryImageMap[category.name] || '/images/notebooks/book1.jpg',
+      // Use the image from the first matching product, or fallback to category's default image
+      image: matchingProduct?.image || category.image || '/images/notebooks/book1.jpg',
       productCount
     }
   })

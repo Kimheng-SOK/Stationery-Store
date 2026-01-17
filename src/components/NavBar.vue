@@ -1,8 +1,8 @@
 <template>
-  <!-- ORIGINAL NAVBAR – untouched on desktop -->
+  <!-- NAVBAR with active states and cart integration -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3 sticky-top">
     <div class="container-fluid px-4" style="max-width: 1400px; margin: 0 auto">
-      <!-- Logo (still an image) -->
+      <!-- Logo -->
       <router-link to="/" class="navbar-brand d-flex align-items-center">
         <img
           src="/logo.png"
@@ -13,20 +13,44 @@
         <span class="fw-semibold fs-5">StationeryBox</span>
       </router-link>
 
-      <!-- Desktop content – exactly as original -->
+      <!-- Desktop content -->
       <div class="collapse navbar-collapse" id="navbarContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
           <li class="nav-item">
-            <router-link to="/shop" class="nav-link px-3">Shop All</router-link>
+            <router-link 
+              to="/shop" 
+              class="nav-link px-3"
+              active-class="active-nav-link"
+            >
+              Shop All
+            </router-link>
           </li>
           <li class="nav-item">
-            <router-link to="/new-arrival" class="nav-link px-3">New Arrival</router-link>
+            <router-link 
+              to="/new-arrival" 
+              class="nav-link px-3"
+              active-class="active-nav-link"
+            >
+              New Arrival
+            </router-link>
           </li>
           <li class="nav-item">
-            <router-link to="/categories" class="nav-link px-3">Categories</router-link>
+            <router-link 
+              to="/categories" 
+              class="nav-link px-3"
+              active-class="active-nav-link"
+            >
+              Categories
+            </router-link>
           </li>
           <li class="nav-item">
-            <router-link to="/hots" class="nav-link px-3">Hots</router-link>
+            <router-link 
+              to="/hots" 
+              class="nav-link px-3"
+              active-class="active-nav-link"
+            >
+              Hots
+            </router-link>
           </li>
         </ul>
 
@@ -62,10 +86,11 @@
             </router-link>
           </template>
 
-          <!-- Cart Icon -->
+          <!-- Cart Icon with dynamic count -->
           <router-link to="/cart" class="btn btn-link p-2 text-white border-0 position-relative">
             <i class="bi bi-cart3 fs-4"></i>
             <span
+              v-if="cartStore.totalItems > 0"
               class="position-absolute badge rounded-pill bg-danger"
               style="
                 font-size: 0.65rem;
@@ -76,7 +101,7 @@
                 padding: 2px 5px;
               "
             >
-              {{ CartNum }}
+              {{ cartStore.totalItems }}
             </span>
           </router-link>
         </div>
@@ -97,9 +122,10 @@
         </template>
 
         <!-- Cart -->
-        <button class="btn btn-link p-2 text-white border-0 position-relative">
+        <router-link to="/cart" class="btn btn-link p-2 text-white border-0 position-relative">
           <i class="bi bi-cart3"></i>
           <span
+            v-if="cartStore.totalItems > 0"
             class="position-absolute badge rounded-pill bg-danger"
             style="
               font-size: 0.65rem;
@@ -110,9 +136,9 @@
               padding: 2px 5px;
             "
           >
-            {{ CartNum }}
+            {{ cartStore.totalItems }}
           </span>
-        </button>
+        </router-link>
 
         <!-- Hamburger -->
         <button
@@ -155,62 +181,73 @@
 
       <!-- Menu items -->
       <div class="d-flex flex-column">
-        <router-link to="/shop" class="px-4 py-3 text-white text-decoration-none hover-bg"
-          >Shop All</router-link
+        <router-link 
+          to="/shop" 
+          class="px-4 py-3 text-white text-decoration-none hover-bg"
+          active-class="active-mobile-link"
         >
-        <router-link to="/new-arrival" class="px-4 py-3 text-white text-decoration-none hover-bg"
-          >New Arrival</router-link
+          Shop All
+        </router-link>
+        <router-link 
+          to="/new-arrival" 
+          class="px-4 py-3 text-white text-decoration-none hover-bg"
+          active-class="active-mobile-link"
         >
-        <router-link to="/categories" class="px-4 py-3 text-white text-decoration-none hover-bg"
-          >Categories</router-link
+          New Arrival
+        </router-link>
+        <router-link 
+          to="/categories" 
+          class="px-4 py-3 text-white text-decoration-none hover-bg"
+          active-class="active-mobile-link"
         >
-        <router-link to="/hots" class="px-4 py-3 text-white text-decoration-none hover-bg"
-          >Hots</router-link
+          Categories
+        </router-link>
+        <router-link 
+          to="/hots" 
+          class="px-4 py-3 text-white text-decoration-none hover-bg"
+          active-class="active-mobile-link"
         >
+          Hots
+        </router-link>
 
         <template v-if="authStore.isAuthenticated">
           <hr class="border-secondary mx-3">
-          <router-link to="/profile" class="px-4 py-3 text-white text-decoration-none hover-bg"
-            >Profile</router-link
+          <router-link 
+            to="/profile" 
+            class="px-4 py-3 text-white text-decoration-none hover-bg"
+            active-class="active-mobile-link"
           >
-          <router-link to="/orders" class="px-4 py-3 text-white text-decoration-none hover-bg"
-            >My Orders</router-link
+            Profile
+          </router-link>
+          <router-link 
+            to="/orders" 
+            class="px-4 py-3 text-white text-decoration-none hover-bg"
+            active-class="active-mobile-link"
           >
-          <a @click="handleLogout" class="px-4 py-3 text-danger text-decoration-none hover-bg" style="cursor: pointer"
-            >Logout</a
-          >
+            My Orders
+          </router-link>
+          <a @click="handleLogout" class="px-4 py-3 text-danger text-decoration-none hover-bg" style="cursor: pointer">
+            Logout
+          </a>
         </template>
       </div>
     </div>
   </div>
 </template>
 
-<script lang="ts">
-// @ts-expect-error: no declaration file for .vue SFC; add proper shims (e.g. src/shims-vue.d.ts) to fix this properly
-import SearchBar from '../components/SearchBar.vue'
+<script setup lang="ts">
+import SearchBar from '@/components/SearchBar.vue'
 import { useAuthStore } from '@/stores/auth'
+import { useCartStore } from '@/stores/cartStore'
 import { useRouter } from 'vue-router'
 
-export default {
-  name: 'NavBar',
-  components: { SearchBar },
-  props: {
-    CartNum: { type: Number, default: 1 },
-  },
-  setup() {
-    const authStore = useAuthStore()
-    const router = useRouter()
+const authStore = useAuthStore()
+const cartStore = useCartStore()
+const router = useRouter()
 
-    const handleLogout = () => {
-      authStore.logout()
-      router.push('/signin')
-    }
-
-    return {
-      authStore,
-      handleLogout
-    }
-  }
+const handleLogout = () => {
+  authStore.logout()
+  router.push('/signin')
 }
 </script>
 
@@ -219,17 +256,74 @@ export default {
   background-color: #1e293b !important;
 }
 
+/* Default nav link styles */
 .nav-link {
-  color: white !important;
-  transition: opacity 0.2s;
+  color: rgba(255, 255, 255, 0.75) !important;
+  transition: all 0.3s ease;
+  position: relative;
+  font-weight: 500;
 }
-.nav-link:hover,
-.btn-link:hover {
-  opacity: 0.8;
+
+/* Hover effect - white color */
+.nav-link:hover {
+  color: white !important;
+}
+
+/* Active link - white with glow */
+.nav-link.active-nav-link {
+  color: white !important;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5),
+               0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+/* Add underline effect on active */
+.nav-link.active-nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 2px;
+  background: white;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
+}
+
+/* Mobile sidebar hover effect */
+.hover-bg {
+  transition: all 0.3s ease;
 }
 
 .hover-bg:hover {
   background-color: rgba(255, 255, 255, 0.1);
+  color: white !important;
+}
+
+/* Active mobile link */
+.active-mobile-link {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  color: white !important;
+  border-left: 3px solid white;
+  font-weight: 600;
+}
+
+/* Button hover effects */
+.btn-link:hover {
+  opacity: 0.8;
+}
+
+/* Cart badge animation */
+.badge {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 @media (min-width: 992px) {
