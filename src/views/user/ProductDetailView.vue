@@ -46,7 +46,7 @@
               </div>
             </div>
 
-            <!-- Thumbnail Images (if you have multiple images) -->
+            <!-- Thumbnail Images -->
             <div class="thumbnail-images d-flex gap-2">
               <img 
                 :src="product.image" 
@@ -144,9 +144,10 @@
               <button 
                 class="btn btn-primary btn-lg flex-grow-1"
                 @click="addToCart"
-                :disabled="!product.inStock"
+                :disabled="!product.inStock || addingToCart"
               >
-                <i class="bi bi-cart-plus"></i> Add to Cart
+                <i class="bi bi-cart-plus"></i> 
+                {{ addingToCart ? 'Adding...' : 'Add to Cart' }}
               </button>
               <button 
                 class="btn btn-outline-secondary btn-lg"
@@ -154,6 +155,17 @@
               >
                 <i :class="isInWishlist ? 'bi bi-heart-fill' : 'bi bi-heart'"></i>
               </button>
+            </div>
+
+            <!-- Success Message -->
+            <div v-if="showSuccessMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+              <i class="bi bi-check-circle-fill"></i>
+              {{ quantity }} {{ product.name }}(s) added to cart!
+              <button 
+                type="button" 
+                class="btn-close" 
+                @click="showSuccessMessage = false"
+              ></button>
             </div>
 
             <!-- Product Description -->
@@ -257,9 +269,11 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { Product } from '@/types/product'
 import { products } from '@/data/products'
+import { useCartStore } from '@/stores/cartStore'
 
 const route = useRoute()
 const router = useRouter()
+const cartStore = useCartStore()
 
 const product = ref<Product | null>(null)
 const loading = ref(true)
@@ -267,6 +281,8 @@ const error = ref<string | null>(null)
 const quantity = ref(1)
 const selectedImage = ref<string>('')
 const isInWishlist = ref(false)
+const addingToCart = ref(false)
+const showSuccessMessage = ref(false)
 
 // Related products based on category
 const relatedProducts = computed(() => {
@@ -285,7 +301,6 @@ const loadProduct = () => {
     loading.value = true
     const productId = Number(route.params.id)
     
-    // Find product from data
     const foundProduct = products.find(p => p.id === productId)
     
     if (foundProduct) {
@@ -314,16 +329,27 @@ const decreaseQuantity = () => {
   }
 }
 
-const addToCart = () => {
-  if (product.value) {
-    // TODO: Implement cart functionality
-    console.log('Adding to cart:', {
-      product: product.value,
-      quantity: quantity.value
-    })
+const addToCart = async () => {
+  if (!product.value || !product.value.inStock) return
+
+  try {
+    addingToCart.value = true
+    cartStore.addToCart(product.value, quantity.value)
     
     // Show success message
-    alert(`${quantity.value} ${product.value.name}(s) added to cart!`)
+    showSuccessMessage.value = true
+    setTimeout(() => {
+      showSuccessMessage.value = false
+    }, 3000)
+
+    // Reset quantity
+    quantity.value = 1
+  } catch (err) {
+    if (err instanceof Error) {
+      alert(err.message)
+    }
+  } finally {
+    addingToCart.value = false
   }
 }
 
@@ -337,9 +363,7 @@ const toggleWishlist = () => {
 
 const navigateToProduct = (productId: number) => {
   router.push({ name: 'ProductDetail', params: { id: productId } })
-  // Reload product data
   loadProduct()
-  // Scroll to top
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
