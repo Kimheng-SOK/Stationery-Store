@@ -84,18 +84,18 @@ const updateCustomer = async (req, res) => {
       });
     }
 
-    const updateDate = {};
-    if (name) updateDate.name = name;
-    if (email) updateDate.email = email;
-    if (phone !== undefined) updateDate.phone = phone;
-    if (avatar !== undefined) updateDate.avatar = avatar;
-    if (purchasedItems !== undefined) updateDate.purchasedItems = purchasedItems;
-    if (rewardPoints !== undefined) updateDate.rewardPoints = rewardPoints;
-    if (isActive !== undefined) updateDate.isActive = isActive;
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (email) updateData.email = email;
+    if (phone !== undefined) updateData.phone = phone;
+    if (avatar !== undefined) updateData.avatar = avatar;
+    if (purchasedItems !== undefined) updateData.purchasedItems = purchasedItems;
+    if (rewardPoints !== undefined) updateData.rewardPoints = rewardPoints;
+    if (isActive !== undefined) updateData.isActive = isActive;
     
     const updatedCustomer = await Customer.findByIdAndUpdate(
       req.params.id,
-      { $set: updateDate },
+      { $set: updateData },
       { new: true, runValidators: true }
     ).select('-password');
 

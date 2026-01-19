@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: [true, 'Email is required'],
+      sparse: true,
       unique: true,
       lowercase: true,
       trim: true,
@@ -30,6 +30,8 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
+      unique: true,
+      sparse: true,
       trim: true
     },
     avatar: {
@@ -58,6 +60,13 @@ const userSchema = new mongoose.Schema(
     timestamps: true // Automatically adds createdAt and updatedAt fields
   }
 );
+
+userSchema.pre('save', async function(next) {
+  if (!this.email && !this.phone) {
+    return next(new Error('Either email or phone number must be provided'));
+  }
+  next();
+});
 
 // Hash password before saving
 userSchema.pre('save', async function(next) {

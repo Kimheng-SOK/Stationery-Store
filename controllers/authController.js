@@ -25,10 +25,32 @@ const signup = async (req, res) => {
     const { name, email, password, phone, role } = req.body;
 
     // Validate required fields
-    if (!name || !email || !password) {
+    if (!name || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Name, email, and password are required'
+        message: 'Name and password are required'
+      });
+    }
+
+    if (!email && !phone) {
+      return res.status(400).json({
+        success: false,
+        message: 'Either email or phone number must be provided'
+      });
+    }
+
+    // Validate email format
+    if (email && !isValidEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid email address'
+      });
+    }
+
+    if (phone && !isValidPhone(phone)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a valid phone number'
       });
     }
 
@@ -47,14 +69,6 @@ const signup = async (req, res) => {
       });
     }
 
-    // Validate email format
-    if (!isValidEmail(email)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide a valid email address'
-      });
-    }
-
     // Validate password strength
     if (!isValidPassword(password)) {
       return res.status(400).json({
@@ -62,26 +76,24 @@ const signup = async (req, res) => {
         message: 'Password must be at least 6 characters long'
       });
     }
-
-    // Validate phone number
-    if (phone && !isValidPhone(phone)) {
+    
+    // Check if user already exists
+    const existingUser = await User.findOne({
+      $or: [
+        { email: email ? email.toLowerCase().trim() : null },
+        { phone: phone ? phone.trim() : null }
+      ].filter(Boolean)
+    });
+    
+    if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide a valid phone number'
+        message: 'User with the provided email or phone number already exists'
       });
     }
 
     // Prevent role manipulation (only allow 'customer' for signup)
     const userRole = role === 'admin' ? 'customer' : (role || 'customer');
-
-    // Check if user already exists
-    const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
-    if (existingUser) {
-      return res.status(400).json({
-        success: false,
-        message: 'User with this email already exists'
-      });
-    }
 
     // Create user (password will be hashed automatically by pre-save hook)
     const user = await User.create({
@@ -132,26 +144,23 @@ const signup = async (req, res) => {
 // @access  Public
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { emailOrPhone, password } = req.body;
 
     // Validate required fields
-    if (!email || !password) {
+    if (!emailOrPhone || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Email and password are required'
+        message: 'Email/Phone and password are required'
       });
     }
 
-    // Validate email format
-    if (!isValidEmail(email)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide a valid email address'
-      });
-    }
-
-    // Find user and include password field (password is excluded by default)
-    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
+     // Find user by email or phone
+     const user = await User.findOne({
+      $or: [
+        { email: emailOrPhone.toLowerCase().trim() },
+        { phone: emailOrPhone.trim()}
+      ]
+    }).select('+password');
 
     if (!user) {
       return res.status(401).json({
