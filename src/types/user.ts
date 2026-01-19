@@ -1,9 +1,10 @@
 export interface User {
-  id: number
-  username: string
+  id: string
+  name: string
   email: string
-  password: string
-  role: 'admin' | 'user'
-  fullName: string
-  createdAt: string
+  role: 'admin' | 'user' | 'customer'
+  phone?: string
+  avatar?: string
+  lastLogin?: string
+  createdAt?: string
 }

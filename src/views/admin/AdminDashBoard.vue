@@ -103,7 +103,7 @@ import { customers } from '@/data/customers'
 const stats = [
   { icon: 'bi-people-fill', bg: 'bg-danger', value: '5,583', label: 'Customers' },
   { icon: 'bi-bag-check', bg: 'bg-primary', value: '539', label: 'Order' },
-  { icon: 'bi-truck', bg: 'bg-pink', value: '105', label: 'Delivery Partners' },
+  { icon: 'bi-truck', bg: 'bg-pink', value: '105', label: '' },
   { icon: 'bi-currency-dollar', bg: 'bg-warning', value: '20,835', label: 'Revenue' },
 ]
 </script>
