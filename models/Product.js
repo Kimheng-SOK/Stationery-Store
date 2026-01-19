@@ -18,11 +18,11 @@ const productSchema = new mongoose.Schema(
     },
     price: {
       type: Number,
-      required: [true, 'Product price is required'],
       min: [0, 'Price cannot be negative']
     },
     originalPrice: {
       type: Number,
+      required: [true, 'Product original price is required'],
       min: [0, 'Original price cannot be negative']
     },
     discount: {
@@ -37,7 +37,7 @@ const productSchema = new mongoose.Schema(
     },
     isNew: {
       type: Boolean,
-      default: false
+      default: true
     },
     inStock: {
       type: Boolean,
@@ -69,13 +69,15 @@ const productSchema = new mongoose.Schema(
       min: [0, 'Rating cannot be negative'],
       max: [5, 'Rating cannot exceed 5']
     },
-    image: {
-      type: String,
-      default: null // Filename of the uploaded image
-    },
     images: {
       type: [String],
-      default: [] // Array of image filenames for multiple images
+      required: [true, 'At least one product image is required'],
+      validate: {
+        validator: function(v) {
+          return v && v.length > 0;
+        },
+        message: 'At least one product image is required'
+      }
     },
     description: {
       type: String,
@@ -95,6 +97,12 @@ const productSchema = new mongoose.Schema(
 );
 
 // Indexes for better query performance
+productSchema.pre('save', function(next) {
+  if (this.originalPrice && this.discount) {
+    this.price = this.originalPrice * (1 - this.discount / 100);
+  }
+  next();
+});
 productSchema.index({ name: 'text', description: 'text' }); // Text search index
 productSchema.index({ price: 1 }); // For price sorting
 productSchema.index({ stock: 1 }); // For stock sorting

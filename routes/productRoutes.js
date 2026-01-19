@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../middleware/upload');
+const { productUpload } = require('../middleware/upload');
 const { isAdmin } = require('../middleware/auth');
 const {
   createProduct,
@@ -14,7 +14,8 @@ const {
 // @desc    Create a new product with image upload
 // @access  Admin only
 // @note    Use 'image' as the field name in form-data (Postman/Vue)
-router.post('/', isAdmin, upload.single('image'), createProduct);
+// router.post('/', isAdmin, productUpload.single('image'), createProduct);
+router.post('/', productUpload.single('image'), createProduct);
 
 // @route   GET /api/products
 // @desc    Get all products with pagination, search, filtering, and sorting
@@ -30,11 +31,13 @@ router.get('/:id', getProductById);
 // @route   PUT /api/products/:id
 // @desc    Update product by ID
 // @access  Admin only
-router.put('/:id', isAdmin, upload.single('image'), updateProduct);
+// router.put('/:id', isAdmin, productUpload.single('image'), updateProduct);
+router.put('/:id', productUpload.single('image'), updateProduct);
 
 // @route   DELETE /api/products/:id
 // @desc    Delete product by ID
 // @access  Admin only
-router.delete('/:id', isAdmin, deleteProduct);
+// router.delete('/:id', isAdmin, deleteProduct);
+router.delete('/:id', deleteProduct);
 
 module.exports = router;

@@ -1,4 +1,4 @@
-const Product = require('../models/Product');
+ const Product = require('../models/Product');
 const Category = require('../models/Category');
 const path = require('path');
 const fs = require('fs');
@@ -11,7 +11,6 @@ const createProduct = async (req, res) => {
     const { 
       name, 
       sku, 
-      price, 
       stock, 
       originalPrice, 
       discount, 
@@ -25,10 +24,10 @@ const createProduct = async (req, res) => {
     } = req.body;
 
     // Validate required fields
-    if (!name || !price || !sku || !category) {
+    if (!name || !originalPrice || !sku || !category) {
       return res.status(400).json({
         success: false,
-        message: 'Name, SKU, price, and category are required fields'
+        message: 'Name, SKU, original price, and category are required fields'
       });
     }
 
@@ -51,13 +50,20 @@ const createProduct = async (req, res) => {
     }
 
     // Check if image was uploaded
-    const imageFilename = req.file ? req.file.filename : null;
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'Product image is required'
+      });
+    }
+
+    // Check if image was uploaded
+    const images = req.file ? [req.file.filename] : [];
 
     // Create product
     const product = await Product.create({
       name,
       sku: sku.toUpperCase(),
-      price: parseFloat(price),
       stock: stock ? parseInt(stock) : 0,
       originalPrice: originalPrice ? parseFloat(originalPrice) : undefined,
       discount: discount ? parseFloat(discount) : undefined,
@@ -66,7 +72,7 @@ const createProduct = async (req, res) => {
       isNew: isNew === 'true' || isNew === true,
       inStock: inStock !== 'false' && inStock !== false,
       rating: rating ? parseFloat(rating) : 0,
-      image: imageFilename,
+      images: images,
       description: description || undefined,
       status: status || 'active'
     });
@@ -256,14 +262,16 @@ const updateProduct = async (req, res) => {
 
     // Handle image update
     if (req.file) {
-      // Delete old image if exists
-      if (product.image) {
-        const oldImagePath = path.join(__dirname, '../uploads/products', product.image);
-        if (fs.existsSync(oldImagePath)) {
-          fs.unlinkSync(oldImagePath);
-        }
+      // Delete old images if they exist
+      if (product.images && product.images.length > 0) {
+        product.images.forEach(img => {
+          const oldImagePath = path.join(__dirname, '../uploads/products', img);
+          if (fs.existsSync(oldImagePath)) {
+            fs.unlinkSync(oldImagePath);
+          }
+        });
       }
-      req.body.image = req.file.filename;
+      req.body.images = [req.file.filename]; // Changed from 'image' to 'images'
     }
 
     // Update product
@@ -307,12 +315,14 @@ const deleteProduct = async (req, res) => {
       });
     }
 
-    // Delete associated image if exists
-    if (product.image) {
-      const imagePath = path.join(__dirname, '../uploads/products', product.image);
-      if (fs.existsSync(imagePath)) {
-        fs.unlinkSync(imagePath);
-      }
+    // Delete associated images if they exist
+    if (product.images && product.images.length > 0) {
+      product.images.forEach(img => {
+        const imagePath = path.join(__dirname, '../uploads/products', img);
+        if (fs.existsSync(imagePath)) {
+          fs.unlinkSync(imagePath);
+        }
+      });
     }
 
     await Product.findByIdAndDelete(req.params.id);
