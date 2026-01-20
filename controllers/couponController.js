@@ -5,21 +5,50 @@ const Coupon = require('../models/Coupon');
 // @access  Public
 const createCoupon = async (req, res) => {
   try {
-    const { code, discount, description, startDate, endDate, status, usageLimit } = req.body;
+    const { code, discount, description, startDate, validityDays, status, usageLimit } = req.body;
 
-    if (!code || discount === undefined) {
+    if (!code || discount === undefined || validityDays === undefined) {
       return res.status(400).json({
         success: false,
-        message: 'Coupon code and discount are required'
+        message: 'Coupon code, discount, and validity days are required'
       });
     }
 
+    const discountNum = parseFloat(discount);
+    if (discountNum < 0 || discountNum > 100) {
+      return res.status(400).json({
+        success: false,
+        message: 'Discount must be between 0 and 100'
+      });
+    }
+
+    const daysNum = parseInt(validityDays);
+    if (daysNum < 1) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validity days must be at least 1 day'
+      });
+    }
+
+    const existingCoupon = await Coupon.findOne({ code: code.toUpperCase()});
+    if (existingCoupon) {
+      return res.status(400).json({
+        success: false,
+        message: 'Coupon code already exists'
+      });
+    }
+    
+    const start = startDate ? new Date(startDate) : new Date();
+    const end = new Date(start);
+    end.setDate(end.getDate() + daysNum);
+
     const coupon = await Coupon.create({
-      code: code.toUpperCase(),
-      discount: parseFloat(discount),
+      code: code.toUpperCase(), 
+      discount: discountNum,
       description: description || null,
-      startDate: startDate ? new Date(startDate) : new Date(),
-      endDate: endDate ? new Date(endDate) : null,
+      startDate: start,
+      endDate: end,
+      validityDays: daysNum,
       status: status || 'active',
       usageLimit: usageLimit ? parseInt(usageLimit) : null
     });
@@ -103,8 +132,17 @@ const getCouponByCode = async (req, res) => {
       });
     }
 
+    const now = new Date();
+
+    if (coupon.startDate && now < coupon.startDate) {
+      return res.status(400).json({
+        success: false,
+        message: 'Coupon is not yet active'
+      })
+    }
+
     // Check if coupon is expired
-    if (coupon.endDate && new Date() > coupon.endDate) {
+    if (coupon.endDate && now > coupon.endDate) {
       await Coupon.findByIdAndUpdate(coupon._id, { status: 'expired' });
       return res.status(400).json({
         success: false,
@@ -146,8 +184,48 @@ const getCouponByCode = async (req, res) => {
 // @access  Public
 const updateCoupon = async (req, res) => {
   try {
+    // Uppercase code if provided
     if (req.body.code) {
       req.body.code = req.body.code.toUpperCase();
+    }
+
+    // Get existing coupon first
+    const existingCoupon = await Coupon.findById(req.params.id);
+    if (!existingCoupon) {
+      return res.status(404).json({
+        success: false,
+        message: 'Coupon not found'
+      });
+    }
+
+    // Recalculate endDate if startDate or validityDays changed
+    const newStartDate = req.body.startDate ? new Date(req.body.startDate) : existingCoupon.startDate;
+    const newValidityDays = req.body.validityDays !== undefined ? parseInt(req.body.validityDays) : existingCoupon.validityDays;
+    
+    if (req.body.startDate || req.body.validityDays !== undefined) {
+      const end = new Date(newStartDate);
+      end.setDate(end.getDate() + newValidityDays);
+      req.body.endDate = end;
+    }
+
+    // Validate discount if provided
+    if (req.body.discount !== undefined) {
+      const discountNum = parseFloat(req.body.discount);
+      if (discountNum < 0 || discountNum > 100) {
+        return res.status(400).json({
+          success: false,
+          message: 'Discount must be between 0 and 100'
+        });
+      }
+      req.body.discount = discountNum;
+    }
+
+    // Validate validityDays if provided
+    if (req.body.validityDays !== undefined && newValidityDays < 1) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validity days must be at least 1'
+      });
     }
 
     const coupon = await Coupon.findByIdAndUpdate(
@@ -155,13 +233,6 @@ const updateCoupon = async (req, res) => {
       req.body,
       { new: true, runValidators: true }
     );
-
-    if (!coupon) {
-      return res.status(404).json({
-        success: false,
-        message: 'Coupon not found'
-      });
-    }
 
     res.status(200).json({
       success: true,

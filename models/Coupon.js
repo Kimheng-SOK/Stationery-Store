@@ -23,7 +23,13 @@ const couponSchema = new mongoose.Schema(
     },
     startDate: {
       type: Date,
+      required: [true, 'Start date is required'],
       default: Date.now
+    },
+    validityDays: {
+      type: Number,
+      required: [true, 'Validity days are required'],
+      min: [1, 'Validity days must be at least 1 day']
     },
     endDate: {
       type: Date
@@ -44,9 +50,19 @@ const couponSchema = new mongoose.Schema(
     }
   },
   {
-    timestamps: true // Automatically adds createdAt and updatedAt fields
+    timestamps: true
   }
 );
+
+couponSchema.pre('save', function (next) {
+  if (this.startDate && this.validityDays) {
+    const end = new Date(this.startDate);
+    end.setDate(end.getDate() + this.validityDays);
+    this.endDate = end;
+  }
+  next();
+});
+
 
 // Create and export the Coupon model
 const Coupon = mongoose.model('Coupon', couponSchema);
