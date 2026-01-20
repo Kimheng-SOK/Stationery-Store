@@ -4,57 +4,36 @@
  */
 
 import { ref } from 'vue'
-import { apiGet, apiPost, apiPut, apiDelete, type ApiResponse } from '@/services/api'
+import axios from 'axios'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 export interface Category {
-  _id: string
+  id: number
   name: string
-  slug?: string
   description?: string
   image?: string
-  parent?: Category | string | null
-  children?: Category[]
-  isActive?: boolean
-  order?: number
-  productCount?: number
   createdAt?: string
   updatedAt?: string
 }
 
-interface CategoryFilters {
-  parent?: string
-  isActive?: boolean
-  nested?: boolean
-  includeProducts?: boolean
-}
-
-interface CategoryResponse {
-  data: Category[]
-  count?: number
-}
-
-export function useCategoryApi() {
+export const useCategoryApi = () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const categories = ref<Category[]>([])
 
   /**
-   * Get all categories with optional filters
+   * Fetch all categories
    */
-  const getCategories = async (filters: CategoryFilters = {}) => {
+  const fetchCategories = async () => {
     loading.value = true
     error.value = null
-
     try {
-      const queryParams: Record<string, string> = {}
-      if (filters.parent !== undefined) queryParams.parent = filters.parent
-      if (filters.isActive !== undefined) queryParams.isActive = String(filters.isActive)
-      if (filters.nested !== undefined) queryParams.nested = String(filters.nested)
-      if (filters.includeProducts !== undefined) queryParams.includeProducts = String(filters.includeProducts)
-
-      const response = await apiGet<CategoryResponse>('/categories', queryParams)
-      return response
+      const response = await axios.get(`${API_URL}/categories`)
+      categories.value = response.data
+      return response.data
     } catch (err: any) {
-      error.value = err.message || 'Failed to fetch categories'
+      error.value = err.response?.data?.message || 'Failed to fetch categories'
       throw err
     } finally {
       loading.value = false
@@ -64,15 +43,14 @@ export function useCategoryApi() {
   /**
    * Get single category by ID
    */
-  const getCategory = async (id: string) => {
+  const getCategoryById = async (id: number) => {
     loading.value = true
     error.value = null
-
     try {
-      const response = await apiGet<{ data: Category }>(`/categories/${id}`)
+      const response = await axios.get(`${API_URL}/categories/${id}`)
       return response.data
     } catch (err: any) {
-      error.value = err.message || 'Failed to fetch category'
+      error.value = err.response?.data?.message || 'Failed to fetch category'
       throw err
     } finally {
       loading.value = false
@@ -82,15 +60,19 @@ export function useCategoryApi() {
   /**
    * Create new category
    */
-  const createCategory = async (categoryData: Partial<Category>) => {
+  const createCategory = async (formData: FormData) => {
     loading.value = true
     error.value = null
-
     try {
-      const response = await apiPost<{ data: Category }>('/categories', categoryData)
+      const response = await axios.post(`${API_URL}/categories`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      await fetchCategories() // Refresh the list
       return response.data
     } catch (err: any) {
-      error.value = err.message || 'Failed to create category'
+      error.value = err.response?.data?.message || 'Failed to create category'
       throw err
     } finally {
       loading.value = false
@@ -100,15 +82,19 @@ export function useCategoryApi() {
   /**
    * Update category
    */
-  const updateCategory = async (id: string, categoryData: Partial<Category>) => {
+  const updateCategory = async (id: number, formData: FormData) => {
     loading.value = true
     error.value = null
-
     try {
-      const response = await apiPut<{ data: Category }>(`/categories/${id}`, categoryData)
+      const response = await axios.put(`${API_URL}/categories/${id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+      await fetchCategories() // Refresh the list
       return response.data
     } catch (err: any) {
-      error.value = err.message || 'Failed to update category'
+      error.value = err.response?.data?.message || 'Failed to update category'
       throw err
     } finally {
       loading.value = false
@@ -118,14 +104,15 @@ export function useCategoryApi() {
   /**
    * Delete category
    */
-  const deleteCategory = async (id: string) => {
+  const deleteCategory = async (id: number) => {
     loading.value = true
     error.value = null
-
     try {
-      await apiDelete(`/categories/${id}`)
+      const response = await axios.delete(`${API_URL}/categories/${id}`)
+      await fetchCategories() // Refresh the list
+      return response.data
     } catch (err: any) {
-      error.value = err.message || 'Failed to delete category'
+      error.value = err.response?.data?.message || 'Failed to delete category'
       throw err
     } finally {
       loading.value = false
@@ -135,8 +122,9 @@ export function useCategoryApi() {
   return {
     loading,
     error,
-    getCategories,
-    getCategory,
+    categories,
+    fetchCategories,
+    getCategoryById,
     createCategory,
     updateCategory,
     deleteCategory,
