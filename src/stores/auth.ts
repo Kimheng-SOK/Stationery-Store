@@ -29,7 +29,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function initializeAuth() {
     if (isInitialized.value) return
-    
+
     try {
       const response = await authApi.getCurrentUser()
       if (response?.user) {
@@ -73,6 +73,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     isAdmin,
     isUser,
+    isInitialized,
     login,
     logout,
     initializeAuth,

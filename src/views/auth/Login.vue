@@ -28,10 +28,10 @@
         <form @submit.prevent="handleSignin" class="login-form">
           <!-- Email/Phone Input -->
           <div class="form-group mb-4">
-            <label class="form-label">Email or Phone</label> <!-- Changed label -->
+            <label class="form-label">Email or Phone</label>
             <div class="input-group-custom">
               <span class="input-icon">
-                <i class="bi bi-envelope"></i> <!-- or use bi-person -->
+                <i class="bi bi-envelope"></i>
               </span>
               <input
                 type="text"
