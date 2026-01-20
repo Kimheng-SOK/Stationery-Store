@@ -12,7 +12,9 @@ const app = express();
 // CORS configuration - allow credentials for cookies
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173', // Vue.js default port
-  credentials: true // Allow cookies to be sent
+  credentials: true, // Allow cookies to be sent
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json()); // Parse JSON bodies
@@ -26,10 +28,11 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production (HTTPS)
+    secure: false,
     httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' // CSRF protection
+    sameSite: 'lax',
+    path: '/'
   }
 }));
 

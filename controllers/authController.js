@@ -144,6 +144,7 @@ const signup = async (req, res) => {
 // @access  Public
 const login = async (req, res) => {
   try {
+    console.log('Login request body:', req.body);
     const { emailOrPhone, password } = req.body;
 
     // Validate required fields
