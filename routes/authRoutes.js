@@ -30,7 +30,7 @@ router.post('/login', login);
 // @route   POST /api/auth/logout
 // @desc    Logout user
 // @access  Private
-router.post('/logout', isAuthenticated, logout);
+router.post('/logout', logout);
 
 // @route   GET /api/auth/me
 // @desc    Get current user session
