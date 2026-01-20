@@ -1,8 +1,6 @@
 import ClientAdminLayout from '../layouts/ClientLayout.vue'
 import ShopView from '../views/user/ShopView.vue'
 import NewArrivalView from '../views/user/NewArrivalView.vue'
-import ShopByCategory from '@/components/product/ShopByCategory.vue'
-import PopularProduct from '@/components/product/PopularProduct.vue'
 import HomePageView from '@/views/user/HomePageView.vue'
 import Privacy from '@/views/user/Privacy.vue'
 import TermCondition from '@/views/user/TermCondition.vue'
@@ -12,6 +10,7 @@ import EmptyProduct from '@/views/user/EmptyProduct.vue'
 import ProductDetailView from '@/views/user/ProductDetailView.vue'
 import PopularPage from '@/views/user/PopularPage.vue'
 import CategoriesPage from '@/views/user/CategoriesPage.vue'
+import AboutUsPage from '@/views/user/AboutUsPage.vue'
 
 import ProfileMain from '@/views/profile/ProfileMain.vue'
 import EditProfile from '@/views/profile/EditProfile.vue'
@@ -21,6 +20,7 @@ import AddressView from '@/views/profile/AddressView.vue'
 import PaymentView from '@/views/profile/PaymentView.vue'
 import NotificationView from '@/views/profile/NotificationView.vue'
 import SettingsView from '@/views/profile/SettingView.vue'
+
 export default [
   {
     path: '/',
@@ -43,6 +43,7 @@ export default [
       { path: '/cart', name: 'Cart', component: CartView},
       { path: '/empty-product', name: 'EmptyProduct', component: EmptyProduct},
       { path: '/product/:id', name: 'ProductDetail', component: ProductDetailView},
+      { path: '/about-us', name: 'AboutUs', component: AboutUsPage },
 
       { path: '/profile', name: 'Profile', component: ProfileMain },
       { path: '/profile/edit', name: 'ProfileEdit', component: EditProfile },

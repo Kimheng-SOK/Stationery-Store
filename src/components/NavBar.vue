@@ -52,6 +52,15 @@
               Hots
             </router-link>
           </li>
+          <li class="nav-item">
+            <router-link 
+              to="/about-us" 
+              class="nav-link px-3"
+              active-class="active-nav-link"
+            >
+              About Us
+            </router-link>
+          </li>
         </ul>
 
         <div class="d-flex align-items-center flex-grow-1 mx-lg-3" style="max-width: 380px">
@@ -208,6 +217,13 @@
           active-class="active-mobile-link"
         >
           Hots
+        </router-link>
+        <router-link 
+          to="user/about-us" 
+          class="px-4 py-3 text-white text-decoration-none hover-bg"
+          active-class="active-mobile-link"
+        >
+          About Us
         </router-link>
 
         <template v-if="authStore.isAuthenticated">
