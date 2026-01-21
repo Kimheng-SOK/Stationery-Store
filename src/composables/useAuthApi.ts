@@ -4,7 +4,7 @@
  */
 
 import { ref } from 'vue'
-import { apiGet, apiPost, apiPut, type ApiResponse } from '@/services/api'
+import { apiGet, apiPost, apiPut } from '@/services/api'
 
 export interface User {
   id: string
@@ -26,7 +26,7 @@ interface SignupData {
 }
 
 interface LoginData {
-  email: string
+  emailOrPhone: string
   password: string
 }
 
@@ -54,9 +54,9 @@ export function useAuthApi() {
     try {
       const response = await apiPost<{ data: AuthResponse }>('/auth/signup', data)
       return response.data
-    } catch (err: any) {
-      error.value = err.message || 'Failed to sign up'
-      throw err
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Failed to sign up'
+    throw err
     } finally {
       loading.value = false
     }
@@ -65,15 +65,20 @@ export function useAuthApi() {
   /**
    * Login user
    */
-  const login = async (data: LoginData) => {
+  const login = async (data: LoginData): Promise<AuthResponse> => {
     loading.value = true
     error.value = null
 
     try {
       const response = await apiPost<{ data: AuthResponse }>('/auth/login', data)
+
+      if (!response || !response.data) {
+        throw new Error('Invalid response from server')
+      }
+
       return response.data
-    } catch (err: any) {
-      error.value = err.message || 'Failed to login'
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Failed to login'
       throw err
     } finally {
       loading.value = false
@@ -89,8 +94,8 @@ export function useAuthApi() {
 
     try {
       await apiPost('/auth/logout')
-    } catch (err: any) {
-      error.value = err.message || 'Failed to logout'
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Failed to logout'
       throw err
     } finally {
       loading.value = false
@@ -107,8 +112,8 @@ export function useAuthApi() {
     try {
       const response = await apiGet<{ data: AuthResponse }>('/auth/me')
       return response.data
-    } catch (err: any) {
-      error.value = err.message || 'Failed to get user'
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Failed to get user'
       throw err
     } finally {
       loading.value = false
@@ -124,9 +129,9 @@ export function useAuthApi() {
 
     try {
       const response = await apiPut<{ data: { user: User } }>('/auth/profile', data)
-      return response.data.user
-    } catch (err: any) {
-      error.value = err.message || 'Failed to update profile'
+      return response.data
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Failed to update profile'
       throw err
     } finally {
       loading.value = false
@@ -145,8 +150,8 @@ export function useAuthApi() {
         currentPassword,
         newPassword,
       })
-    } catch (err: any) {
-      error.value = err.message || 'Failed to change password'
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Failed to change password'
       throw err
     } finally {
       loading.value = false
