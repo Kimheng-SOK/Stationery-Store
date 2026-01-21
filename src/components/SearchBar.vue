@@ -4,8 +4,8 @@
       <!-- Replaced the image with Bootstrap Icon -->
       <i class="bi bi-search search-icon"></i>
     </span>
-    <input 
-      type="text" 
+    <input
+      type="text"
       class="form-control border-0 search-input"
       placeholder="Search products..."
       aria-label="Search products"
@@ -13,10 +13,12 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'SearchBar'
-}
+<script setup lang="ts">
+import { defineComponent } from 'vue';
+
+  defineComponent({
+    name: 'SearchBar',
+  });
 </script>
 
 <style scoped>
@@ -32,7 +34,7 @@ export default {
 }
 
 .search-icon {
-  font-size: 18px; 
+  font-size: 18px;
   opacity: 0.5;
 }
 

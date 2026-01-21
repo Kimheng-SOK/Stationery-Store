@@ -36,6 +36,7 @@
               <input
                 type="text"
                 placeholder="Enter your email or phone"
+                autocomplete="username"
                 v-model="emailOrPhone"
                 :class="['form-control form-control-custom', { 'is-invalid': errors.emailOrPhone }]"
 
@@ -57,6 +58,7 @@
                 placeholder="Enter your password"
                 :type="showPassword ? 'text' : 'password'"
                 v-model="password"
+                autocomplete="current-password"
                 :class="['form-control form-control-custom', { 'is-invalid': errors.password }]"
                 required
                 @blur="validatePassword"
