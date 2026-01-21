@@ -17,8 +17,8 @@
       <div class="collapse navbar-collapse" id="navbarContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
           <li class="nav-item">
-            <router-link 
-              to="/shop" 
+            <router-link
+              to="/shop"
               class="nav-link px-3"
               active-class="active-nav-link"
             >
@@ -26,8 +26,8 @@
             </router-link>
           </li>
           <li class="nav-item">
-            <router-link 
-              to="/new-arrival" 
+            <router-link
+              to="/new-arrival"
               class="nav-link px-3"
               active-class="active-nav-link"
             >
@@ -35,8 +35,8 @@
             </router-link>
           </li>
           <li class="nav-item">
-            <router-link 
-              to="/categories" 
+            <router-link
+              to="/categories"
               class="nav-link px-3"
               active-class="active-nav-link"
             >
@@ -44,8 +44,8 @@
             </router-link>
           </li>
           <li class="nav-item">
-            <router-link 
-              to="/hots" 
+            <router-link
+              to="/hots"
               class="nav-link px-3"
               active-class="active-nav-link"
             >
@@ -61,19 +61,23 @@
         <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
           <!-- Account Icon - Show different based on auth state -->
           <template v-if="authStore.isAuthenticated">
-            <div class="dropdown">
+            <div class="dropdown" ref="dropdownRef" style="position: relative;">
               <button
                 class="btn btn-link p-2 text-white border-0 dropdown-toggle"
                 type="button"
-                id="userDropdown"
-                data-bs-toggle="dropdown"
+                @click="toggleDropdown"
+                :aria-expanded="showDropdown"
               >
                 <i class="bi bi-person-circle fs-4"></i>
-                <span class="ms-2">{{ authStore.user?.username || 'User' }}</span>
+                <span class="ms-2">{{ authStore.user?.name || 'User' }}</span>
               </button>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li><router-link to="/profile" class="dropdown-item">Profile</router-link></li>
-                <li><router-link to="/orders" class="dropdown-item">My Orders</router-link></li>
+              <ul
+                v-show="showDropdown"
+                class="dropdown-menu dropdown-menu-end show"
+                style="display: block; position: absolute; right: 0; top: 100%;"
+              >
+                <li><router-link to="/profile" class="dropdown-item" @click="closeDropdown">Profile</router-link></li>
+                <li><router-link to="/orders" class="dropdown-item" @click="closeDropdown">My Orders</router-link></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a @click="handleLogout" class="dropdown-item text-danger" style="cursor: pointer">Logout</a></li>
               </ul>
@@ -181,29 +185,29 @@
 
       <!-- Menu items -->
       <div class="d-flex flex-column">
-        <router-link 
-          to="/shop" 
+        <router-link
+          to="/shop"
           class="px-4 py-3 text-white text-decoration-none hover-bg"
           active-class="active-mobile-link"
         >
           Shop All
         </router-link>
-        <router-link 
-          to="/new-arrival" 
+        <router-link
+          to="/new-arrival"
           class="px-4 py-3 text-white text-decoration-none hover-bg"
           active-class="active-mobile-link"
         >
           New Arrival
         </router-link>
-        <router-link 
-          to="/categories" 
+        <router-link
+          to="/categories"
           class="px-4 py-3 text-white text-decoration-none hover-bg"
           active-class="active-mobile-link"
         >
           Categories
         </router-link>
-        <router-link 
-          to="/hots" 
+        <router-link
+          to="/hots"
           class="px-4 py-3 text-white text-decoration-none hover-bg"
           active-class="active-mobile-link"
         >
@@ -212,15 +216,15 @@
 
         <template v-if="authStore.isAuthenticated">
           <hr class="border-secondary mx-3">
-          <router-link 
-            to="/profile" 
+          <router-link
+            to="/profile"
             class="px-4 py-3 text-white text-decoration-none hover-bg"
             active-class="active-mobile-link"
           >
             Profile
           </router-link>
-          <router-link 
-            to="/orders" 
+          <router-link
+            to="/orders"
             class="px-4 py-3 text-white text-decoration-none hover-bg"
             active-class="active-mobile-link"
           >
@@ -240,10 +244,39 @@ import SearchBar from '@/components/SearchBar.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cartStore'
 import { useRouter } from 'vue-router'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const router = useRouter()
+
+const showDropdown = ref(false)
+const dropdownRef = ref<HTMLElement | null>(null)
+
+const toggleDropdown = (event: MouseEvent) => {
+  event.stopPropagation()
+  showDropdown.value = !showDropdown.value
+}
+
+const closeDropdown = () => {
+  showDropdown.value = false
+}
+
+const handleClickOutside = (event: MouseEvent) => {
+  if (
+    dropdownRef.value &&
+    !dropdownRef.value.contains(event.target as Node)
+  ) {
+    showDropdown.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
+})
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 
 const handleLogout = () => {
   authStore.logout()
