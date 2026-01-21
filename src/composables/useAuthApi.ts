@@ -47,13 +47,18 @@ export function useAuthApi() {
   /**
    * Sign up (Register) a new user
    */
-  const signup = async (data: SignupData) => {
+  const signup = async (data: SignupData): Promise<AuthResponse> => {
     loading.value = true
     error.value = null
 
     try {
-      const response = await apiPost<{ data: AuthResponse }>('/auth/signup', data)
+      const response = await apiPost<AuthResponse>('/auth/signup', data)
+      if (!response || !response.data) {
+        throw new Error('Invalid response from server')
+      }
+
       return response.data
+
     } catch (err: unknown) {
       error.value = err instanceof Error ? err.message : 'Failed to sign up'
     throw err
@@ -70,7 +75,7 @@ export function useAuthApi() {
     error.value = null
 
     try {
-      const response = await apiPost<{ data: AuthResponse }>('/auth/login', data)
+      const response = await apiPost<AuthResponse>('/auth/login', data)
 
       if (!response || !response.data) {
         throw new Error('Invalid response from server')

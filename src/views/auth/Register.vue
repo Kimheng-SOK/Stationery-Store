@@ -172,10 +172,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useAuthApi } from '@/composables/useAuthApi'
+
+defineComponent({
+  name: 'SignUp',
+})
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -312,8 +316,8 @@ const handleSignUp = async () => {
         }
       }, 1500)
     }
-  } catch (error: any) {
-    errorMessage.value = error.message || authApi.error.value || 'Sign up failed. Please try again.'
+  } catch (error: unknown) {
+    errorMessage.value = error instanceof Error ? error.message : authApi.error.value || 'Sign up failed. Please try again.'
   } finally {
     isLoading.value = false
   }
