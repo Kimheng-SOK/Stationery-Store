@@ -11,6 +11,7 @@ import ProductDetailView from '@/views/user/ProductDetailView.vue'
 import PopularPage from '@/views/user/PopularPage.vue'
 import CategoriesPage from '@/views/user/CategoriesPage.vue'
 import AboutUsPage from '@/views/user/AboutUsPage.vue'
+import OrderSuccessPage from '@/views/user/OrderSuccessPage.vue'
 
 import ProfileMain from '@/views/profile/ProfileMain.vue'
 import EditProfile from '@/views/profile/EditProfile.vue'
@@ -20,6 +21,7 @@ import AddressView from '@/views/profile/AddressView.vue'
 import PaymentView from '@/views/profile/PaymentView.vue'
 import NotificationView from '@/views/profile/NotificationView.vue'
 import SettingsView from '@/views/profile/SettingView.vue'
+
 
 export default [
   {
@@ -44,6 +46,7 @@ export default [
       { path: '/empty-product', name: 'EmptyProduct', component: EmptyProduct},
       { path: '/product/:id', name: 'ProductDetail', component: ProductDetailView},
       { path: '/about-us', name: 'AboutUs', component: AboutUsPage },
+      { path: '/order-success', name: 'OrderSuccess', component: OrderSuccessPage }, 
 
       { path: '/profile', name: 'Profile', component: ProfileMain },
       { path: '/profile/edit', name: 'ProfileEdit', component: EditProfile },
