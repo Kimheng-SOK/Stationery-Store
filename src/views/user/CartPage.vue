@@ -46,10 +46,7 @@
           <template v-else>
             <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
               <h2 class="h6 fw-bold mb-0">Product</h2>
-              <div class="d-flex gap-5 me-12">
-                <span class="h6 fw-bold mb-0 me-8" style="width: 80px; text-align: center;">Quantity</span>
-                <span class="h6 fw-bold mb-0 me-3" style="width: 80px; text-align: right;">Total</span>
-              </div>
+              
             </div>
 
             <CartItem

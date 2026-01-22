@@ -14,11 +14,20 @@
 
           <div class="col-4 d-flex justify-content-center">
             <div class="d-flex align-items-center gap-2 gap-md-3">
-              <div :class="['step-pill', { 'active': step >= 1 }]">1</div>
+              <div class="d-flex flex-column align-items-center">
+                <div :class="['step-pill', { 'active': step >= 1 }]">1</div>
+                <span :class="['step-label', { 'active': step >= 1 }]">Address</span>
+              </div>
               <div class="step-line d-none d-sm-block"></div>
-              <div :class="['step-pill', { 'active': step >= 2 }]">2</div>
+              <div class="d-flex flex-column align-items-center">
+                <div :class="['step-pill', { 'active': step >= 2 }]">2</div>
+                <span :class="['step-label', { 'active': step >= 2 }]">Payment</span>
+              </div>
               <div class="step-line d-none d-sm-block"></div>
-              <div :class="['step-pill', { 'active': step >= 3 }]">3</div>
+              <div class="d-flex flex-column align-items-center">
+                <div :class="['step-pill', { 'active': step >= 3 }]">3</div>
+                <span :class="['step-label', { 'active': step >= 3 }]">Review</span>
+              </div>
             </div>
           </div>
           
@@ -67,6 +76,7 @@
           <div v-if="step === 2" class="checkout-card slide-in">
             <h4 class="fw-bold mb-4">Payment Method</h4>
             <div class="payment-grid">
+              <!-- Credit Card Option -->
               <div 
                 class="payment-option" 
                 :class="{ 'active': form.paymentMethod === 'card' }"
@@ -74,26 +84,54 @@
               >
                 <div class="d-flex align-items-center gap-3">
                   <input type="radio" :checked="form.paymentMethod === 'card'">
-                  <span class="fw-bold">Credit Card</span>
+                  <div>
+                    <div class="fw-bold">Credit/Debit Card</div>
+                    <small class="text-muted">Pay securely with your card</small>
+                  </div>
                 </div>
-                <div class="payment-icons">
-                  <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa" height="18">
-                </div>
+                <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                </svg>
               </div>
 
+              <!-- Cash on Delivery Option -->
               <div 
                 class="payment-option" 
-                :class="{ 'active': form.paymentMethod === 'paypal' }"
-                @click="form.paymentMethod = 'paypal'"
+                :class="{ 'active': form.paymentMethod === 'cash' }"
+                @click="form.paymentMethod = 'cash'"
               >
                 <div class="d-flex align-items-center gap-3">
-                  <input type="radio" :checked="form.paymentMethod === 'paypal'">
-                  <span class="fw-bold">PayPal</span>
+                  <input type="radio" :checked="form.paymentMethod === 'cash'">
+                  <div>
+                    <div class="fw-bold">Cash on Delivery</div>
+                    <small class="text-muted">Pay when you receive</small>
+                  </div>
                 </div>
-                <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" height="15" alt="Paypal">
+                <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+              </div>
+
+              <!-- QR Code Option -->
+              <div 
+                class="payment-option" 
+                :class="{ 'active': form.paymentMethod === 'qr' }"
+                @click="form.paymentMethod = 'qr'"
+              >
+                <div class="d-flex align-items-center gap-3">
+                  <input type="radio" :checked="form.paymentMethod === 'qr'">
+                  <div>
+                    <div class="fw-bold">Scan QR Code</div>
+                    <small class="text-muted">Pay via mobile banking</small>
+                  </div>
+                </div>
+                <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                </svg>
               </div>
             </div>
 
+            <!-- Card Details Form -->
             <div v-if="form.paymentMethod === 'card'" class="mt-4 p-3 bg-light rounded border border-2 shadow-sm">
                <div class="mb-3">
                 <label class="form-label small fw-bold">Card Number</label>
@@ -101,12 +139,42 @@
               </div>
               <div class="row g-2">
                 <div class="col-6">
+                  <label class="form-label small fw-bold">Expiry Date</label>
                   <input type="text" class="form-control custom-input" placeholder="MM/YY">
                 </div>
                 <div class="col-6">
-                  <input type="password" class="form-control custom-input" placeholder="CVV">
+                  <label class="form-label small fw-bold">CVV</label>
+                  <input type="password" class="form-control custom-input" placeholder="123">
                 </div>
               </div>
+            </div>
+
+            <!-- Cash on Delivery Info -->
+            <div v-if="form.paymentMethod === 'cash'" class="mt-4 p-3 bg-light rounded border border-2">
+              <div class="d-flex align-items-start gap-2">
+                <svg style="width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px;" class="text-success" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                </svg>
+                <div>
+                  <p class="mb-1 fw-bold small">Cash on Delivery Available</p>
+                  <p class="mb-0 text-muted small">Please keep exact change ready. Our delivery partner will collect the payment when your order arrives.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- QR Code Display -->
+            <div v-if="form.paymentMethod === 'qr'" class="mt-4 p-4 bg-light rounded border border-2 text-center">
+              <p class="fw-bold mb-3">Scan to Pay</p>
+              <div class="qr-code-container mx-auto mb-3">
+                <img 
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Payment:${{ cartStore.grandTotal.toFixed(2) }}" 
+                  alt="QR Code for Payment"
+                  class="w-100 h-100"
+                  style="object-fit: contain;"
+                />
+              </div>
+              <p class="text-muted small mb-0">Use your banking app to scan and complete payment</p>
+              <p class="text-muted small">Total: <span class="fw-bold text-dark">${{ cartStore.grandTotal.toFixed(2) }}</span></p>
             </div>
 
             <div class="row g-2 mt-4">
@@ -129,6 +197,18 @@
                   <p class="mb-0 small text-muted">{{ form.address }}, {{ form.city }} {{ form.zip }}</p>
                 </div>
                 <button class="btn btn-sm btn-outline-dark px-3" @click="step = 1">Edit</button>
+              </div>
+            </div>
+
+            <div class="bg-light p-3 rounded mb-4 border border-1">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="fw-bold mb-1 text-primary">Payment Method:</h6>
+                  <p class="mb-0 small fw-bold">
+                    {{ form.paymentMethod === 'card' ? 'Credit/Debit Card' : form.paymentMethod === 'cash' ? 'Cash on Delivery' : 'QR Code Payment' }}
+                  </p>
+                </div>
+                <button class="btn btn-sm btn-outline-dark px-3" @click="step = 2">Edit</button>
               </div>
             </div>
 
@@ -229,9 +309,6 @@ const placeOrder = async () => {
 
 <style scoped>
 .main-header {
-  position: sticky !important;
-  top: 0;
-  z-index: 2000 !important; /* Higher z-index to stay above sidebar */
   background: white;
   box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
@@ -239,7 +316,7 @@ const placeOrder = async () => {
 .sticky-summary {
   position: sticky;
   top: 90px; 
-  z-index: 1000; /* Lower z-index so it slides under header */
+  z-index: 1000;
 }
 
 /* Form & UI Styling */
@@ -282,10 +359,23 @@ const placeOrder = async () => {
   color: #fff;
 }
 
+.step-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #888;
+  margin-top: 0.35rem;
+  transition: all 0.3s ease;
+}
+
+.step-label.active {
+  color: #000;
+}
+
 .step-line {
   height: 2px;
   width: 30px;
   background: #f1f1f1;
+  margin-bottom: 20px;
 }
 
 /* Payment Layout */
@@ -312,6 +402,24 @@ const placeOrder = async () => {
 .payment-option.active {
   border-color: #0d6efd;
   background-color: #f8fbff;
+}
+
+/* QR Code Styling */
+.qr-code-container {
+  width: 200px;
+  height: 200px;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+}
+
+.qr-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Responsive Fixes */

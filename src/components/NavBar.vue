@@ -1,8 +1,6 @@
 <template>
-  <!-- NAVBAR with active states and cart integration -->
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3 sticky-top">
     <div class="container-fluid px-4" style="max-width: 1400px; margin: 0 auto">
-      <!-- Logo -->
       <router-link to="/" class="navbar-brand d-flex align-items-center">
         <img
           src="/logo.png"
@@ -13,7 +11,6 @@
         <span class="fw-semibold fs-5">StationeryBox</span>
       </router-link>
 
-      <!-- Desktop content -->
       <div class="collapse navbar-collapse" id="navbarContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
           <li class="nav-item">
@@ -63,12 +60,11 @@
           </li>
         </ul>
 
-        <div class="d-flex align-items-center flex-grow-1 mx-lg-3" style="max-width: 380px">
+        <div class="d-flex align-items-center flex-grow-1 mx-lg-3 d-none d-lg-flex" style="max-width: 380px">
           <SearchBar />
         </div>
 
-        <div class="d-flex align-items-center gap-3 mt-3 mt-lg-0">
-          <!-- Account Icon - Show different based on auth state -->
+        <div class="d-none d-lg-flex align-items-center gap-3">
           <template v-if="authStore.isAuthenticated">
             <div class="dropdown">
               <button
@@ -76,6 +72,7 @@
                 type="button"
                 id="userDropdown"
                 data-bs-toggle="dropdown"
+                aria-expanded="false"
               >
                 <i class="bi bi-person-circle fs-4"></i>
                 <span class="ms-2">{{ authStore.user?.username || 'User' }}</span>
@@ -91,24 +88,16 @@
           <template v-else>
             <router-link to="/signin" class="btn btn-link p-2 text-white border-0">
               <i class="bi bi-person-circle fs-4"></i>
-              <span class="ms-2 d-none d-md-inline">Sign In</span>
+              <span class="ms-2">Sign In</span>
             </router-link>
           </template>
 
-          <!-- Cart Icon with dynamic count -->
           <router-link to="/cart" class="btn btn-link p-2 text-white border-0 position-relative">
             <i class="bi bi-cart3 fs-4"></i>
             <span
               v-if="cartStore.totalItems > 0"
               class="position-absolute badge rounded-pill bg-danger"
-              style="
-                font-size: 0.65rem;
-                top: 0;
-                right: 0;
-                min-width: 16px;
-                height: 16px;
-                padding: 2px 5px;
-              "
+              style="font-size: 0.65rem; top: 0; right: 0; min-width: 16px; height: 16px; padding: 2px 5px;"
             >
               {{ cartStore.totalItems }}
             </span>
@@ -116,53 +105,42 @@
         </div>
       </div>
 
-      <!-- Mobile Right Icons: Account → Cart → Hamburger -->
-      <div class="d-flex align-items-center gap-3 d-lg-none">
-        <!-- Account -->
+      <div class="d-flex align-items-center gap-2 d-lg-none">
         <template v-if="authStore.isAuthenticated">
           <button @click="handleLogout" class="btn btn-link p-2 text-danger border-0">
-            <i class="bi bi-box-arrow-right"></i>
+            <i class="bi bi-box-arrow-right fs-4"></i>
           </button>
         </template>
         <template v-else>
           <router-link to="/signin" class="btn btn-link p-2 text-white border-0">
-            <i class="bi bi-person-circle"></i>
+            <i class="bi bi-person-circle fs-4"></i>
           </router-link>
         </template>
 
-        <!-- Cart -->
         <router-link to="/cart" class="btn btn-link p-2 text-white border-0 position-relative">
-          <i class="bi bi-cart3"></i>
+          <i class="bi bi-cart3 fs-4"></i>
           <span
             v-if="cartStore.totalItems > 0"
             class="position-absolute badge rounded-pill bg-danger"
-            style="
-              font-size: 0.65rem;
-              top: 0;
-              right: 0;
-              min-width: 16px;
-              height: 16px;
-              padding: 2px 5px;
-            "
+            style="font-size: 0.65rem; top: 0; right: 0; min-width: 16px; height: 16px; padding: 2px 5px;"
           >
             {{ cartStore.totalItems }}
           </span>
         </router-link>
 
-        <!-- Hamburger -->
         <button
           class="navbar-toggler border-0 p-2"
           type="button"
           data-bs-toggle="offcanvas"
           data-bs-target="#mobileSidebar"
+          aria-controls="mobileSidebar"
         >
-          <i class="bi bi-list"></i>
+          <i class="bi bi-list fs-2 text-white"></i>
         </button>
       </div>
     </div>
   </nav>
 
-  <!-- Mobile Sidebar -->
   <div
     class="offcanvas offcanvas-start text-white"
     style="background-color: #1e293b; width: 300px"
@@ -179,72 +157,26 @@
         />
         StationeryBox
       </h5>
-      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
 
     <div class="offcanvas-body p-0">
-      <!-- Search bar FIRST, right under logo -->
       <div class="p-4 pb-3">
         <SearchBar />
       </div>
 
-      <!-- Menu items -->
       <div class="d-flex flex-column">
-        <router-link 
-          to="/shop" 
-          class="px-4 py-3 text-white text-decoration-none hover-bg"
-          active-class="active-mobile-link"
-        >
-          Shop All
-        </router-link>
-        <router-link 
-          to="/new-arrival" 
-          class="px-4 py-3 text-white text-decoration-none hover-bg"
-          active-class="active-mobile-link"
-        >
-          New Arrival
-        </router-link>
-        <router-link 
-          to="/categories" 
-          class="px-4 py-3 text-white text-decoration-none hover-bg"
-          active-class="active-mobile-link"
-        >
-          Categories
-        </router-link>
-        <router-link 
-          to="/hots" 
-          class="px-4 py-3 text-white text-decoration-none hover-bg"
-          active-class="active-mobile-link"
-        >
-          Hots
-        </router-link>
-        <router-link 
-          to="user/about-us" 
-          class="px-4 py-3 text-white text-decoration-none hover-bg"
-          active-class="active-mobile-link"
-        >
-          About Us
-        </router-link>
+        <router-link to="/shop" class="px-4 py-3 text-white text-decoration-none hover-bg" active-class="active-mobile-link" data-bs-dismiss="offcanvas">Shop All</router-link>
+        <router-link to="/new-arrival" class="px-4 py-3 text-white text-decoration-none hover-bg" active-class="active-mobile-link" data-bs-dismiss="offcanvas">New Arrival</router-link>
+        <router-link to="/categories" class="px-4 py-3 text-white text-decoration-none hover-bg" active-class="active-mobile-link" data-bs-dismiss="offcanvas">Categories</router-link>
+        <router-link to="/hots" class="px-4 py-3 text-white text-decoration-none hover-bg" active-class="active-mobile-link" data-bs-dismiss="offcanvas">Hots</router-link>
+        <router-link to="/about-us" class="px-4 py-3 text-white text-decoration-none hover-bg" active-class="active-mobile-link" data-bs-dismiss="offcanvas">About Us</router-link>
 
         <template v-if="authStore.isAuthenticated">
           <hr class="border-secondary mx-3">
-          <router-link 
-            to="/profile" 
-            class="px-4 py-3 text-white text-decoration-none hover-bg"
-            active-class="active-mobile-link"
-          >
-            Profile
-          </router-link>
-          <router-link 
-            to="/orders" 
-            class="px-4 py-3 text-white text-decoration-none hover-bg"
-            active-class="active-mobile-link"
-          >
-            My Orders
-          </router-link>
-          <a @click="handleLogout" class="px-4 py-3 text-danger text-decoration-none hover-bg" style="cursor: pointer">
-            Logout
-          </a>
+          <router-link to="/profile" class="px-4 py-3 text-white text-decoration-none hover-bg" active-class="active-mobile-link" data-bs-dismiss="offcanvas">Profile</router-link>
+          <router-link to="/orders" class="px-4 py-3 text-white text-decoration-none hover-bg" active-class="active-mobile-link" data-bs-dismiss="offcanvas">My Orders</router-link>
+          <a @click="handleLogout" class="px-4 py-3 text-danger text-decoration-none hover-bg" style="cursor: pointer" data-bs-dismiss="offcanvas">Logout</a>
         </template>
       </div>
     </div>
@@ -272,7 +204,6 @@ const handleLogout = () => {
   background-color: #1e293b !important;
 }
 
-/* Default nav link styles */
 .nav-link {
   color: rgba(255, 255, 255, 0.75) !important;
   transition: all 0.3s ease;
@@ -280,19 +211,15 @@ const handleLogout = () => {
   font-weight: 500;
 }
 
-/* Hover effect - white color */
 .nav-link:hover {
   color: white !important;
 }
 
-/* Active link - white with glow */
 .nav-link.active-nav-link {
   color: white !important;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5),
-               0 0 20px rgba(255, 255, 255, 0.3);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
-/* Add underline effect on active */
 .nav-link.active-nav-link::after {
   content: '';
   position: absolute;
@@ -305,7 +232,6 @@ const handleLogout = () => {
   box-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
 }
 
-/* Mobile sidebar hover effect */
 .hover-bg {
   transition: all 0.3s ease;
 }
@@ -315,7 +241,6 @@ const handleLogout = () => {
   color: white !important;
 }
 
-/* Active mobile link */
 .active-mobile-link {
   background-color: rgba(255, 255, 255, 0.15) !important;
   color: white !important;
@@ -323,23 +248,17 @@ const handleLogout = () => {
   font-weight: 600;
 }
 
-/* Button hover effects */
 .btn-link:hover {
   opacity: 0.8;
 }
 
-/* Cart badge animation */
 .badge {
   animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
 @media (min-width: 992px) {
