@@ -26,7 +26,7 @@ export const useCategoryApi = () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
   const categories = ref<Category[]>([])
-  let fetchPromise: Promise<any> | null = null
+  let fetchPromise: Promise<unknown> | null = null
 
   /**
    * Fetch all categories

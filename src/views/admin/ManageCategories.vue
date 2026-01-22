@@ -307,11 +307,9 @@ const handleSubmit = async () => {
     setTimeout(() => {
       successMessage.value = ''
     }, 3000)
-  } catch (err: any) {
-    errorMessage.value = err.message || 'Operation failed'
-    setTimeout(() => {
-      errorMessage.value = ''
-    }, 3000)
+  } catch (err: unknown) {
+    errorMessage.value = (err instanceof Error && err.message) ? err.message : 'Operation failed'
+    setTimeout(() => { errorMessage.value = '' }, 3000)
   }
 }
 
@@ -330,11 +328,9 @@ const handleDelete = async () => {
     setTimeout(() => {
       successMessage.value = ''
     }, 3000)
-  } catch (err: any) {
-    errorMessage.value = err.message || 'Delete failed'
-    setTimeout(() => {
-      errorMessage.value = ''
-    }, 3000)
+  } catch (err: unknown) {
+    errorMessage.value = (err instanceof Error && err.message) ? err.message : 'Operation failed'
+    setTimeout(() => { errorMessage.value = '' }, 3000)
   }
 }
 
