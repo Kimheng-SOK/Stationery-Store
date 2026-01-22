@@ -44,9 +44,11 @@
               Discover premium notebooks, elegant pens, and thoughtfully designed
               desk accessories for the modern professional
             </p>
-            <button class="btn btn-success btn-lg">
-              Shop Collection →
-            </button>
+            <router-link to="/shop">
+              <button class="btn btn-success btn-lg">
+                Shop Collection →
+              </button>
+            </router-link>
           </div>
         </div>
       </div>

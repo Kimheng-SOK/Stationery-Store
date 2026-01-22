@@ -14,39 +14,6 @@
             <span class="fw-bold">Back to shopping</span>
           </button>
 
-          <!-- Progress Steps -->
-          <div class="d-flex align-items-center gap-4 position-absolute start-50 translate-middle-x">
-            <div 
-              class="d-flex align-items-center gap-2 step-item"
-              :class="{ active: currentStep === 'cart' }"
-              @click="currentStep = 'cart'"
-              style="cursor: pointer;"
-            >
-              <span :class="currentStep === 'cart' ? 'fw-bold text-dark' : 'text-muted'">Cart</span>
-            </div>
-
-            <div class="text-muted" style="font-size: 0.875rem;">- - - - - - - - - -</div>
-
-            <div 
-              class="d-flex align-items-center gap-2 step-item"
-              :class="{ active: currentStep === 'address' }"
-              @click="currentStep = 'address'"
-              style="cursor: pointer;"
-            >
-              <span :class="currentStep === 'address' ? 'fw-bold text-dark' : 'text-muted'">Address</span>
-            </div>
-
-            <div class="text-muted" style="font-size: 0.875rem;">- - - - - - - - - -</div>
-
-            <div 
-              class="d-flex align-items-center gap-2 step-item"
-              :class="{ active: currentStep === 'payment' }"
-              @click="currentStep = 'payment'"
-              style="cursor: pointer;"
-            >
-              <span :class="currentStep === 'payment' ? 'fw-bold text-dark' : 'text-muted'">Payment</span>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -79,10 +46,7 @@
           <template v-else>
             <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
               <h2 class="h6 fw-bold mb-0">Product</h2>
-              <div class="d-flex gap-5 me-12">
-                <span class="h6 fw-bold mb-0 me-8" style="width: 80px; text-align: center;">Quantity</span>
-                <span class="h6 fw-bold mb-0 me-3" style="width: 80px; text-align: right;">Total</span>
-              </div>
+              
             </div>
 
             <CartItem
@@ -144,9 +108,11 @@ const handleCheckout = () => {
     alert('Your cart is empty!')
     return
   }
+  // Change step to 'address' (optional if you stay on page)
   currentStep.value = 'address'
-  // Navigate to checkout page or handle checkout logic
-  console.log('Proceeding to checkout...')
+  
+  // NAVIGATE TO THE NEW PAGE
+  router.push('/checkout') 
 }
 </script>
 
