@@ -5,22 +5,9 @@
 
 import { ref } from 'vue'
 import axios from 'axios'
+import type { Category } from '@/types/category'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
-
-export interface Category {
-  _id: string
-  name: string
-  description?: string
-  image?: string
-  parent?: string | null
-  isActive?: boolean
-  order?: number
-  slug?: string
-  createdAt?: string
-  updatedAt?: string
-  __v?: number
-}
 
 export const useCategoryApi = () => {
   const loading = ref(false)
@@ -74,7 +61,7 @@ export const useCategoryApi = () => {
     error.value = null
     try {
       const response = await axios.get(`${API_URL}/categories/${id}`)
-      return response.data
+      return response.data as Category
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         error.value = err.response?.data?.message || 'Failed to fetch category'
@@ -100,7 +87,7 @@ export const useCategoryApi = () => {
         },
       })
       await fetchCategories() // Refresh the list
-      return response.data
+      return response.data as Category
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         error.value = err.response?.data?.message || 'Failed to create category'
@@ -126,7 +113,7 @@ export const useCategoryApi = () => {
         },
       })
       await fetchCategories() // Refresh the list
-      return response.data
+      return response.data as Category
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         error.value = err.response?.data?.message || 'Failed to update category'
@@ -148,7 +135,7 @@ export const useCategoryApi = () => {
     try {
       const response = await axios.delete(`${API_URL}/categories/${id}`)
       await fetchCategories() // Refresh the list
-      return response.data
+      return response.data as Category
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         error.value = err.response?.data?.message || 'Failed to delete category'

@@ -1,7 +1,3 @@
-/**
- * Authentication API Composable
- * Handles all authentication-related API calls
- */
 
 import { ref } from 'vue'
 import { apiGet, apiPost, apiPut } from '@/services/api'

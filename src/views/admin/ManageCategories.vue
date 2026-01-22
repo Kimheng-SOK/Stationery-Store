@@ -200,7 +200,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useCategoryApi, type Category } from '@/composables/useCategoryApi'
+import { useCategoryApi } from '@/composables/useCategoryApi'
+import type { Category } from '@/types/category'
 import { Modal } from 'bootstrap'
 
 const categoryApi = useCategoryApi()
@@ -319,7 +320,7 @@ const confirmDelete = (category: Category) => {
 }
 
 const handleDelete = async () => {
-  if (!categoryToDelete.value) return
+  if (!categoryToDelete.value || !categoryToDelete.value._id) return
 
   try {
     await categoryApi.deleteCategory(categoryToDelete.value._id)
