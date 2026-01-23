@@ -34,12 +34,14 @@ const router = createRouter({
   ],
 })
 
-// Navigation guard
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
-  
-  // Initialize auth (will check session)
-  await authStore.initializeAuth()
+
+
+  // Only initialize auth if not already initialized
+  if (!authStore.isInitialized) {
+    await authStore.initializeAuth()
+  }
 
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
   const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin)
