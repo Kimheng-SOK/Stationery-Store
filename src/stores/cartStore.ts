@@ -1,21 +1,20 @@
-// stores/cartStore.ts
 import { defineStore } from 'pinia'
-import type { Product } from '@/types/product'
 
+// Updated interface to handle backend _id (string)
 export interface CartItem {
-  id: number
-  name: string
-  price: number
-  originalPrice?: number
-  image: string
-  quantity: number
-  sku: string
-  category: string
-  brand?: string
-  badge?: string
-  description?: string
-  delivery: string
-  stock: number
+  _id: string;      // Changed from id: number to match MongoDB
+  name: string;
+  price: number;
+  originalPrice?: number;
+  image: string;
+  quantity: number;
+  sku: string;
+  category: string;
+  brand?: string;
+  badge?: string;
+  description?: string;
+  delivery: string;
+  stock: number;
 }
 
 export const useCartStore = defineStore('cart', {
@@ -23,7 +22,9 @@ export const useCartStore = defineStore('cart', {
     items: [] as CartItem[],
     couponCode: '',
     shippingMethod: 'shipping' as 'shipping' | 'pickup',
-    deliverTogether: false
+    deliverTogether: false,
+    // Add your backend URL for image formatting
+    baseUrl: 'http://localhost:5000' 
   }),
 
   getters: {
@@ -36,6 +37,7 @@ export const useCartStore = defineStore('cart', {
     },
 
     discount: () => {
+      // You can make this dynamic later
       return 2.50
     },
 
@@ -43,48 +45,61 @@ export const useCartStore = defineStore('cart', {
       return state.shippingMethod === 'shipping' ? 2.50 : 0
     },
 
-    grandTotal(state): number {
-      return this.itemTotal - this.discount + this.shippingCost
+    grandTotal(): number {
+      const total = this.itemTotal - this.discount + this.shippingCost
+      return total > 0 ? total : 0
     },
 
-    isInCart: (state) => (productId: number) => {
-      return state.items.some(item => item.id === productId)
+    // Updated to search by _id
+    isInCart: (state) => (productId: string) => {
+      return state.items.some(item => item._id === productId)
     },
 
-    getCartItem: (state) => (productId: number) => {
-      return state.items.find(item => item.id === productId)
+    getCartItem: (state) => (productId: string) => {
+      return state.items.find(item => item._id === productId)
     }
   },
 
   actions: {
-    addToCart(product: Product, quantity: number = 1) {
-      const existingItem = this.items.find(item => item.id === product.id)
+    /**
+     * addToCart
+     * Handles both frontend-friendly data and raw backend data
+     */
+    addToCart(product: any, quantity: number = 1) {
+      // Use _id (backend) or fallback to id (local)
+      const pId = product._id || product.id;
+      
+      const existingItem = this.items.find(item => item._id === pId)
 
       if (existingItem) {
-        // Update quantity if item already exists
         const newQuantity = existingItem.quantity + quantity
         if (newQuantity <= product.stock) {
           existingItem.quantity = newQuantity
         } else {
-          throw new Error(`Cannot add more than ${product.stock} items`)
+          alert(`Sorry, only ${product.stock} units available in stock.`)
         }
       } else {
-        // Add new item
+        // Format the image URL if it's a relative path from the backend
+        const formattedImage = product.image?.startsWith('http') 
+          ? product.image 
+          : `${this.baseUrl}${product.image?.replace(/^\/?public/, '')}`
+
         const cartItem: CartItem = {
-          id: product.id,
+          _id: pId,
           name: product.name,
           price: product.price,
           originalPrice: product.originalPrice,
-          image: product.image,
+          image: formattedImage,
           quantity: quantity,
-          sku: product.sku,
-          category: product.category,
-          brand: product.brand,
+          sku: product.sku || 'N/A',
+          category: product.categoryName || product.category || 'General',
+          brand: product.brand || 'Premium',
           badge: product.isNew ? 'New' : undefined,
-          description: `${product.brand || ''} - ${product.category}`,
+          description: product.description || 'Quality Stationery Product',
           delivery: this.calculateDeliveryDate(),
           stock: product.stock
         }
+        
         this.items.push(cartItem)
       }
     },
@@ -102,6 +117,8 @@ export const useCartStore = defineStore('cart', {
           this.removeFromCart(index)
         } else if (quantity <= item.stock) {
           item.quantity = quantity
+        } else {
+          alert(`Only ${item.stock} items available.`)
         }
       }
     },
@@ -110,6 +127,8 @@ export const useCartStore = defineStore('cart', {
       const item = this.items[index]
       if (item && item.quantity < item.stock) {
         item.quantity++
+      } else {
+        alert("Maximum stock reached")
       }
     },
 
@@ -122,11 +141,11 @@ export const useCartStore = defineStore('cart', {
 
     clearCart() {
       this.items = []
+      this.couponCode = ''
     },
 
     applyCoupon(code: string) {
       this.couponCode = code
-      // TODO: Implement coupon validation logic
     },
 
     setShippingMethod(method: 'shipping' | 'pickup') {
@@ -139,7 +158,7 @@ export const useCartStore = defineStore('cart', {
 
     calculateDeliveryDate(): string {
       const date = new Date()
-      date.setDate(date.getDate() + 7) // Add 7 days
+      date.setDate(date.getDate() + 5) // Estimated 5 days
       return date.toLocaleDateString('en-US', { 
         day: 'numeric', 
         month: 'short', 
@@ -148,5 +167,9 @@ export const useCartStore = defineStore('cart', {
     }
   },
 
-  persist: true // Enable persistence with pinia-plugin-persistedstate
+  // Persist the cart so items stay after refresh
+  persist: {
+    key: 'user-cart',
+    storage: localStorage,
+  }
 })
