@@ -26,10 +26,10 @@ export const useCategoryStore = defineStore('category', {
       this.error = null
 
       try {
-        console.log('🔍 Fetching categories...')
+        console.log('Fetching categories...')
         const response = await apiGet('/categories')
 
-        console.log('📦 Categories API Response:', response)
+        console.log('Categories API Response:', response)
         
         // Handle different response structures
         this.categories = response.data
@@ -39,10 +39,10 @@ export const useCategoryStore = defineStore('category', {
           : []
 
         this.isFetched = true
-        console.log('✅ Categories loaded:', this.categories.length, this.categories)
+        console.log('Categories loaded:', this.categories.length, this.categories)
       } catch (err: any) {
         this.error = err.message || 'Failed to load categories'
-        console.error('❌ Error fetching categories:', err)
+        console.error('Error fetching categories:', err)
       } finally {
         this.loading = false
       }

@@ -1,55 +1,139 @@
 import { defineStore } from 'pinia'
 import { apiGet } from '@/services/api'
-import type { Product } from '@/types/product'
+import type { Product, ProductQueryParams } from '@/types/product'
 
 export const useProductStore = defineStore('product', {
   state: () => ({
     products: [] as Product[],
+    currentProduct: null as Product | null,
     loading: false,
     error: null as string | null,
     isFetched: false,
+    totalProducts: 0,
+    currentPage: 1,
+    totalPages: 1,
   }),
 
   getters: {
-    getAllProducts: (state) => state.products,
-
-    getProductsByCategory: (state) => {
-      return (categorySlug: string) =>
-        state.products.filter(p => p.categorySlug === categorySlug)
-    },
-
-    getPopularProducts: (state) => {
-      return state.products.filter(p => (p.countSold ?? 0) > 10)
-    },
-
+    getProducts: (state) => state.products,
+    isLoading: (state) => state.loading,
+    
+    // Unique brands for the sidebar
     getBrands: (state) => {
-      return [...new Set(state.products.map(p => p.brand).filter(Boolean))]
+      const brands = state.products
+        .map(p => p.brand)
+        .filter((brand): brand is string => Boolean(brand))
+      return [...new Set(brands)].sort()
     },
+
+    /**
+     * Getter: Filters products based on UI selection
+     */
+    getFilteredProducts: (state) => (filters: {
+      categoryId?: string,
+      brand?: string,
+      rating?: number,
+      priceRange?: { min: number, max: number },
+      sortBy?: string
+    }) => {
+      let result = state.products.filter(p => p.status === 'active')
+
+      if (filters.categoryId) {
+        result = result.filter(p => {
+          const pCatId = typeof p.category === 'object' ? p.category._id : p.category
+          return String(pCatId) === String(filters.categoryId)
+        })
+      }
+
+      if (filters.brand) {
+        result = result.filter(p => p.brand === filters.brand)
+      }
+
+      if (filters.priceRange) {
+        result = result.filter(p => {
+          const price = Number(p.price || p.originalPrice)
+          return price >= filters.priceRange!.min && price <= filters.priceRange!.max
+        })
+      }
+
+      if (filters.rating && filters.rating > 0) {
+        result = result.filter(p => Math.floor(Number(p.rating)) === Number(filters.rating))
+      }
+
+      const sorted = [...result]
+      switch (filters.sortBy) {
+        case 'price-asc': sorted.sort((a, b) => Number(a.price || a.originalPrice) - Number(b.price || b.originalPrice)); break
+        case 'price-desc': sorted.sort((a, b) => Number(b.price || b.originalPrice) - Number(a.price || a.originalPrice)); break
+        case 'rating': sorted.sort((a, b) => Number(b.rating) - Number(a.rating)); break
+        case 'newest': sorted.sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime()); break
+      }
+      return sorted
+    },
+
+    /**
+     * Getter: Formats a single product for the UI
+     * Fixes: Images, reviewCount, and Price logic
+     */
+    formatProduct: () => (product: Product) => {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+      const BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '').replace(/\/$/, '')
+      
+      // Image Construction
+      let imageUrl = '/placeholder.jpg'
+      const filename = product.images && product.images.length > 0 ? product.images[0] : null
+      
+      if (filename) {
+        if (filename.startsWith('http')) {
+          imageUrl = filename
+        } else {
+          const cleanFilename = filename.startsWith('/') ? filename : `/${filename}`
+          // Uses the /uploads/products subfolder from your backend
+          imageUrl = `${BASE_URL}/uploads/products${cleanFilename}`
+        }
+      }
+
+      // Price logic: If price is 0 or null, use originalPrice
+      const hasValidPrice = product.price !== undefined && product.price !== null && product.price !== 0
+      
+      return {
+        ...product, // Spreading ensures reviewCount is preserved
+        id: product._id,
+        image: imageUrl,
+        displayPrice: hasValidPrice ? product.price : product.originalPrice,
+        showStrikePrice: hasValidPrice && product.originalPrice > 0,
+        categoryName: typeof product.category === 'object' ? product.category.name : product.category
+      }
+    }
   },
 
   actions: {
-    async fetchProducts(force = false) {
-      if (this.isFetched && !force) return
+    async fetchProducts(params: ProductQueryParams = {}, force = false) {
+      if (this.isFetched && !force && Object.keys(params).length === 0) return
 
       this.loading = true
       this.error = null
 
       try {
-        const response = await apiGet('/products')
-        this.products = response.data ? (Array.isArray(response.data) ? response.data : response.data.data || response.data) : []
+        const queryParams = new URLSearchParams()
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== '') queryParams.append(key, value.toString())
+        })
+
+        const endpoint = `/products${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+        const response = await apiGet(endpoint)
+
+        if (response.data) {
+          this.products = Array.isArray(response.data) ? response.data : response.data.data || []
+          this.totalProducts = response.total || this.products.length
+          this.totalPages = response.pages || 1
+        }
         this.isFetched = true
-        console.log('Products loaded:', this.products.length, this.products)
       } catch (err: any) {
         this.error = err.message || 'Failed to load products'
-        console.error('Error fetching products:', err)
+        this.products = []
       } finally {
         this.loading = false
       }
-    },
-
-    clearProducts() {
-      this.products = []
-      this.isFetched = false
-    },
-  },
+    }
+  }
 })
