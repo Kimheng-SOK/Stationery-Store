@@ -26,23 +26,24 @@
         </div>
 
         <form @submit.prevent="handleSignin" class="login-form">
-          <!-- Email Input -->
+          <!-- Email/Phone Input -->
           <div class="form-group mb-4">
-            <label class="form-label">Email Address</label>
+            <label class="form-label">Email or Phone</label>
             <div class="input-group-custom">
               <span class="input-icon">
                 <i class="bi bi-envelope"></i>
               </span>
               <input
-                type="email"
-                placeholder="Enter your email"
-                v-model="email"
-                :class="['form-control form-control-custom', { 'is-invalid': errors.email }]"
+                type="text"
+                placeholder="Enter your email or phone"
+                v-model="emailOrPhone"
+                :class="['form-control form-control-custom', { 'is-invalid': errors.emailOrPhone }]"
+
                 required
-                @blur="validateEmail"
+                @blur="validateEmailOrPhone"
               />
             </div>
-            <small v-if="errors.email" class="text-danger">{{ errors.email }}</small>
+            <small v-if="errors.emailOrPhone" class="text-danger">{{ errors.emailOrPhone }}</small>
           </div>
 
           <!-- Password Input -->
@@ -121,29 +122,33 @@ const router = useRouter()
 const authStore = useAuthStore()
 const authApi = useAuthApi()
 
-const email = ref('')
+const emailOrPhone = ref('') // Changed from 'email'
 const password = ref('')
 const showPassword = ref(false)
 const isLoading = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
-const errors = ref<{ email?: string; password?: string }>({})
+const errors = ref<{ emailOrPhone?: string; password?: string }>({}) // Changed from 'email'
 
 const togglePassword = () => {
   showPassword.value = !showPassword.value
 }
 
-const validateEmail = () => {
-  if (!email.value) {
-    errors.value.email = 'Email is required'
+const validateEmailOrPhone = () => { // Changed function name
+  if (!emailOrPhone.value) {
+    errors.value.emailOrPhone = 'Email or phone is required'
     return false
   }
+  // Optional: Add validation for both email and phone formats
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!emailRegex.test(email.value)) {
-    errors.value.email = 'Please enter a valid email address'
+  const phoneRegex = /^[0-9]{10,15}$/
+  const trimmedValue = emailOrPhone.value.trim()
+
+  if (!emailRegex.test(trimmedValue) && !phoneRegex.test(trimmedValue.replace(/[\s\-\(\)]/g, ''))) {
+    errors.value.emailOrPhone = 'Please enter a valid email address or phone number'
     return false
   }
-  delete errors.value.email
+  delete errors.value.emailOrPhone
   return true
 }
 
@@ -167,10 +172,10 @@ const handleSignin = async () => {
   errors.value = {}
 
   // Validate form
-  const isEmailValid = validateEmail()
+  const isEmailOrPhoneValid = validateEmailOrPhone() // Changed
   const isPasswordValid = validatePassword()
 
-  if (!isEmailValid || !isPasswordValid) {
+  if (!isEmailOrPhoneValid || !isPasswordValid) {
     errorMessage.value = 'Please fix the errors in the form'
     return
   }
@@ -179,7 +184,7 @@ const handleSignin = async () => {
 
   try {
     const response = await authApi.login({
-      email: email.value.trim().toLowerCase(),
+      emailOrPhone: emailOrPhone.value.trim(), // Changed from email
       password: password.value,
     })
 

@@ -561,12 +561,10 @@ const loadProducts = async () => {
 // Load categories from API
 const loadCategories = async () => {
   try {
-    const response = await categoryApi.getCategories({ isActive: true, nested: false })
-    if (response.success && response.data) {
-      categories.value = response.data.data || []
-    }
+    // Change from getCategories to fetchCategories
+    await categoryApi.fetchCategories()
   } catch (error: any) {
-    console.error('Failed to load categories:', error)
+    console.error('Failed to load categories:', error.message)
   }
 }
 
@@ -661,7 +659,7 @@ const saveProduct = async () => {
     formDataToSend.append('price', String(formData.price))
     formDataToSend.append('stock', String(formData.stock))
     formDataToSend.append('category', formData.category)
-    
+
     if (formData.originalPrice) formDataToSend.append('originalPrice', String(formData.originalPrice))
     if (formData.discount) formDataToSend.append('discount', String(formData.discount))
     if (formData.brand) formDataToSend.append('brand', formData.brand)
