@@ -1,529 +1,452 @@
 <template>
-  <div class="checkout-page">
-
-    <div class="checkout-header bg-dark text-white py-3">
+  <div class="checkout-page w-100 min-vh-100 bg-light">
+    <header class="bg-white border-bottom py-3 main-header">
       <div class="container">
-        <h4 class="mb-0">Checkout</h4>
-      </div>
-    </div>
-
-    <div class="container my-5">
-
-      <div class="mb-4">
-        <router-link to="/shop" class="text-decoration-none text-dark">
-          <i class="bi bi-chevron-left"></i> Back to shopping
-        </router-link>
-      </div>
-
-
-      <div class="progress-steps mb-5">
-        <div class="step" :class="{ active: currentStep >= 1, completed: currentStep > 1 }">
-          <div class="step-circle">
-            <span v-if="currentStep > 1"><i class="bi bi-check"></i></span>
-            <span v-else>1</span>
+        <div class="row align-items-center">
+          <div class="col-4">
+            <button class="btn btn-link text-dark text-decoration-none d-flex align-items-center gap-2 p-0" @click="goBack">
+              <svg style="width: 18px; height: 18px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+              </svg>
+              <span class="fw-bold d-none d-md-inline">Back</span>
+            </button>
           </div>
-          <div class="step-label">Cart</div>
-        </div>
-        <div class="step-line" :class="{ active: currentStep >= 2 }"></div>
-        <div class="step" :class="{ active: currentStep >= 2, completed: currentStep > 2 }">
-          <div class="step-circle">
-            <span v-if="currentStep > 2"><i class="bi bi-check"></i></span>
-            <span v-else>2</span>
+
+          <div class="col-4 d-flex justify-content-center">
+            <div class="d-flex align-items-center gap-2 gap-md-3">
+              <div class="d-flex flex-column align-items-center">
+                <div :class="['step-pill', { 'active': step >= 1 }]">1</div>
+                <span :class="['step-label', { 'active': step >= 1 }]">Address</span>
+              </div>
+              <div class="step-line d-none d-sm-block"></div>
+              <div class="d-flex flex-column align-items-center">
+                <div :class="['step-pill', { 'active': step >= 2 }]">2</div>
+                <span :class="['step-label', { 'active': step >= 2 }]">Payment</span>
+              </div>
+              <div class="step-line d-none d-sm-block"></div>
+              <div class="d-flex flex-column align-items-center">
+                <div :class="['step-pill', { 'active': step >= 3 }]">3</div>
+                <span :class="['step-label', { 'active': step >= 3 }]">Review</span>
+              </div>
+            </div>
           </div>
-          <div class="step-label">Address</div>
-        </div>
-        <div class="step-line" :class="{ active: currentStep >= 3 }"></div>
-        <div class="step" :class="{ active: currentStep >= 3 }">
-          <div class="step-circle">3</div>
-          <div class="step-label">Payment</div>
+          
+          <div class="col-4 text-end">
+             <span class="small fw-bold d-none d-md-inline">Secured Checkout</span>
+          </div>
         </div>
       </div>
+    </header>
 
-
+    <main class="container py-4 py-md-5">
       <div class="row g-4">
-
-        <div class="col-lg-7">
-          <h3 class="mb-4">Checkout</h3>
-          <div class="checkout-section mb-4">
-            <div class="section-header d-flex align-items-center mb-3">
-              <i class="bi bi-person-circle me-2 fs-5"></i>
-              <h5 class="mb-0">Contact Information</h5>
-            </div>
-            <div class="section-content">
-              <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input
-                  type="email"
-                  class="form-control"
-                  id="email"
-                  v-model="formData.email"
-                  placeholder="your@email.com"
-                  required
-                >
-              </div>
+        <div class="col-lg-8">
+          
+          <div v-if="step === 1" class="checkout-card slide-in">
+            <h4 class="fw-bold mb-4">Shipping Address</h4>
+            <form @submit.prevent="nextStep">
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label for="firstName" class="form-label">First Name</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="firstName"
-                    v-model="formData.firstName"
-                    required
-                  >
+                  <label class="form-label small fw-bold">First Name</label>
+                  <input v-model="form.firstName" type="text" class="form-control custom-input" required placeholder="John">
                 </div>
                 <div class="col-md-6">
-                  <label for="lastName" class="form-label">Last Name</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="lastName"
-                    v-model="formData.lastName"
-                    required
-                  >
+                  <label class="form-label small fw-bold">Last Name</label>
+                  <input v-model="form.lastName" type="text" class="form-control custom-input" required placeholder="Doe">
+                </div>
+                <div class="col-12">
+                  <label class="form-label small fw-bold">Street Address</label>
+                  <input v-model="form.address" type="text" class="form-control custom-input" required placeholder="123 Main St">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold">City</label>
+                  <input v-model="form.city" type="text" class="form-control custom-input" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-bold">Postal Code</label>
+                  <input v-model="form.zip" type="text" class="form-control custom-input" required>
                 </div>
               </div>
-              <div class="mt-3">
-                <label for="phone" class="form-label">Phone</label>
-                <input
-                  type="tel"
-                  class="form-control"
-                  id="phone"
-                  v-model="formData.phone"
-                  placeholder="+855100000000"
-                  required
-                >
-              </div>
-            </div>
+              <button type="submit" class="btn btn-dark w-100 mt-4 py-3 fw-bold checkout-btn">
+                Continue to Payment
+              </button>
+            </form>
           </div>
 
-
-          <div class="checkout-section mb-4">
-            <div class="section-header d-flex align-items-center mb-3">
-              <i class="bi bi-geo-alt me-2 fs-5"></i>
-              <h5 class="mb-0">Shipping Address</h5>
-            </div>
-            <div class="section-content">
-              <div class="mb-3">
-                <label for="street" class="form-label">Street Address</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="street"
-                  v-model="formData.street"
-                  required
-                >
-              </div>
-              <div class="row g-3">
-                <div class="col-md-4">
-                  <label for="city" class="form-label">City</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="city"
-                    v-model="formData.city"
-                    placeholder="122 Main st"
-                    required
-                  >
-                </div>
-                <div class="col-md-4">
-                  <label for="state" class="form-label">State</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="state"
-                    v-model="formData.state"
-                    required
-                  >
-                </div>
-                <div class="col-md-4">
-                  <label for="zipCode" class="form-label">Zip Code</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="zipCode"
-                    v-model="formData.zipCode"
-                    required
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
-
-
-          <button
-            class="btn btn-success btn-lg w-100"
-            @click="placeOrder"
-            :disabled="!isFormValid || isProcessing"
-          >
-            <span v-if="isProcessing">
-              <span class="spinner-border spinner-border-sm me-2"></span>
-              Processing...
-            </span>
-            <span v-else>
-              Place order ${{ orderTotal.toFixed(2) }}
-            </span>
-          </button>
-        </div>
-
-        <div class="col-lg-5">
-          <div class="order-summary">
-            <h5 class="mb-4">Order Summary</h5>
-
-            <div class="cart-items mb-4">
-              <div
-                v-for="item in cartItems"
-                :key="item.id"
-                class="cart-item d-flex mb-3"
+          <div v-if="step === 2" class="checkout-card slide-in">
+            <h4 class="fw-bold mb-4">Payment Method</h4>
+            <div class="payment-grid">
+              <!-- Credit Card Option -->
+              <div 
+                class="payment-option" 
+                :class="{ 'active': form.paymentMethod === 'card' }"
+                @click="form.paymentMethod = 'card'"
               >
-                <div class="item-image me-3">
-                  <img :src="item.image" :alt="item.name" class="img-fluid rounded">
-                  <span class="item-quantity">{{ item.quantity }}</span>
+                <div class="d-flex align-items-center gap-3">
+                  <input type="radio" :checked="form.paymentMethod === 'card'">
+                  <div>
+                    <div class="fw-bold">Credit/Debit Card</div>
+                    <small class="text-muted">Pay securely with your card</small>
+                  </div>
                 </div>
-                <div class="item-details flex-grow-1">
-                  <h6 class="mb-1">{{ item.name }}</h6>
-                  <p class="text-muted mb-0 small">Qty: {{ item.quantity }}</p>
+                <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                </svg>
+              </div>
+
+              <!-- Cash on Delivery Option -->
+              <div 
+                class="payment-option" 
+                :class="{ 'active': form.paymentMethod === 'cash' }"
+                @click="form.paymentMethod = 'cash'"
+              >
+                <div class="d-flex align-items-center gap-3">
+                  <input type="radio" :checked="form.paymentMethod === 'cash'">
+                  <div>
+                    <div class="fw-bold">Cash on Delivery</div>
+                    <small class="text-muted">Pay when you receive</small>
+                  </div>
                 </div>
-                <div class="item-price">
-                  <strong>${{ (item.price * item.quantity).toFixed(2) }}</strong>
+                <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+              </div>
+
+              <!-- QR Code Option -->
+              <div 
+                class="payment-option" 
+                :class="{ 'active': form.paymentMethod === 'qr' }"
+                @click="form.paymentMethod = 'qr'"
+              >
+                <div class="d-flex align-items-center gap-3">
+                  <input type="radio" :checked="form.paymentMethod === 'qr'">
+                  <div>
+                    <div class="fw-bold">Scan QR Code</div>
+                    <small class="text-muted">Pay via mobile banking</small>
+                  </div>
+                </div>
+                <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                </svg>
+              </div>
+            </div>
+
+            <!-- Card Details Form -->
+            <div v-if="form.paymentMethod === 'card'" class="mt-4 p-3 bg-light rounded border border-2 shadow-sm">
+               <div class="mb-3">
+                <label class="form-label small fw-bold">Card Number</label>
+                <input type="text" class="form-control custom-input" placeholder="0000 0000 0000 0000">
+              </div>
+              <div class="row g-2">
+                <div class="col-6">
+                  <label class="form-label small fw-bold">Expiry Date</label>
+                  <input type="text" class="form-control custom-input" placeholder="MM/YY">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-bold">CVV</label>
+                  <input type="password" class="form-control custom-input" placeholder="123">
                 </div>
               </div>
             </div>
 
-            <div class="order-totals">
-              <div class="d-flex justify-content-between mb-2">
-                <span>Subtotal:</span>
-                <span>${{ subtotal.toFixed(2) }}</span>
+            <!-- Cash on Delivery Info -->
+            <div v-if="form.paymentMethod === 'cash'" class="mt-4 p-3 bg-light rounded border border-2">
+              <div class="d-flex align-items-start gap-2">
+                <svg style="width: 20px; height: 20px; flex-shrink: 0; margin-top: 2px;" class="text-success" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                </svg>
+                <div>
+                  <p class="mb-1 fw-bold small">Cash on Delivery Available</p>
+                  <p class="mb-0 text-muted small">Please keep exact change ready. Our delivery partner will collect the payment when your order arrives.</p>
+                </div>
               </div>
-              <div class="d-flex justify-content-between mb-3">
-                <span>Shipping:</span>
-                <span class="text-success">{{ shipping === 0 ? 'Free' : '$' + shipping.toFixed(2) }}</span>
+            </div>
+
+            <!-- QR Code Display -->
+            <div v-if="form.paymentMethod === 'qr'" class="mt-4 p-4 bg-light rounded border border-2 text-center">
+              <p class="fw-bold mb-3">Scan to Pay</p>
+              <div class="qr-code-container mx-auto mb-3">
+                <img 
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Payment:${{ cartStore.grandTotal.toFixed(2) }}" 
+                  alt="QR Code for Payment"
+                  class="w-100 h-100"
+                  style="object-fit: contain;"
+                />
               </div>
-              <hr>
-              <div class="d-flex justify-content-between fs-5">
-                <strong>Total:</strong>
-                <strong>${{ orderTotal.toFixed(2) }}</strong>
+              <p class="text-muted small mb-0">Use your banking app to scan and complete payment</p>
+              <p class="text-muted small">Total: <span class="fw-bold text-dark">${{ cartStore.grandTotal.toFixed(2) }}</span></p>
+            </div>
+
+            <div class="row g-2 mt-4">
+              <div class="col-6">
+                <button @click="step = 1" class="btn btn-outline-dark w-100 py-3 fw-bold">Back</button>
+              </div>
+              <div class="col-6">
+                <button @click="step = 3" class="btn btn-dark w-100 py-3 fw-bold checkout-btn">Review Order</button>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
 
-    <div
-      class="modal fade"
-      id="successModal"
-      tabindex="-1"
-      ref="successModalRef"
-    >
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-body text-center py-5">
-            <div class="success-icon mb-4">
-              <i class="bi bi-check-circle-fill text-success" style="font-size: 4rem;"></i>
+          <div v-if="step === 3" class="checkout-card slide-in">
+            <h4 class="fw-bold mb-4">Review Your Order</h4>
+            <div class="bg-light p-3 rounded mb-4 border border-1">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <h6 class="fw-bold mb-1 text-primary">Shipping To:</h6>
+                  <p class="mb-0 small fw-bold">{{ form.firstName }} {{ form.lastName }}</p>
+                  <p class="mb-0 small text-muted">{{ form.address }}, {{ form.city }} {{ form.zip }}</p>
+                </div>
+                <button class="btn btn-sm btn-outline-dark px-3" @click="step = 1">Edit</button>
+              </div>
             </div>
-            <h3 class="mb-3">Order Placed Successfully!</h3>
-            <p class="text-muted mb-4">
-              Thank you for your purchase. Your order has been received and will be processed soon.
-            </p>
-            <p class="mb-4">
-              <strong>Order ID:</strong> #{{ orderId }}
-            </p>
-            <button class="btn btn-primary" @click="goToHome">
-              Continue Shopping
+
+            <div class="bg-light p-3 rounded mb-4 border border-1">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="fw-bold mb-1 text-primary">Payment Method:</h6>
+                  <p class="mb-0 small fw-bold">
+                    {{ form.paymentMethod === 'card' ? 'Credit/Debit Card' : form.paymentMethod === 'cash' ? 'Cash on Delivery' : 'QR Code Payment' }}
+                  </p>
+                </div>
+                <button class="btn btn-sm btn-outline-dark px-3" @click="step = 2">Edit</button>
+              </div>
+            </div>
+
+            <div class="cart-items-preview">
+              <div v-for="item in cartStore.items" :key="item.id" class="d-flex align-items-center gap-3 py-3 border-bottom">
+                <img :src="item.image" class="rounded border" width="60" height="60" style="object-fit: cover; background: #fff;">
+                <div class="flex-grow-1">
+                  <h6 class="mb-0 fw-bold small">{{ item.name }}</h6>
+                  <small class="text-muted">Quantity: {{ item.quantity }}</small>
+                </div>
+                <span class="fw-bold small">${{ (item.price * item.quantity).toFixed(2) }}</span>
+              </div>
+            </div>
+
+            <button @click="placeOrder" class="btn btn-success w-100 mt-4 py-3 fw-bold checkout-btn shadow-sm" :disabled="isProcessing">
+              <span v-if="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
+              {{ isProcessing ? 'Confirming Order...' : 'Place Order Now' }}
             </button>
           </div>
         </div>
+
+        <div class="col-lg-4">
+          <aside class="sticky-summary">
+            <div class="card border-0 shadow-sm p-4 rounded-4">
+              <h5 class="fw-bold mb-4">Order Summary</h5>
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Subtotal</span>
+                <span class="fw-bold">${{ cartStore.itemTotal.toFixed(2) }}</span>
+              </div>
+              <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Shipping</span>
+                <span class="text-success fw-bold">{{ cartStore.shippingCost === 0 ? 'Free' : '$' + cartStore.shippingCost }}</span>
+              </div>
+              <div v-if="cartStore.discount > 0" class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Discount</span>
+                <span class="text-danger fw-bold">-${{ cartStore.discount.toFixed(2) }}</span>
+              </div>
+              <hr class="my-3">
+              <div class="d-flex justify-content-between align-items-end mb-0">
+                <div>
+                  <span class="fw-bold h5 mb-0">Total</span>
+                  <p class="text-muted small mb-0">Inc. taxes</p>
+                </div>
+                <span class="fw-bold h3 text-primary mb-0">${{ cartStore.grandTotal.toFixed(2) }}</span>
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
-    </div>
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+import { useCartStore } from '@/stores/cartStore'
 
-interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-}
+const router = useRouter()
+const cartStore = useCartStore()
+const step = ref(1)
+const isProcessing = ref(false)
 
-interface FormData {
-  email: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
-  street: string;
-  city: string;
-  state: string;
-  zipCode: string;
-}
-
-const router = useRouter();
-const currentStep = ref(2);
-const isProcessing = ref(false);
-const orderId = ref('');
-const successModalRef = ref<HTMLElement | null>(null);
-
-const formData = ref<FormData>({
-  email: '',
+const form = reactive({
   firstName: '',
   lastName: '',
-  phone: '',
-  street: '',
+  address: '',
   city: '',
-  state: '',
-  zipCode: ''
-});
+  zip: '',
+  paymentMethod: 'card'
+})
 
-const cartItems = ref<CartItem[]>([
-  {
-    id: 1,
-    name: 'Premium Leather Notebook',
-    price: 45.00,
-    quantity: 1,
-    image: '/public/images/notebooks/book1.jpg'
-  }
-]);
+const goBack = () => {
+  if (step.value > 1) step.value--
+  else router.push('/cart')
+}
 
-const subtotal = computed(() => {
-  return cartItems.value.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-});
-
-const shipping = computed(() => {
-  return subtotal.value > 50 ? 0 : 5.00;
-});
-
-const orderTotal = computed(() => {
-  return subtotal.value + shipping.value;
-});
-
-const isFormValid = computed(() => {
-  return formData.value.email &&
-         formData.value.firstName &&
-         formData.value.lastName &&
-         formData.value.phone &&
-         formData.value.street &&
-         formData.value.city &&
-         formData.value.state &&
-         formData.value.zipCode;
-});
+const nextStep = () => {
+  step.value++
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 
 const placeOrder = async () => {
-  if (!isFormValid.value) {
-    alert('Please fill in all required fields');
-    return;
-  }
-
-  isProcessing.value = true;
-
+  isProcessing.value = true
+  
+  // Simulating real API delay
   setTimeout(() => {
-    orderId.value = 'ORD' + Math.random().toString(36).substr(2, 9).toUpperCase();
-    isProcessing.value = false;
-
-
-    alert(`Order Placed Successfully! Order ID: ${orderId.value}`);
-    router.push('/');
-  }, 2000);
-};
-
-const goToHome = () => {
-  router.push('/');
-};
+    isProcessing.value = false
+    
+    // EMPTY THE CART HERE
+    cartStore.$reset() 
+    
+    // NAVIGATE TO SUCCESS PAGE
+    router.push('/order-success')
+  }, 1800)
+}
 </script>
 
 <style scoped>
-.checkout-page {
-  min-height: 100vh;
-  background-color: #f8f9fa;
+.main-header {
+  background: white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
-.checkout-header {
-  background-color: #1e293b !important;
+.sticky-summary {
+  position: sticky;
+  top: 90px; 
+  z-index: 1000;
 }
 
-.progress-steps {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 0;
+/* Form & UI Styling */
+.checkout-card {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
-.step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
+.custom-input {
+  border: 2px solid #f1f1f1;
+  padding: 0.75rem;
+  font-size: 0.95rem;
+  border-radius: 8px;
 }
 
-.step-circle {
-  width: 40px;
-  height: 40px;
+.custom-input:focus {
+  border-color: #000;
+  box-shadow: 0 0 0 4px rgba(0,0,0,0.05);
+}
+
+/* Progress Step UI */
+.step-pill {
+  width: 32px;
+  height: 32px;
+  background: #f1f1f1;
   border-radius: 50%;
-  background-color: #e9ecef;
-  border: 2px solid #e9ecef;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  color: #6c757d;
+  font-weight: bold;
+  font-size: 0.85rem;
+  color: #888;
   transition: all 0.3s ease;
 }
 
-.step.active .step-circle {
-  background-color: #0d6efd;
-  border-color: #0d6efd;
-  color: white;
-}
-
-.step.completed .step-circle {
-  background-color: #198754;
-  border-color: #198754;
-  color: white;
+.step-pill.active {
+  background: #000;
+  color: #fff;
 }
 
 .step-label {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: #6c757d;
-  font-weight: 500;
-}
-
-.step.active .step-label {
-  color: #0d6efd;
-}
-
-.step-line {
-  width: 100px;
-  height: 2px;
-  background-color: #e9ecef;
-  margin: 0 1rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #888;
+  margin-top: 0.35rem;
   transition: all 0.3s ease;
 }
 
-.step-line.active {
-  background-color: #198754;
+.step-label.active {
+  color: #000;
 }
 
-.checkout-section {
-  background: white;
-  padding: 1.5rem;
+.step-line {
+  height: 2px;
+  width: 30px;
+  background: #f1f1f1;
+  margin-bottom: 20px;
+}
+
+/* Payment Layout */
+.payment-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.payment-option {
+  border: 2px solid #f1f1f1;
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.2s;
+}
+
+.payment-option:hover {
+  border-color: #ccc;
+}
+
+.payment-option.active {
+  border-color: #0d6efd;
+  background-color: #f8fbff;
+}
+
+/* QR Code Styling */
+.qr-code-container {
+  width: 200px;
+  height: 200px;
+  border: 2px solid #dee2e6;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.section-header h5 {
-  color: #1e293b;
-}
-
-.section-content {
-  padding-left: 2rem;
-}
-
-
-.order-summary {
+  overflow: hidden;
   background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  position: sticky;
-  top: 100px;
 }
 
-.cart-item {
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.cart-item:last-child {
-  border-bottom: none;
-}
-
-.item-image {
-  position: relative;
-  width: 80px;
-  height: 80px;
-}
-
-.item-image img {
+.qr-placeholder {
   width: 100%;
   height: 100%;
-  object-fit: cover;
-}
-
-.item-quantity {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  background-color: #dc3545;
-  color: white;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 600;
 }
 
-.item-details h6 {
-  font-size: 0.95rem;
-  margin-bottom: 0.25rem;
-}
-
-.order-totals {
-  margin-top: 1.5rem;
-}
-
-.success-icon {
-  animation: scaleIn 0.5s ease-out;
-}
-
-@keyframes scaleIn {
-  from {
-    transform: scale(0);
-  }
-  to {
-    transform: scale(1);
-  }
-}
-
-@media (max-width: 992px) {
-  .order-summary {
-    position: static;
+/* Responsive Fixes */
+@media (max-width: 991.98px) {
+  .sticky-summary {
+    position: static; 
     margin-top: 2rem;
   }
-
-  .section-content {
-    padding-left: 0;
-  }
-
-  .step-line {
-    width: 60px;
+  .checkout-card {
+    padding: 1.5rem;
   }
 }
 
-@media (max-width: 576px) {
-  .progress-steps {
-    padding: 1rem 0;
-  }
+.checkout-btn {
+  transition: all 0.2s;
+}
 
-  .step-circle {
-    width: 35px;
-    height: 35px;
-    font-size: 0.875rem;
-  }
+.checkout-btn:active {
+  transform: scale(0.98);
+}
 
-  .step-label {
-    font-size: 0.75rem;
-  }
+.slide-in {
+  animation: slideUp 0.4s ease-out;
+}
 
-  .step-line {
-    width: 40px;
-  }
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>

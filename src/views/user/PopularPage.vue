@@ -29,14 +29,6 @@
           <p class="text-muted">Check back soon for our latest hot deals.</p>
         </div>
       </div>
-
-      <!-- View All Button -->
-      <div class="text-center mt-5">
-        <router-link to="/shop" class="btn btn-primary btn-lg">
-          Explore More Products
-          <i class="bi bi-arrow-right ms-2"></i>
-        </router-link>
-      </div>
     </div>
   </section>
 </template>

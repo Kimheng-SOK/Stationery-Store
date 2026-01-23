@@ -30,16 +30,31 @@
             ${{ product.originalPrice }}
           </span>
         </div>
-        <button class="btn btn-sm btn-outline-primary" @click="addToCart">
-          <i class="bi bi-cart-plus"></i>
+        <button 
+          class="btn btn-sm btn-outline-primary" 
+          @click="addToCart"
+          :disabled="!product.inStock || addingToCart"
+        >
+          <i :class="addingToCart ? 'bi bi-hourglass-split' : 'bi bi-cart-plus'"></i>
         </button>
       </div>
+    </div>
+
+    <!-- Success Toast Message -->
+    <div 
+      v-if="showSuccessMessage" 
+      class="success-toast"
+    >
+      <i class="bi bi-check-circle-fill me-2"></i>
+      Added to cart!
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useCartStore } from '@/stores/cartStore'
 import type { Product, BadgeType } from '@/types/product'
 
 interface Props {
@@ -48,8 +63,11 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const emit = defineEmits(['add-to-cart'])
 const router = useRouter()
+const cartStore = useCartStore()
+
+const addingToCart = ref(false)
+const showSuccessMessage = ref(false)
 
 const renderStars = (rating: number): string => {
   return '★'.repeat(rating) + '☆'.repeat(5 - rating)
@@ -77,8 +95,31 @@ const getBadgeText = (badgeType: BadgeType): string => {
   return texts[badgeType] || badgeType.toUpperCase()
 }
 
-const addToCart = () => {
-  emit('add-to-cart')
+const addToCart = async () => {
+  if (!props.product.inStock) {
+    return
+  }
+
+  try {
+    addingToCart.value = true
+    
+    // Add to cart with quantity of 1
+    cartStore.addToCart(props.product, 1)
+    
+    // Show success message
+    showSuccessMessage.value = true
+    
+    // Hide message after 2 seconds
+    setTimeout(() => {
+      showSuccessMessage.value = false
+    }, 2000)
+  } catch (err) {
+    if (err instanceof Error) {
+      alert(err.message)
+    }
+  } finally {
+    addingToCart.value = false
+  }
 }
 
 const viewDetails = () => {
@@ -184,5 +225,41 @@ const viewDetails = () => {
   color: #6c757d;
   text-decoration: line-through;
   margin-left: 0.5rem;
+}
+
+.btn-outline-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Success Toast */
+.success-toast {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #198754;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 20;
+  animation: slideUp 0.3s ease-out;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex gap-3 mb-3 pb-3 border-bottom position-relative cart-item">
+  <div class="d-flex gap-3 mb-3 pb-3 border-bottom position-relative cart-item flex-column flex-md-row">
     <!-- Badge -->
     <div 
       v-if="item.badge" 
@@ -9,51 +9,54 @@
       {{ item.badge }}
     </div>
 
-    <!-- Product Image -->
-    <div class="position-relative" style="width: 150px; height: 150px; flex-shrink: 0;">
-      <img 
-        :src="item.image" 
-        :alt="item.name" 
-        class="w-100 h-100 rounded" 
-        style="object-fit: cover; cursor: pointer;"
-        @click="goToProduct"
-      />
-    </div>
-
-    <!-- Product Details -->
-    <div class="flex-grow-1">
-      <h3 
-        class="fw-bold mb-1" 
-        style="font-size: 0.9rem; cursor: pointer;"
-        @click="goToProduct"
-      >
-        {{ item.name }}
-      </h3>
-      <p class="text-muted fw-bold mb-2" style="font-size: 0.8rem;">
-        {{ item.description }}
-      </p>
-      <div class="d-flex gap-3 align-items-center">
-        <span class="fw-bold">${{ item.price.toFixed(2) }}</span>
-        <span 
-          v-if="item.originalPrice" 
-          class="text-muted text-decoration-line-through" 
-          style="font-size: 0.85rem;"
-        >
-          ${{ item.originalPrice.toFixed(2) }}
-        </span>
+    <!-- First Row (Mobile) / Left Section (Desktop): Image and Product Details -->
+    <div class="d-flex gap-3 flex-grow-1">
+      <!-- Product Image -->
+      <div class="position-relative" style="width: 150px; height: 150px; flex-shrink: 0;">
+        <img 
+          :src="item.image" 
+          :alt="item.name" 
+          class="w-100 h-100 rounded" 
+          style="object-fit: cover; cursor: pointer;"
+          @click="goToProduct"
+        />
       </div>
-      <p class="text-muted fw-bold mb-0" style="font-size: 0.75rem;">
-        SKU: {{ item.sku }}
-      </p>
-      <p class="text-muted fw-bold mb-0" style="font-size: 0.75rem;">
-        Delivery by {{ item.delivery }}
-      </p>
+
+      <!-- Product Details -->
+      <div class="flex-grow-1">
+        <h3 
+          class="fw-bold mb-1" 
+          style="font-size: 0.9rem; cursor: pointer;"
+          @click="goToProduct"
+        >
+          {{ item.name }}
+        </h3>
+        <p class="text-muted fw-bold mb-2" style="font-size: 0.8rem;">
+          {{ item.description }}
+        </p>
+        <div class="d-flex gap-3 align-items-center">
+          <span class="fw-bold">${{ item.price.toFixed(2) }}</span>
+          <span 
+            v-if="item.originalPrice" 
+            class="text-muted text-decoration-line-through" 
+            style="font-size: 0.85rem;"
+          >
+            ${{ item.originalPrice.toFixed(2) }}
+          </span>
+        </div>
+        <p class="text-muted fw-bold mb-0" style="font-size: 0.75rem;">
+          SKU: {{ item.sku }}
+        </p>
+        <p class="text-muted fw-bold mb-0" style="font-size: 0.75rem;">
+          Delivery by {{ item.delivery }}
+        </p>
+      </div>
     </div>
 
-    <!-- Quantity & Total -->
-    <div class="d-flex align-items-center gap-4">
+    <!-- Second Row (Mobile) / Right Section (Desktop): Quantity & Total -->
+    <div class="d-flex align-items-center gap-3 justify-content-between justify-content-md-end">
       <!-- Quantity Controls -->
-      <div class="quantity-controls d-flex align-items-center gap-2 border px-2 h-25 me-8" style="height: 32px;">
+      <div class="quantity-controls d-flex align-items-center gap-2 border px-2" style="height: 32px;">
         <button 
           @click="$emit('decrease')" 
           class="btn btn-link p-0 text-dark text-decoration-none" 
@@ -76,15 +79,16 @@
       </div>
 
       <!-- Total Price -->
-      <span class="fw-bold me-4" style="width: 80px; text-align: right;">
+      <span class="fw-bold" style="width: 80px; text-align: right;">
         ${{ (item.price * item.quantity).toFixed(2) }}
       </span>
 
       <!-- Remove Button -->
       <button 
         @click="$emit('remove')" 
-        class="btn btn-link p-0 text-dark bg-secondary-subtle h-full"
+        class="btn btn-link p-0 text-dark bg-secondary-subtle"
         title="Remove item"
+        style="padding: 8px !important;"
       >
         <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
