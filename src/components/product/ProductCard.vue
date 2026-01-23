@@ -30,8 +30,8 @@
             ${{ product.originalPrice }}
           </span>
         </div>
-        <button 
-          class="btn btn-sm btn-outline-primary" 
+        <button
+          class="btn btn-sm btn-outline-primary"
           @click="addToCart"
           :disabled="!product.inStock || addingToCart"
         >
@@ -41,8 +41,8 @@
     </div>
 
     <!-- Success Toast Message -->
-    <div 
-      v-if="showSuccessMessage" 
+    <div
+      v-if="showSuccessMessage"
       class="success-toast"
     >
       <i class="bi bi-check-circle-fill me-2"></i>
@@ -102,13 +102,13 @@ const addToCart = async () => {
 
   try {
     addingToCart.value = true
-    
+
     // Add to cart with quantity of 1
     cartStore.addToCart(props.product, 1)
-    
+
     // Show success message
     showSuccessMessage.value = true
-    
+
     // Hide message after 2 seconds
     setTimeout(() => {
       showSuccessMessage.value = false
@@ -123,7 +123,7 @@ const addToCart = async () => {
 }
 
 const viewDetails = () => {
-  router.push({ name: 'ProductDetail', params: { id: props.product.id } })
+  router.push({ name: 'ProductDetail', params: { id: props.product._id } })
 }
 </script>
 

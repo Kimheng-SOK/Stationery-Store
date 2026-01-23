@@ -4,7 +4,6 @@ export type ProductStatus = 'active' | 'inactive' | 'draft'
 // Backend Product Model (from API)
 export interface Product {
   _id?: string
-  id?: number | string // For backward compatibility
   name: string
   sku: string
   price: number
@@ -25,21 +24,4 @@ export interface Product {
   description?: string
   status?: ProductStatus
   badges?: BadgeType[]
-}
-
-// Category interface (matches backend)
-export interface Category {
-  _id?: string
-  id?: number | string // For backward compatibility
-  name: string
-  slug?: string
-  description?: string
-  image?: string
-  parent?: Category | string | null
-  children?: Category[]
-  isActive?: boolean
-  order?: number
-  productCount?: number
-  createdAt?: string
-  updatedAt?: string
 }

@@ -66,7 +66,7 @@
           <p class="drop-text">
             Drag and drop your image here or
             <button
-              @click="$refs.fileInput?.click()"
+              @click="fileInput?.click()"
               class="link-primary text-decoration-none fw-semibold"
               type="button"
             >
@@ -123,7 +123,7 @@ const emit = defineEmits<{
 
 const uploadMode = ref<'url' | 'device'>('device')
 const urlInput = ref('')
-const fileInput = ref<HTMLInputElement>()
+const fileInput = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
 const isLoading = ref(false)
 const imagePreview = ref(props.modelValue)
@@ -165,6 +165,7 @@ const addFromUrl = async () => {
     imagePreview.value = urlInput.value
     emit('update:modelValue', urlInput.value)
     urlInput.value = ''
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     errorMessage.value = 'Failed to load image from URL'
   } finally {
