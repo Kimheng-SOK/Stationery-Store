@@ -3,12 +3,19 @@
     <div class="rewards-card">
       <!-- Header -->
       <div class="rewards-header">
-        <h2 class="rewards-title">Rewards</h2>
+        <h2 class="rewards-title">Rewards ({{ coupons.length }})</h2>
         <button class="btn-add-new" @click="openAddModal">Add New</button>
       </div>
 
+      <!-- Loading State -->
+      <div v-if="loading" class="text-center py-5">
+        <div class="spinner-border text-danger" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+
       <!-- Coupons Grid -->
-      <div class="coupons-grid">
+      <div v-else class="coupons-grid">
         <div
           v-if="coupons.length === 0"
           class="text-center py-5 text-muted"
@@ -17,16 +24,32 @@
           <p>No coupons found. Click "Add New" to create one.</p>
         </div>
 
-        <div v-for="(coupon, index) in coupons" :key="coupon.id" class="coupon-card">
+        <div v-for="(coupon, index) in coupons" :key="coupon._id" class="coupon-card">
           <div class="coupon-content">
             <div class="coupon-number-section">
               <div class="coupon-number">{{ index + 1 }}</div>
               <div class="coupon-label">No.</div>
             </div>
             <div class="divider"></div>
-            <div class="coupon-text">
+              <div class="coupon-text">
               <div class="coupon-code">{{ coupon.code }}</div>
               <div class="discount-text">Discount {{ coupon.discount }}%</div>
+              <div class="usage-info">
+                <span class="usage-text">
+                  <i class="bi bi-ticket-perforated"></i>
+                  <!-- Coupon: {{ coupon.usageLimit }}/{{ (coupon.usageLimit) - (coupon.usedCount) }} -->
+                   Coupon: {{ coupon.usedCount }}/{{ coupon.usageLimit }}
+                </span>
+              </div>
+              <div class="status-badge">
+                <span
+                  :class="['badge', 'badge-clickable', getStatusClass(coupon.status)]"
+                  @click="toggleStatus(coupon)"
+                  :title="coupon.status === 'expired' ? 'Expired (cannot change)' : 'Click to toggle status'"
+                >
+                  {{ coupon.status }}
+                </span>
+              </div>
             </div>
             <div class="coupon-actions">
               <button class="btn-edit" @click="editCoupon(coupon)">Edit</button>
@@ -60,35 +83,98 @@
               {{ submitMessage.text }}
             </div>
 
-            <!-- Coupon Code -->
-            <div class="mb-3">
-              <label class="form-label">Coupon Code</label>
-              <input
-                v-model="formData.code"
-                type="text"
-                :class="['form-control', { 'is-invalid': errors.code }]"
-                placeholder="e.g., HAPPYNEWYEAR"
-                @input="formData.code = formData.code.toUpperCase()"
-              />
-              <small v-if="errors.code" class="text-danger">{{ errors.code }}</small>
-              <small class="text-muted d-block mt-1">Coupon code (uppercase automatically)</small>
+            <!-- Coupon Code & Discount -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Coupon Code <span class="text-danger">*</span></label>
+                <input
+                  v-model="formData.code"
+                  type="text"
+                  :class="['form-control', { 'is-invalid': errors.code }]"
+                  placeholder="e.g., HAPPYNEWYEAR"
+                  @input="formData.code = formData.code.toUpperCase()"
+                  :disabled="isSubmitting"
+                />
+                <small v-if="errors.code" class="text-danger">{{ errors.code }}</small>
+                <small class="text-muted d-block mt-1">Coupon code (uppercase automatically)</small>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Discount Percentage (%) <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <input
+                    v-model.number="formData.discount"
+                    type="number"
+                    :class="['form-control', { 'is-invalid': errors.discount }]"
+                    placeholder="e.g., 15"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    :disabled="isSubmitting"
+                  />
+                  <span class="input-group-text">%</span>
+                </div>
+                <small v-if="errors.discount" class="text-danger">{{ errors.discount }}</small>
+              </div>
             </div>
 
-            <!-- Discount -->
-            <div class="mb-3">
-              <label class="form-label">Discount Percentage (%)</label>
-              <div class="input-group">
+            <!-- Start Date & Validity Days -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Start Date</label>
                 <input
-                  v-model.number="formData.discount"
-                  type="number"
-                  :class="['form-control', { 'is-invalid': errors.discount }]"
-                  placeholder="e.g., 15"
-                  min="0"
-                  max="100"
+                  v-model="formData.startDate"
+                  type="date"
+                  :class="['form-control', { 'is-invalid': errors.startDate }]"
+                  :disabled="isSubmitting"
                 />
-                <span class="input-group-text">%</span>
+                <small v-if="errors.startDate" class="text-danger">{{ errors.startDate }}</small>
+                <small class="text-muted d-block mt-1">Leave empty for immediate start</small>
               </div>
-              <small v-if="errors.discount" class="text-danger">{{ errors.discount }}</small>
+
+              <div class="col-md-6">
+                <label class="form-label">Validity Days <span class="text-danger">*</span></label>
+                <input
+                  v-model.number="formData.validityDays"
+                  type="number"
+                  :class="['form-control', { 'is-invalid': errors.validityDays }]"
+                  placeholder="e.g., 30"
+                  min="1"
+                  :disabled="isSubmitting"
+                />
+                <small v-if="errors.validityDays" class="text-danger">{{ errors.validityDays }}</small>
+                <small class="text-muted d-block mt-1">Number of days coupon is valid</small>
+              </div>
+            </div>
+
+            <!-- Status & Usage Limit -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <select
+                  :class="['form-select', { 'is-invalid': errors.status }]"
+                  v-model="formData.status"
+                  :disabled="isSubmitting"
+                >
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+                <small v-if="errors.status" class="text-danger">{{ errors.status }}</small>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Usage Limit (optional)</label>
+                <input
+                  v-model.number="formData.usageLimit"
+                  type="number"
+                  :class="['form-control', { 'is-invalid': errors.usageLimit }]"
+                  placeholder="e.g., 100 (leave empty for unlimited)"
+                  min="1"
+                  :disabled="isSubmitting"
+                />
+                <small v-if="errors.usageLimit" class="text-danger">{{ errors.usageLimit }}</small>
+                <small class="text-muted d-block mt-1">Maximum number of times this coupon can be used</small>
+              </div>
             </div>
 
             <!-- Description -->
@@ -99,54 +185,16 @@
                 class="form-control"
                 rows="3"
                 placeholder="e.g., New Year Special Offer"
+                :disabled="isSubmitting"
               ></textarea>
             </div>
 
-            <!-- Start Date & End Date -->
-            <div class="row g-3 mb-3">
-              <div class="col-md-6">
-                <label class="form-label">Start Date</label>
-                <input
-                  v-model="formData.startDate"
-                  type="date"
-                  :class="['form-control', { 'is-invalid': errors.startDate }]"
-                />
-                <small v-if="errors.startDate" class="text-danger">{{ errors.startDate }}</small>
+            <!-- End Date Display (calculated) -->
+            <div v-if="calculatedEndDate" class="mb-3">
+              <div class="alert alert-info">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>End Date:</strong> {{ formatDate(calculatedEndDate) }}
               </div>
-
-              <div class="col-md-6">
-                <label class="form-label">End Date</label>
-                <input
-                  v-model="formData.endDate"
-                  type="date"
-                  :class="['form-control', { 'is-invalid': errors.endDate }]"
-                />
-                <small v-if="errors.endDate" class="text-danger">{{ errors.endDate }}</small>
-              </div>
-            </div>
-
-            <!-- Status -->
-            <div class="mb-3">
-              <label class="form-label">Status</label>
-              <select :class="['form-select', { 'is-invalid': errors.status }]" v-model="formData.status">
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="expired">Expired</option>
-              </select>
-              <small v-if="errors.status" class="text-danger">{{ errors.status }}</small>
-            </div>
-
-            <!-- Usage Limit -->
-            <div class="mb-3">
-              <label class="form-label">Usage Limit (optional)</label>
-              <input
-                v-model.number="formData.usageLimit"
-                type="number"
-                class="form-control"
-                placeholder="e.g., 100 (leave empty for unlimited)"
-                min="1"
-              />
-              <small class="text-muted d-block mt-1">Maximum number of times this coupon can be used</small>
             </div>
 
             <!-- Action Buttons -->
@@ -179,8 +227,7 @@
           </div>
           <div class="modal-body">
             <p>
-              Are you sure you want to delete the coupon <strong>{{ couponToDelete?.code }}</strong
-              >?
+              Are you sure you want to delete the coupon <strong>{{ couponToDelete?.code }}</strong>?
             </p>
             <p class="text-muted small">This action cannot be undone.</p>
           </div>
@@ -188,7 +235,10 @@
             <button type="button" class="btn btn-secondary" @click="showDeleteModal = false">
               Cancel
             </button>
-            <button type="button" class="btn btn-danger" @click="deleteCoupon">Delete</button>
+            <button type="button" class="btn btn-danger" @click="deleteCoupon" :disabled="isDeleting">
+              <span v-if="isDeleting" class="spinner-border spinner-border-sm me-2"></span>
+              Delete
+            </button>
           </div>
         </div>
       </div>
@@ -197,190 +247,307 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useFormState } from '@/composables/useFormState'
+import { ref, computed, onMounted } from 'vue'
+import axios from 'axios'
 
 interface Coupon {
-  id: number
+  _id: string
   code: string
   discount: number
   description?: string
-  startDate?: string
-  endDate?: string
+  startDate: string
+  endDate: string
+  validityDays: number
   status: 'active' | 'inactive' | 'expired'
-  usageLimit?: number
+  usageLimit: number
+  usedCount: number
+  createdAt: string
+  updatedAt: string
 }
 
-// Sample data
-const initialCoupons: Coupon[] = [
-  {
-    id: 1,
-    code: 'HAPPYNEWYEAR',
-    discount: 15,
-    description: 'New Year Special Offer',
-    status: 'active',
-  },
-  {
-    id: 2,
-    code: 'MERRYCHRISTMAS',
-    discount: 15,
-    description: 'Christmas Special',
-    status: 'active',
-  },
-  {
-    id: 3,
-    code: 'SAVE40',
-    discount: 40,
-    description: 'Big Savings',
-    status: 'active',
-  },
-  {
-    id: 4,
-    code: 'WELCOME10',
-    discount: 10,
-    description: 'Welcome Offer',
-    status: 'active',
-  },
-  {
-    id: 5,
-    code: 'STUDENT10',
-    discount: 10,
-    description: 'Student Discount',
-    status: 'active',
-  },
-  {
-    id: 6,
-    code: 'CLEARANCE25',
-    discount: 30,
-    description: 'Clearance Sale',
-    status: 'active',
-  },
-  {
-    id: 7,
-    code: 'HALLOWEEN',
-    discount: 5,
-    description: 'Halloween Special',
-    status: 'active',
-  },
-  {
-    id: 8,
-    code: 'ANNIVERSARY10',
-    discount: 50,
-    description: 'Anniversary Special',
-    status: 'active',
-  },
-]
+interface CouponFormData {
+  code: string
+  discount: number | string
+  description?: string
+  startDate?: string
+  validityDays: number | string
+  status: 'active' | 'inactive'
+  usageLimit: number | string
+}
 
-const coupons = ref<Coupon[]>(initialCoupons)
+const API_URL = 'http://localhost:5000/api/coupons'
+
+const coupons = ref<Coupon[]>([])
+const loading = ref(false)
 const showModal = ref(false)
 const showDeleteModal = ref(false)
 const editingCoupon = ref<Coupon | null>(null)
 const couponToDelete = ref<Coupon | null>(null)
+const isSubmitting = ref(false)
+const isDeleting = ref(false)
 
-const initialFormData = {
-  id: 0,
+const initialFormData: CouponFormData = {
   code: '',
-  discount: 0,
+  discount: '',
   description: '',
   startDate: '',
-  endDate: '',
-  status: 'active' as const,
-  usageLimit: undefined as number | undefined,
+  validityDays: 30,
+  status: 'active',
+  usageLimit: '',
 }
 
-const {
-  formData,
-  errors,
-  isSubmitting,
-  submitMessage,
-  validateForm,
-  resetForm,
-  showSuccess,
-  showError,
-  clearErrors,
-} = useFormState(initialFormData)
+const formData = ref<CouponFormData>({ ...initialFormData })
+const errors = ref<Record<string, string>>({})
+const submitMessage = ref<{ type: 'success' | 'danger'; text: string } | null>(null)
 
+// Calculated end date based on start date and validity days
+const calculatedEndDate = computed(() => {
+  if (!formData.value.validityDays) return null
+
+  const startDate = formData.value.startDate
+    ? new Date(formData.value.startDate)
+    : new Date()
+
+  const endDate = new Date(startDate)
+  endDate.setDate(endDate.getDate() + Number(formData.value.validityDays))
+
+  return endDate
+})
+
+// Format date for display
+const formatDate = (date: Date | string) => {
+  const d = new Date(date)
+  return d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
+// Get status badge class
+const getStatusClass = (status: string) => {
+  const classes = {
+    active: 'bg-success',
+    inactive: 'bg-secondary',
+    expired: 'bg-danger'
+  }
+  return classes[status as keyof typeof classes] || 'bg-secondary'
+}
+
+// Toggle status
+const toggleStatus = async (coupon: Coupon) => {
+  // Don't allow toggling expired coupons
+  if (coupon.status === 'expired') {
+    return
+  }
+
+  const newStatus = coupon.status === 'active' ? 'inactive' : 'active'
+
+  try {
+    const response = await axios.put(`${API_URL}/${coupon._id}`, {
+      code: coupon.code,
+      discount: coupon.discount,
+      description: coupon.description,
+      startDate: coupon.startDate,
+      validityDays: coupon.validityDays,
+      status: newStatus,
+      usageLimit: coupon.usageLimit,
+    })
+
+    if (response.data.success) {
+      // Update the coupon in the list
+      const index = coupons.value.findIndex(c => c._id === coupon._id)
+      if (index !== -1) {
+        coupons.value[index].status = newStatus
+      }
+    }
+  } catch (error: any) {
+    console.error('Error toggling status:', error)
+    alert(error.response?.data?.message || 'Failed to update status')
+  }
+}
+
+// Load all coupons from backend
+const loadCoupons = async () => {
+  loading.value = true
+  try {
+    const response = await axios.get(API_URL)
+    if (response.data.success) {
+      // Sort coupons by creation date (oldest first)
+      coupons.value = response.data.data.sort((a: Coupon, b: Coupon) => {
+        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      })
+    }
+  } catch (error: any) {
+    console.error('Error loading coupons:', error)
+    showErrorMessage(error.response?.data?.message || 'Failed to load coupons')
+  } finally {
+    loading.value = false
+  }
+}
+
+// Validate form
+const validateForm = (): boolean => {
+  errors.value = {}
+
+  if (!formData.value.code || formData.value.code.trim().length < 3) {
+    errors.value.code = 'Coupon code must be at least 3 characters'
+  }
+
+  const discount = Number(formData.value.discount)
+  if (!formData.value.discount || discount < 0 || discount > 100) {
+    errors.value.discount = 'Discount must be between 0 and 100'
+  }
+
+  const validityDays = Number(formData.value.validityDays)
+  if (!formData.value.validityDays || validityDays < 1) {
+    errors.value.validityDays = 'Validity days must be at least 1'
+  }
+
+  // REMOVED - No validation for usageLimit, it's optional
+  // Only validate if user enters a value
+  if (formData.value.usageLimit) {
+    const usageLimit = Number(formData.value.usageLimit)
+    if (isNaN(usageLimit) || usageLimit < 1) {
+      errors.value.usageLimit = 'Usage limit must be at least 1'
+    }
+  }
+
+  return Object.keys(errors.value).length === 0
+}
+
+// Open add modal
 const openAddModal = () => {
   editingCoupon.value = null
-  resetForm()
-  clearErrors()
+  formData.value = { ...initialFormData }
+  errors.value = {}
+  submitMessage.value = null
   showModal.value = true
 }
 
+// Edit coupon
 const editCoupon = (coupon: Coupon) => {
   editingCoupon.value = coupon
-  Object.assign(formData, coupon)
-  clearErrors()
+  formData.value = {
+    code: coupon.code,
+    discount: coupon.discount,
+    description: coupon.description || '',
+    startDate: coupon.startDate ? new Date(coupon.startDate).toISOString().split('T')[0] : '',
+    validityDays: coupon.validityDays,
+    status: coupon.status === 'expired' ? 'inactive' : coupon.status,
+    usageLimit: coupon.usageLimit || '',
+  }
+  errors.value = {}
+  submitMessage.value = null
   showModal.value = true
 }
 
+// Close modal
 const closeModal = () => {
   showModal.value = false
   editingCoupon.value = null
-  resetForm()
+  formData.value = { ...initialFormData }
+  errors.value = {}
+  submitMessage.value = null
 }
 
-const confirmDelete = (coupon: Coupon) => {
-  couponToDelete.value = coupon
-  showDeleteModal.value = true
+// Show error message
+const showErrorMessage = (message: string) => {
+  submitMessage.value = { type: 'danger', text: message }
+  setTimeout(() => {
+    submitMessage.value = null
+  }, 5000)
 }
 
+// Show success message
+const showSuccessMessage = (message: string) => {
+  submitMessage.value = { type: 'success', text: message }
+  setTimeout(() => {
+    submitMessage.value = null
+  }, 3000)
+}
+
+// Save coupon (create or update)
 const saveCoupon = async () => {
-  const validationRules = {
-    code: { required: true, minLength: 3, maxLength: 50 },
-    discount: { required: true, min: 0, max: 100 },
-    status: { required: true },
-  }
-
-  if (!validateForm(validationRules)) {
-    showError('Please fix the errors in the form')
+  if (!validateForm()) {
     return
   }
 
   isSubmitting.value = true
+  submitMessage.value = null
 
   try {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 500))
-
-    if (editingCoupon.value) {
-      const index = coupons.value.findIndex((c) => c.id === editingCoupon.value!.id)
-      if (index !== -1) {
-        coupons.value[index] = { ...formData } as Coupon
-      }
-      showSuccess('Coupon updated successfully')
-    } else {
-      const newCoupon: Coupon = {
-        ...formData,
-        id: Math.max(...coupons.value.map((c) => c.id), 0) + 1,
-      } as Coupon
-      coupons.value.unshift(newCoupon)
-      showSuccess('Coupon added successfully')
+    const payload = {
+      code: formData.value.code.toUpperCase(),
+      discount: Number(formData.value.discount),
+      description: formData.value.description || undefined,
+      startDate: formData.value.startDate || undefined,
+      validityDays: Number(formData.value.validityDays),
+      status: formData.value.status,
+      usageLimit: Number(formData.value.usageLimit),
     }
 
-    closeModal()
-  } catch (error) {
-    showError('Failed to save coupon')
+    if (editingCoupon.value) {
+      // Update existing coupon
+      const response = await axios.put(`${API_URL}/${editingCoupon.value._id}`, payload)
+      if (response.data.success) {
+        showSuccessMessage('Coupon updated successfully')
+        await loadCoupons()
+        setTimeout(() => {
+          closeModal()
+        }, 1500)
+      }
+    } else {
+      // Create new coupon
+      const response = await axios.post(API_URL, payload)
+      if (response.data.success) {
+        showSuccessMessage('Coupon created successfully')
+        await loadCoupons()
+        setTimeout(() => {
+          closeModal()
+        }, 1500)
+      }
+    }
+  } catch (error: any) {
+    console.error('Error saving coupon:', error)
+    const errorMessage = error.response?.data?.message || 'Failed to save coupon'
+    showErrorMessage(errorMessage)
   } finally {
     isSubmitting.value = false
   }
 }
 
+// Confirm delete
+const confirmDelete = (coupon: Coupon) => {
+  couponToDelete.value = coupon
+  showDeleteModal.value = true
+}
+
+// Delete coupon
 const deleteCoupon = async () => {
   if (!couponToDelete.value) return
 
-  try {
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 300))
+  isDeleting.value = true
 
-    coupons.value = coupons.value.filter((c) => c.id !== couponToDelete.value!.id)
-    showSuccess('Coupon deleted successfully')
-    showDeleteModal.value = false
-    couponToDelete.value = null
-  } catch (error) {
-    showError('Failed to delete coupon')
+  try {
+    const response = await axios.delete(`${API_URL}/${couponToDelete.value._id}`)
+    if (response.data.success) {
+      await loadCoupons()
+      showDeleteModal.value = false
+      couponToDelete.value = null
+    }
+  } catch (error: any) {
+    console.error('Error deleting coupon:', error)
+    alert(error.response?.data?.message || 'Failed to delete coupon')
+  } finally {
+    isDeleting.value = false
   }
 }
+
+// Load coupons on mount
+onMounted(() => {
+  loadCoupons()
+})
 </script>
 
 <style scoped>
@@ -445,14 +612,15 @@ const deleteCoupon = async () => {
   border: 1px solid #d3d3d3;
   background: #fff;
   box-shadow: 0 0 30px 3px rgba(0, 0, 0, 0.03);
-  height: 70px;
+  min-height: 100px;
+  margin-bottom: 20px;
 }
 
 .coupon-content {
   display: flex;
   align-items: center;
   padding: 1px 27px;
-  height: 100%;
+  min-height: 100px;
   position: relative;
 }
 
@@ -484,7 +652,7 @@ const deleteCoupon = async () => {
 
 .divider {
   width: 1px;
-  height: 68px;
+  min-height: 100px;
   background: #ebebeb;
   margin-right: 21px;
 }
@@ -505,6 +673,94 @@ const deleteCoupon = async () => {
 
 .discount-text {
   font-weight: 600;
+  margin-top: 2px;
+}
+
+/* Enhanced Badge Styling */
+.status-badge {
+  margin-top: 6px;
+}
+
+.status-badge .badge {
+  font-size: 11px;
+  padding: 4px 12px;
+  font-weight: 600;
+  border-radius: 12px;
+  text-transform: capitalize;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+/* Active Badge - Green */
+.status-badge .badge.bg-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Inactive Badge - Gray */
+.status-badge .badge.bg-secondary {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
+  border: 1px solid rgba(107, 114, 128, 0.3);
+}
+
+/* Expired Badge - Red */
+.status-badge .badge.bg-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Clickable Badge Hover Effects */
+.badge-clickable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.badge-clickable:not(.bg-danger):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.badge-clickable:not(.bg-danger):active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* Expired Badge - Not Clickable */
+.badge-clickable.bg-danger {
+  cursor: not-allowed;
+  opacity: 0.75;
+  filter: grayscale(0.2);
+}
+
+/* Optional: Add pulsing dot indicator for active status */
+.status-badge .badge.bg-success::before {
+  content: "●";
+  font-size: 8px;
+  animation: pulse-success 2s infinite;
+}
+
+.status-badge .badge.bg-secondary::before {
+  content: "●";
+  font-size: 8px;
+}
+
+.status-badge .badge.bg-danger::before {
+  content: "●";
+  font-size: 8px;
+}
+
+/* Pulse animation for active status */
+@keyframes pulse-success {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .coupon-actions {
@@ -541,6 +797,11 @@ const deleteCoupon = async () => {
 .btn-delete:hover {
   background: #ff4f5a;
   color: #fff;
+}
+
+.usage-text {
+  font-size: 12px;
+  line-height: 16px;
 }
 
 /* Responsive design */

@@ -1,3 +1,5 @@
+
+
 <template>
   <div class="cart-container">
     <div class="container">
@@ -7,13 +9,13 @@
           <div class="cart-icon-wrapper">
             <!-- Wind Lines -->
             <div class="wind-lines">
-              <img src="../assets/image/ph_wind-light.png" alt="">
+              <!-- <img src="../assets/image/ph_wind-light.png" alt=""> -->
             </div>
 
-            <img src="../assets/image/Combined-Shape.png" alt="">
+            <!-- <img src="../assets/image/Combined-Shape.png" alt=""> -->
 
             <!-- Shadow -->
-            <img src="../assets/image/EllipseBlue.png" alt="" class="cart-shadow">
+            <!-- <img src="../assets/image/EllipseBlue.png" alt="" class="cart-shadow"> -->
           </div>
 
           <!-- Text Content -->
@@ -175,3 +177,4 @@ h1 {
   }
 }
 </style>
+

@@ -43,16 +43,16 @@
               style="height: 180px"
             >
               <img
-                :src="prod.image"
+                :src="prod.imageUrl || prod.image || 'https://via.placeholder.com/120'"
                 :alt="prod.name"
                 class="img-fluid"
                 style="max-height: 120px; object-fit: contain"
               />
             </div>
             <div class="card-body">
-              <p class="text-danger text-uppercase small fw-bold mb-1">{{ prod.category }}</p>
+              <p class="text-danger text-uppercase small fw-bold mb-1">{{ prod.category?.name || prod.category }}</p>
               <h3 class="h6 fw-semibold mb-2">{{ prod.name }}</h3>
-              <div v-if="prod.stock" class="d-flex align-items-center gap-2">
+              <div v-if="prod.stock || null" class="d-flex align-items-center gap-2">
                 <span class="fw-bold">${{ prod.price }}</span>
                 <span class="text-decoration-line-through text-secondary">${{ prod.stock }}</span>
               </div>
@@ -78,7 +78,7 @@
           class="d-flex align-items-center gap-3 p-2 rounded-3 bg-white shadow-sm customer-hover"
         >
           <img
-            :src="cus.avatar"
+           :src="cus.avatar || 'https://via.placeholder.com/40'"
             :alt="cus.name"
             class="rounded-circle"
             style="width: 40px; height: 40px; object-fit: cover"
@@ -95,17 +95,63 @@
 </template>
 
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import ChartSection from '../../components/common/ChartComponent.vue'
 import { dataset } from '@/data/chartData'
-import { products } from '@/data/products'
-import { customers } from '@/data/customers'
+import axios from 'axios'
 
-const stats = [
-  { icon: 'bi-people-fill', bg: 'bg-danger', value: '5,583', label: 'Customers' },
-  { icon: 'bi-bag-check', bg: 'bg-primary', value: '539', label: 'Order' },
-  { icon: 'bi-truck', bg: 'bg-pink', value: '105', label: '' },
-  { icon: 'bi-currency-dollar', bg: 'bg-warning', value: '20,835', label: 'Revenue' },
-]
+
+interface Product {
+  _id?: string
+  id?: string
+  name: string
+  price: number
+  stock?: number
+  imageUrl?: string
+  image?: string
+  category?: any
+}
+
+interface Customer {
+  _id?: string
+  id?: string
+  name: string
+  email: string
+  avatar?: string
+}
+
+const products = ref<Product[]>([])
+const customers = ref<Customer[]>([])
+
+axios.defaults.withCredentials = true
+const API_URL = 'http://localhost:5000'
+
+
+const stats = ref([
+  { icon: 'bi-people-fill', bg: 'bg-danger', value: '0', label: 'Customers' },
+  { icon: 'bi-bag-check', bg: 'bg-primary', value: '0', label: 'Order' },
+  { icon: 'bi-truck', bg: 'bg-pink', value: '0', label: 'Shipping' },
+  { icon: 'bi-currency-dollar', bg: 'bg-warning', value: '0', label: 'Revenue' },
+])
+
+onMounted(async () => {
+  try {
+    const customersRes = await axios.get(`${API_URL}/api/auth/customers`, {
+      params: { page: 1, pageSize: 5 },
+      withCredentials: true
+    })
+    customers.value = customersRes.data.data.slice(0, 5)
+    stats.value[0].value = customersRes.data.total.toString()
+
+    const productsRes = await axios.get(`${API_URL}/api/products`, {
+      params: { page: 1, pageSize: 4 },
+      withCredentials: true
+    })
+    products.value = productsRes.data.data.slice(0, 4)
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error)
+  }
+})
 </script>
 
 <script lang="ts">

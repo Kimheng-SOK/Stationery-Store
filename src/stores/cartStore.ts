@@ -1,6 +1,7 @@
 // stores/cartStore.ts
 import { defineStore } from 'pinia'
 import type { Product } from '@/types/product'
+import axios from 'axios'
 
 export interface CartItem {
   id: number
@@ -18,10 +19,24 @@ export interface CartItem {
   stock: number
 }
 
+export interface AppliedCoupon {
+  _id: string
+  code: string
+  discount: number
+  description?: string
+  status: string
+  usedCount: number
+  usageLimit: number
+  startDate: string
+  endDate: string
+}
+
 export const useCartStore = defineStore('cart', {
   state: () => ({
     items: [] as CartItem[],
     couponCode: '',
+    appliedCoupon: null as AppliedCoupon | null,
+    couponDiscount: 0,
     shippingMethod: 'shipping' as 'shipping' | 'pickup',
     deliverTogether: false
   }),
@@ -44,7 +59,7 @@ export const useCartStore = defineStore('cart', {
     },
 
     grandTotal(state): number {
-      return this.itemTotal - this.discount + this.shippingCost
+      return this.itemTotal - this.discount - state.couponDiscount + this.shippingCost
     },
 
     isInCart: (state) => (productId: number) => {
@@ -122,12 +137,103 @@ export const useCartStore = defineStore('cart', {
 
     clearCart() {
       this.items = []
+      this.couponCode = ''
+      this.appliedCoupon = null
+      this.couponDiscount = 0
     },
 
-    applyCoupon(code: string) {
-      this.couponCode = code
-      // TODO: Implement coupon validation logic
+   async applyCoupon(code: string) {
+  this.couponCode = code
+
+  try {
+    const res = await axios.get(`http://localhost:5000/api/coupons/code/${code.toUpperCase()}`)
+
+    if (res.data.success) {
+      const coupon = res.data.data[0]
+
+      // Check if coupon exists
+      if (!coupon) {
+        this.couponCode = ''
+        this.appliedCoupon = null
+        this.couponDiscount = 0
+        throw new Error('Coupon not found')
+      }
+
+      // Check status
+      if (coupon.status !== 'active') {
+        this.couponCode = ''
+        this.appliedCoupon = null
+        this.couponDiscount = 0
+        throw new Error('This coupon is not active')
+      }
+
+      // Check date validity
+      const now = new Date()
+      const startDate = new Date(coupon.startDate)
+      const endDate = new Date(coupon.endDate)
+
+      if (now < startDate) {
+        this.couponCode = ''
+        this.appliedCoupon = null
+        this.couponDiscount = 0
+        throw new Error('This coupon is not yet active. It will be available from ' +
+          startDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }))
+      }
+
+      if (now > endDate) {
+        this.couponCode = ''
+        this.appliedCoupon = null
+        this.couponDiscount = 0
+        throw new Error('This coupon has expired')
+      }
+
+      // Check usage limit
+      if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+        this.couponCode = ''
+        this.appliedCoupon = null
+        this.couponDiscount = 0
+        throw new Error('This coupon usage limit has been reached')
+      }
+
+      // Calculate discount
+      const subTotal = this.itemTotal - this.discount
+      const couponDiscountAmount = (subTotal * coupon.discount) / 100
+
+      this.couponCode = coupon.code
+      this.appliedCoupon = coupon
+      this.couponDiscount = couponDiscountAmount
+
+      return {
+        success: true,
+        message: `Coupon "${coupon.code}" applied! You saved $${couponDiscountAmount.toFixed(2)} (${coupon.discount}% off)`
+      }
+    }
+  } catch (error: any) {
+    this.couponCode = ''
+    this.appliedCoupon = null
+    this.couponDiscount = 0
+
+    const errorMessage = error.message || error.response?.data?.message || 'Invalid or expired coupon code'
+    throw new Error(errorMessage)
+  }
+},
+
+     async incrementUsageCoupon(){
+            if (this.appliedCoupon) {
+              try {
+          await axios.put(
+            `http://localhost:5000/api/coupons/${this.appliedCoupon._id}`,
+            {
+              usedCount: this.appliedCoupon.usedCount + 1
+            }
+          )
+        } catch (error) {
+          console.error('Error incrementing coupon usage:', error)
+        }
+      }
     },
+
+
 
     setShippingMethod(method: 'shipping' | 'pickup') {
       this.shippingMethod = method
@@ -140,10 +246,10 @@ export const useCartStore = defineStore('cart', {
     calculateDeliveryDate(): string {
       const date = new Date()
       date.setDate(date.getDate() + 7) // Add 7 days
-      return date.toLocaleDateString('en-US', { 
-        day: 'numeric', 
-        month: 'short', 
-        year: 'numeric' 
+      return date.toLocaleDateString('en-US', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
       })
     }
   },
