@@ -33,7 +33,7 @@
         </div>
         <select v-model="filters.category" class="form-select form-select-sm w-25" @change="loadProducts">
           <option value="">All Categories</option>
-          <option v-for="cat in categories" :key="cat._id || cat.id" :value="cat._id || cat.id">
+          <option v-for="cat in categories" :key="cat._id" :value="cat._id">
             {{ cat.name }}
           </option>
         </select>
@@ -356,7 +356,7 @@
               </div>
               <div class="card-body">
                 <div class="row g-3">
-                  <div class="col-md-4">
+                  <!-- <div class="col-md-4">
                     <div class="form-floating">
                       <input
                         v-model.number="formData.price"
@@ -371,7 +371,7 @@
                       <label for="productPrice">Price ($)</label>
                       <small v-if="errors.price" class="text-danger">{{ errors.price }}</small>
                     </div>
-                  </div>
+                  </div> -->
                   <div class="col-md-4">
                     <div class="form-floating">
                       <input
@@ -569,8 +569,8 @@
                 <div v-if="formData.images && formData.images.length" class="d-flex flex-wrap gap-3 mt-2">
                   <div v-for="(img, idx) in formData.images" :key="idx" class="text-center">
                     <img
-                      v-if="img instanceof File && img.type.startsWith('images/')"
-                      :src="URL.createObjectURL(img)"
+                      v-if="img && typeof img === 'object' && 'type' in img && img.type && img.type.startsWith('image/')"
+                      :src="window.URL.createObjectURL(img)"
                       alt="Preview"
                       class="rounded border"
                       style="max-width: 120px; max-height: 120px; object-fit: cover"
@@ -583,7 +583,7 @@
                       style="max-width: 120px; max-height: 120px; object-fit: cover"
                     />
                     <div v-else class="text-muted small mt-1">
-                      <i class="bi bi-file-earmark"></i> {{ img.name || img }}
+                      <i class="bi bi-file-earmark"></i> {{ img?.name || img }}
                     </div>
                     <div class="text-muted small mt-1">File {{ idx + 1 }}</div>
                   </div>
@@ -647,7 +647,6 @@ const BADGE_OPTIONS: BadgeType[] = ['new', 'popular', 'instock', 'discount']
 const initialFormData = {
   name: '',
   sku: '',
-  price: 0,
   originalPrice: 0,
   discount: 0,
   isNew: false,
@@ -759,7 +758,6 @@ const editProduct = (product: Product) => {
   Object.assign(formData, {
     name: product.name,
     sku: product.sku,
-    price: product.price,
     originalPrice: product.originalPrice ?? 0,
     discount: product.discount ?? 0,
     isNew: product.isNew ?? false,
@@ -770,6 +768,8 @@ const editProduct = (product: Product) => {
     rating: product.rating,
     description: product.description || '',
     status: product.status || 'active',
+    badges: product.badges || [],
+    images: product.images || [],
   })
   clearErrors()
   showAddModal.value = true
@@ -793,9 +793,16 @@ const saveProduct = async () => {
   const validationRules = {
     name: { required: true, minLength: 3, maxLength: 200 },
     sku: { required: true, minLength: 3 },
-    price: { required: true, min: 0 },
     category: { required: true },
     stock: { required: true, min: 0 },
+  }
+
+  if (!formData.images || formData.images.length === 0) {
+    errors.images = 'At least one product image/file is required'
+    showError('At least one product image/file is required')
+    return
+  } else {
+    errors.images = ''
   }
 
   if (!validateForm(validationRules)) {
@@ -810,7 +817,7 @@ const saveProduct = async () => {
     const formDataToSend = new FormData()
     formDataToSend.append('name', formData.name)
     formDataToSend.append('sku', formData.sku)
-    formDataToSend.append('price', String(formData.price))
+    // formDataToSend.append('price', String(formData.price))
     formDataToSend.append('stock', String(formData.stock))
     formDataToSend.append('category', formData.category)
     formDataToSend.append('isNew', String(formData.isNew))
@@ -835,7 +842,7 @@ const saveProduct = async () => {
     }
 
     if (editingProduct.value) {
-      const productId = editingProduct.value._id || editingProduct.value.id
+      const productId = editingProduct.value._id
       await productApi.updateProduct(String(productId), formDataToSend)
       showSuccess('Product updated successfully')
     } else {
@@ -864,7 +871,7 @@ const closeModal = () => {
 const getCategoryName = (category: any): string => {
   if (!category) return 'N/A'
   if (typeof category === 'string') {
-    const cat = categories.value.find(c => (c._id || c.id) === category)
+    const cat = categories.value.find(c => (c._id) === category)
     return cat?.name || category
   }
   return category.name || 'N/A'
@@ -895,6 +902,16 @@ const handleImageError = (event: Event) => {
 const formatDate = (date: string | undefined): string => {
   if (!date) return 'N/A'
   return new Date(date).toLocaleDateString()
+}
+
+function onImagesChange(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files.length > 0) {
+    formData.images = Array.from(input.files)
+    errors.images = ''
+  } else {
+    formData.images = []
+  }
 }
 
 // Initialize
