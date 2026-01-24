@@ -29,30 +29,41 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import ProductCarousel from '@/components/product/ProductCarousel.vue'
-import { categories } from '@/data/products'
+import { useCategoryStore } from '@/stores/category'
+import type { Category } from '@/types/category'
 
 interface CategoryCard {
-  id: number
+  id: string
   name: string
   image: string
   slug: string
 }
 
 const router = useRouter()
+const categoryStore = useCategoryStore()
 
-/**
- * Build category cards directly from categories data
- * (images are now included in the categories array)
- */
+// Fetch categories from API
+onMounted(() => {
+  if (!categoryStore.isFetched) {
+    categoryStore.fetchCategories()
+  }
+})
+
+// Build category cards from store data
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+const BASE_URL = API_BASE_URL.replace('/api', '')
+
 const categoryCards = computed<CategoryCard[]>(() =>
-  categories.map(category => ({
-    id: category.id,
+  categoryStore.categories.map((category: Category) => ({
+    id: category._id,
     name: category.name,
-    image: category.image,
-    slug: category.name.toLowerCase().replace(/\s+/g, '-'),
+    image: category.image
+      ? `${BASE_URL}${category.image}`
+      : '/placeholder.jpg',
+    slug: category.slug || category.name.toLowerCase().replace(/\s+/g, '-'),
   }))
 )
 
@@ -63,6 +74,8 @@ const goToCategory = (category: CategoryCard) => {
   })
 }
 </script>
+
+
 
 <style scoped>
 .shop-by-category {
