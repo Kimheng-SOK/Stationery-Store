@@ -1,7 +1,10 @@
 <template>
   <div class="categories-admin">
     <div class="header-section mb-4">
-      <h2 class="page-title">Category Management</h2>
+      <h2 class="h5 fw-semibold mb-0">
+        Category Management
+        <span v-if="categories.length">({{ categories.length }})</span>
+      </h2>
       <button class="btn btn-primary" @click="openAddModal">
         <i class="bi bi-plus-circle me-2"></i>Add New Category
       </button>
@@ -35,26 +38,33 @@
           <table class="table table-hover">
             <thead>
               <tr>
-                <th>ID</th>
                 <th>Image</th>
                 <th>Name</th>
                 <th>Description</th>
+                <th>Slug</th>
+                <th>Status</th>
                 <th>Created At</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="category in categories" :key="category.id">
-                <td>{{ category.id }}</td>
+              <tr v-for="category in categories" :key="category._id">
                 <td>
                   <img
-                    :src="category.image || '/placeholder.png'"
+                    :src="getImageUrl(category.image)"
                     :alt="category.name"
                     class="category-image"
+                    @error="handleImageError"
                   />
                 </td>
                 <td>{{ category.name }}</td>
                 <td>{{ category.description || 'N/A' }}</td>
+                <td><span class="badge bg-secondary">{{ category.slug }}</span></td>
+                <td>
+                  <span :class="['badge', category.isActive ? 'bg-success' : 'bg-warning']">
+                    {{ category.isActive ? 'Active' : 'Inactive' }}
+                  </span>
+                </td>
                 <td>{{ formatDate(category.createdAt) }}</td>
                 <td>
                   <button class="btn btn-sm btn-outline-primary me-2" @click="openEditModal(category)">
@@ -104,6 +114,21 @@
                 ></textarea>
               </div>
 
+              <!-- Active Status -->
+              <div class="mb-3">
+                <div class="form-check form-switch">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="isActiveSwitch"
+                    v-model="formData.isActive"
+                  >
+                  <label class="form-check-label" for="isActiveSwitch">
+                    Active
+                  </label>
+                </div>
+              </div>
+
               <!-- Image Upload -->
               <div class="mb-3">
                 <label class="form-label">Category Image</label>
@@ -121,7 +146,12 @@
               <div v-if="imagePreview || formData.existingImage" class="mb-3">
                 <label class="form-label">Preview</label>
                 <div class="image-preview-container">
-                  <img :src="imagePreview || formData.existingImage" alt="Preview" class="img-fluid" />
+                  <img
+                    :src="imagePreview || getImageUrl(formData.existingImage)"
+                    alt="Preview"
+                    class="img-fluid"
+                    @error="handleImageError"
+                  />
                   <button
                     type="button"
                     class="btn btn-sm btn-danger remove-image"
@@ -170,7 +200,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { useCategoryApi, type Category } from '@/composables/useCategoryApi'
+import { useCategoryApi } from '@/composables/useCategoryApi'
+import type { Category } from '@/types/category'
 import { Modal } from 'bootstrap'
 
 const categoryApi = useCategoryApi()
@@ -186,6 +217,7 @@ const isEditMode = ref(false)
 const formData = ref({
   name: '',
   description: '',
+  isActive: true,
   existingImage: '',
 })
 const selectedImage = ref<File | null>(null)
@@ -193,7 +225,7 @@ const imagePreview = ref<string>('')
 const categoryToDelete = ref<Category | null>(null)
 const successMessage = ref('')
 const errorMessage = ref('')
-const editingCategoryId = ref<number | null>(null)
+const editingCategoryId = ref<string | null>(null)
 
 onMounted(async () => {
   await categoryApi.fetchCategories()
@@ -213,10 +245,11 @@ const openAddModal = () => {
 
 const openEditModal = (category: Category) => {
   isEditMode.value = true
-  editingCategoryId.value = category.id
+  editingCategoryId.value = category._id
   formData.value = {
     name: category.name,
     description: category.description || '',
+    isActive: category.isActive ?? true,
     existingImage: category.image || '',
   }
   imagePreview.value = ''
@@ -257,6 +290,7 @@ const handleSubmit = async () => {
     const formDataToSend = new FormData()
     formDataToSend.append('name', formData.value.name)
     formDataToSend.append('description', formData.value.description)
+    formDataToSend.append('isActive', formData.value.isActive.toString())
 
     if (selectedImage.value) {
       formDataToSend.append('image', selectedImage.value)
@@ -274,11 +308,9 @@ const handleSubmit = async () => {
     setTimeout(() => {
       successMessage.value = ''
     }, 3000)
-  } catch (err: any) {
-    errorMessage.value = err.message || 'Operation failed'
-    setTimeout(() => {
-      errorMessage.value = ''
-    }, 3000)
+  } catch (err: unknown) {
+    errorMessage.value = (err instanceof Error && err.message) ? err.message : 'Operation failed'
+    setTimeout(() => { errorMessage.value = '' }, 3000)
   }
 }
 
@@ -288,20 +320,18 @@ const confirmDelete = (category: Category) => {
 }
 
 const handleDelete = async () => {
-  if (!categoryToDelete.value) return
+  if (!categoryToDelete.value || !categoryToDelete.value._id) return
 
   try {
-    await categoryApi.deleteCategory(categoryToDelete.value.id)
+    await categoryApi.deleteCategory(categoryToDelete.value._id)
     successMessage.value = 'Category deleted successfully!'
     closeDeleteModal()
     setTimeout(() => {
       successMessage.value = ''
     }, 3000)
-  } catch (err: any) {
-    errorMessage.value = err.message || 'Delete failed'
-    setTimeout(() => {
-      errorMessage.value = ''
-    }, 3000)
+  } catch (err: unknown) {
+    errorMessage.value = (err instanceof Error && err.message) ? err.message : 'Operation failed'
+    setTimeout(() => { errorMessage.value = '' }, 3000)
   }
 }
 
@@ -309,6 +339,7 @@ const resetForm = () => {
   formData.value = {
     name: '',
     description: '',
+    isActive: true,
     existingImage: '',
   }
   selectedImage.value = null
@@ -329,11 +360,34 @@ const closeDeleteModal = () => {
 
 const formatDate = (date?: string) => {
   if (!date) return 'N/A'
-  return new Date(date).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
+  try {
+    return new Date(date).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    })
+  } catch (error) {
+    console.error('Date formatting error:', error, date)
+    return 'Invalid Date'
+  }
+}
+
+const getImageUrl = (imagePath?: string) => {
+  if (!imagePath) return '/placeholder.png'
+
+  // If it's already a full URL, return as is
+  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    return imagePath
+  }
+
+  // If it's a relative path from your API
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+  return `${baseUrl}${imagePath}`
+}
+
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement
+  img.src = '/placeholder.png'
 }
 </script>
 
@@ -347,12 +401,6 @@ const formatDate = (date?: string) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.page-title {
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #1a1a1a;
 }
 
 .category-image {

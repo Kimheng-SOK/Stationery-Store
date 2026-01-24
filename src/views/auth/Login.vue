@@ -36,6 +36,7 @@
               <input
                 type="text"
                 placeholder="Enter your email or phone"
+                autocomplete="username"
                 v-model="emailOrPhone"
                 :class="['form-control form-control-custom', { 'is-invalid': errors.emailOrPhone }]"
 
@@ -57,6 +58,7 @@
                 placeholder="Enter your password"
                 :type="showPassword ? 'text' : 'password'"
                 v-model="password"
+                autocomplete="current-password"
                 :class="['form-control form-control-custom', { 'is-invalid': errors.password }]"
                 required
                 @blur="validatePassword"
@@ -113,10 +115,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useAuthApi } from '@/composables/useAuthApi'
+
+defineComponent({
+  name: 'SignIn',
+})
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -184,7 +190,7 @@ const handleSignin = async () => {
 
   try {
     const response = await authApi.login({
-      emailOrPhone: emailOrPhone.value.trim(), // Changed from email
+      emailOrPhone: emailOrPhone.value.trim(),
       password: password.value,
     })
 
@@ -210,8 +216,9 @@ const handleSignin = async () => {
         }
       }, 1000)
     }
-  } catch (error: any) {
-    errorMessage.value = error.message || authApi.error.value || 'Login failed. Please try again.'
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error occurred during login.'
+    errorMessage.value = authApi.error.value || errorMsg || 'Login failed. Please try again.'
   } finally {
     isLoading.value = false
   }
