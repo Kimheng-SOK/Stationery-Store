@@ -17,7 +17,7 @@ export const useProductStore = defineStore('product', {
   getters: {
     getProducts: (state) => state.products,
     isLoading: (state) => state.loading,
-    
+
     // Unique brands for the sidebar
     getBrands: (state) => {
       const brands = state.products
@@ -77,11 +77,11 @@ export const useProductStore = defineStore('product', {
     formatProduct: () => (product: Product) => {
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
       const BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '').replace(/\/$/, '')
-      
+
       // Image Construction
       let imageUrl = '/placeholder.jpg'
       const filename = product.images && product.images.length > 0 ? product.images[0] : null
-      
+
       if (filename) {
         if (filename.startsWith('http')) {
           imageUrl = filename
@@ -94,14 +94,14 @@ export const useProductStore = defineStore('product', {
 
       // Price logic: If price is 0 or null, use originalPrice
       const hasValidPrice = product.price !== undefined && product.price !== null && product.price !== 0
-      
+
       return {
         ...product, // Spreading ensures reviewCount is preserved
         id: product._id,
         image: imageUrl,
         displayPrice: hasValidPrice ? product.price : product.originalPrice,
         showStrikePrice: hasValidPrice && product.originalPrice > 0,
-        categoryName: typeof product.category === 'object' ? product.category.name : product.category
+        categoryName: typeof product.category === 'object' && product.category !== null ? product.category.name : product.category
       }
     }
   },

@@ -1,3 +1,4 @@
+import type { Product } from '@/types/product';
 import { defineStore } from 'pinia'
 
 // Updated interface to handle backend _id (string)
@@ -5,7 +6,7 @@ export interface CartItem {
   _id: string;      // Changed from id: number to match MongoDB
   name: string;
   price: number;
-  originalPrice?: number;
+  originalPrice: number;
   image: string;
   quantity: number;
   sku: string;
@@ -24,7 +25,7 @@ export const useCartStore = defineStore('cart', {
     shippingMethod: 'shipping' as 'shipping' | 'pickup',
     deliverTogether: false,
     // Add your backend URL for image formatting
-    baseUrl: 'http://localhost:5000' 
+    baseUrl: 'http://localhost:5000'
   }),
 
   getters: {
@@ -65,10 +66,10 @@ export const useCartStore = defineStore('cart', {
      * addToCart
      * Handles both frontend-friendly data and raw backend data
      */
-    addToCart(product: any, quantity: number = 1) {
-      // Use _id (backend) or fallback to id (local)
-      const pId = product._id || product.id;
-      
+    addToCart(product: Product, quantity: number = 1) {
+      // Use _id (backend) or fallback to a default string if missing
+      const pId = product._id ?? 'unknown-id';
+
       const existingItem = this.items.find(item => item._id === pId)
 
       if (existingItem) {
@@ -80,8 +81,8 @@ export const useCartStore = defineStore('cart', {
         }
       } else {
         // Format the image URL if it's a relative path from the backend
-        const formattedImage = product.image?.startsWith('http') 
-          ? product.image 
+        const formattedImage = product.image?.startsWith('http')
+          ? product.image
           : `${this.baseUrl}${product.image?.replace(/^\/?public/, '')}`
 
         const cartItem: CartItem = {
@@ -92,14 +93,14 @@ export const useCartStore = defineStore('cart', {
           image: formattedImage,
           quantity: quantity,
           sku: product.sku || 'N/A',
-          category: product.categoryName || product.category || 'General',
+          category: typeof product.category === 'object' && product.category !== null ? product.category.name : product.category || 'General',
           brand: product.brand || 'Premium',
           badge: product.isNew ? 'New' : undefined,
           description: product.description || 'Quality Stationery Product',
           delivery: this.calculateDeliveryDate(),
           stock: product.stock
         }
-        
+
         this.items.push(cartItem)
       }
     },
@@ -159,10 +160,10 @@ export const useCartStore = defineStore('cart', {
     calculateDeliveryDate(): string {
       const date = new Date()
       date.setDate(date.getDate() + 5) // Estimated 5 days
-      return date.toLocaleDateString('en-US', { 
-        day: 'numeric', 
-        month: 'short', 
-        year: 'numeric' 
+      return date.toLocaleDateString('en-US', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric'
       })
     }
   },

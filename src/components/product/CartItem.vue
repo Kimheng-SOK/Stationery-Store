@@ -1,9 +1,9 @@
 <template>
   <div class="d-flex gap-3 mb-3 pb-3 border-bottom position-relative cart-item flex-column flex-md-row">
     <!-- Badge -->
-    <div 
-      v-if="item.badge" 
-      class="position-absolute start-0 top-0 bg-warning text-white px-2 py-1 rounded-bottom border border-white" 
+    <div
+      v-if="item.badge"
+      class="position-absolute start-0 top-0 bg-warning text-white px-2 py-1 rounded-bottom border border-white"
       style="font-size: 0.75rem; font-weight: 600; z-index: 1;"
     >
       {{ item.badge }}
@@ -13,10 +13,10 @@
     <div class="d-flex gap-3 flex-grow-1">
       <!-- Product Image -->
       <div class="position-relative" style="width: 150px; height: 150px; flex-shrink: 0;">
-        <img 
-          :src="item.image" 
-          :alt="item.name" 
-          class="w-100 h-100 rounded" 
+        <img
+          :src="item.image"
+          :alt="item.name"
+          class="w-100 h-100 rounded"
           style="object-fit: cover; cursor: pointer;"
           @click="goToProduct"
         />
@@ -24,8 +24,8 @@
 
       <!-- Product Details -->
       <div class="flex-grow-1">
-        <h3 
-          class="fw-bold mb-1" 
+        <h3
+          class="fw-bold mb-1"
           style="font-size: 0.9rem; cursor: pointer;"
           @click="goToProduct"
         >
@@ -35,13 +35,13 @@
           {{ item.description }}
         </p>
         <div class="d-flex gap-3 align-items-center">
-          <span class="fw-bold">${{ item.price.toFixed(2) }}</span>
-          <span 
-            v-if="item.originalPrice" 
-            class="text-muted text-decoration-line-through" 
+          <span class="fw-bold">${{ (item.price ?? 0).toFixed(2) }}</span>
+          <span
+            v-if="item.originalPrice"
+            class="text-muted text-decoration-line-through"
             style="font-size: 0.85rem;"
           >
-            ${{ item.originalPrice.toFixed(2) }}
+            ${{ (item.originalPrice ?? 0).toFixed(2) }}
           </span>
         </div>
         <p class="text-muted fw-bold mb-0" style="font-size: 0.75rem;">
@@ -57,9 +57,9 @@
     <div class="d-flex align-items-center gap-3 justify-content-between justify-content-md-end">
       <!-- Quantity Controls -->
       <div class="quantity-controls d-flex align-items-center gap-2 border px-2" style="height: 32px;">
-        <button 
-          @click="$emit('decrease')" 
-          class="btn btn-link p-0 text-dark text-decoration-none" 
+        <button
+          @click="$emit('decrease')"
+          class="btn btn-link p-0 text-dark text-decoration-none"
           style="width: 30px; height: 30px; font-size: 1.6rem; line-height: 1;"
           :disabled="item.quantity <= 1"
         >
@@ -68,9 +68,9 @@
         <span class="fw-bold" style="min-width: 30px; text-align: center; font-size: 1.3rem;">
           {{ item.quantity }}
         </span>
-        <button 
-          @click="$emit('increase')" 
-          class="btn btn-link p-0 text-dark text-decoration-none" 
+        <button
+          @click="$emit('increase')"
+          class="btn btn-link p-0 text-dark text-decoration-none"
           style="width: 30px; height: 30px; font-size: 1.6rem; line-height: 1;"
           :disabled="item.quantity >= item.stock"
         >
@@ -84,8 +84,8 @@
       </span>
 
       <!-- Remove Button -->
-      <button 
-        @click="$emit('remove')" 
+      <button
+        @click="$emit('remove')"
         class="btn btn-link p-0 text-dark bg-secondary-subtle"
         title="Remove item"
         style="padding: 8px !important;"
@@ -108,7 +108,7 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const emit = defineEmits<{
+defineEmits<{
   increase: []
   decrease: []
   remove: []
@@ -117,7 +117,7 @@ const emit = defineEmits<{
 const router = useRouter()
 
 const goToProduct = () => {
-  router.push({ name: 'ProductDetail', params: { id: props.item.id } })
+  router.push({ name: 'ProductDetail', params: { id: props.item._id } })
 }
 </script>
 

@@ -7,8 +7,8 @@ export interface Product {
   name: string
   sku: string
   price: number
-  originalPrice?: number
-  discount?: number
+  originalPrice: number
+  discount: number
   reviewCount?: number
   isNew: boolean
   inStock: boolean
