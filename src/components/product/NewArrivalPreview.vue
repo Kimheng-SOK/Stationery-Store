@@ -24,7 +24,7 @@
       </div>
 
       <div class="text-center mt-4">
-        <RouterLink to="/new-arrivals">
+        <RouterLink to="/new-arrival">
           <button class="btn btn-outline-success px-4">View All New</button>
         </RouterLink>
       </div>
