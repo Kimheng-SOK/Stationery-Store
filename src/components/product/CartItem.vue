@@ -22,7 +22,7 @@
         />
       </div>
 
-      <!-- Product Details -->
+        <!-- Product Details -->
       <div class="flex-grow-1">
         <h3 
           class="fw-bold mb-1" 
@@ -35,14 +35,21 @@
           {{ item.description }}
         </p>
         <div class="d-flex gap-3 align-items-center">
-          <span class="fw-bold">${{ item.price.toFixed(2) }}</span>
-          <span 
-            v-if="item.originalPrice" 
-            class="text-muted text-decoration-line-through" 
-            style="font-size: 0.85rem;"
-          >
-            ${{ item.originalPrice.toFixed(2) }}
-          </span>
+          <!-- If price is 0 or null, show only originalPrice -->
+          <template v-if="!item.price || item.price === 0">
+            <span class="fw-bold">${{ (item.originalPrice || 0).toFixed(2) }}</span>
+          </template>
+          <!-- If both price and originalPrice exist, show both -->
+          <template v-else>
+            <span class="fw-bold">${{ item.price.toFixed(2) }}</span>
+            <span 
+              v-if="item.originalPrice" 
+              class="text-muted text-decoration-line-through" 
+              style="font-size: 0.85rem;"
+            >
+              ${{ item.originalPrice.toFixed(2) }}
+            </span>
+          </template>
         </div>
         <p class="text-muted fw-bold mb-0" style="font-size: 0.75rem;">
           SKU: {{ item.sku }}
@@ -80,7 +87,7 @@
 
       <!-- Total Price -->
       <span class="fw-bold" style="width: 80px; text-align: right;">
-        ${{ (item.price * item.quantity).toFixed(2) }}
+        ${{ ((item.price && item.price > 0 ? item.price : item.originalPrice || 0) * item.quantity).toFixed(2) }}
       </span>
 
       <!-- Remove Button -->
@@ -117,7 +124,7 @@ const emit = defineEmits<{
 const router = useRouter()
 
 const goToProduct = () => {
-  router.push({ name: 'ProductDetail', params: { id: props.item.id } })
+  router.push({ name: 'ProductDetail', params: { id: props.item._id } })
 }
 </script>
 

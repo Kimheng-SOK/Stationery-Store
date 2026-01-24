@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 
 // Updated interface to handle backend _id (string)
 export interface CartItem {
-  _id: string;      // Changed from id: number to match MongoDB
+  _id: string;
   name: string;
   price: number;
   originalPrice?: number;
@@ -23,7 +23,6 @@ export const useCartStore = defineStore('cart', {
     couponCode: '',
     shippingMethod: 'shipping' as 'shipping' | 'pickup',
     deliverTogether: false,
-    // Add your backend URL for image formatting
     baseUrl: 'http://localhost:5000' 
   }),
 
@@ -32,12 +31,14 @@ export const useCartStore = defineStore('cart', {
       return state.items.reduce((sum, item) => sum + item.quantity, 0)
     },
 
-    itemTotal: (state) => {
-      return state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+   itemTotal: (state) => {
+      return state.items.reduce((sum, item) => {
+        const price = item.price && item.price > 0 ? item.price : (item.originalPrice || 0)
+        return sum + (price * item.quantity)
+      }, 0)
     },
 
     discount: () => {
-      // You can make this dynamic later
       return 2.50
     },
 
@@ -50,7 +51,6 @@ export const useCartStore = defineStore('cart', {
       return total > 0 ? total : 0
     },
 
-    // Updated to search by _id
     isInCart: (state) => (productId: string) => {
       return state.items.some(item => item._id === productId)
     },
@@ -61,35 +61,29 @@ export const useCartStore = defineStore('cart', {
   },
 
   actions: {
-    /**
-     * addToCart
-     * Handles both frontend-friendly data and raw backend data
-     */
     addToCart(product: any, quantity: number = 1) {
-      // Use _id (backend) or fallback to id (local)
       const pId = product._id || product.id;
       
       const existingItem = this.items.find(item => item._id === pId)
 
       if (existingItem) {
         const newQuantity = existingItem.quantity + quantity
-        if (newQuantity <= product.stock) {
+        if (newQuantity <= (product.stock || 999)) {
           existingItem.quantity = newQuantity
         } else {
-          alert(`Sorry, only ${product.stock} units available in stock.`)
+          alert(`Sorry, only ${product.stock || 999} units available in stock.`)
         }
       } else {
-        // Format the image URL if it's a relative path from the backend
         const formattedImage = product.image?.startsWith('http') 
           ? product.image 
           : `${this.baseUrl}${product.image?.replace(/^\/?public/, '')}`
 
         const cartItem: CartItem = {
           _id: pId,
-          name: product.name,
-          price: product.price,
+          name: product.name || 'Unnamed Product',
+          price: product.price || 0,
           originalPrice: product.originalPrice,
-          image: formattedImage,
+          image: formattedImage || '/placeholder.jpg',
           quantity: quantity,
           sku: product.sku || 'N/A',
           category: product.categoryName || product.category || 'General',
@@ -97,7 +91,7 @@ export const useCartStore = defineStore('cart', {
           badge: product.isNew ? 'New' : undefined,
           description: product.description || 'Quality Stationery Product',
           delivery: this.calculateDeliveryDate(),
-          stock: product.stock
+          stock: product.stock || 999
         }
         
         this.items.push(cartItem)
@@ -158,7 +152,7 @@ export const useCartStore = defineStore('cart', {
 
     calculateDeliveryDate(): string {
       const date = new Date()
-      date.setDate(date.getDate() + 5) // Estimated 5 days
+      date.setDate(date.getDate() + 5)
       return date.toLocaleDateString('en-US', { 
         day: 'numeric', 
         month: 'short', 
@@ -167,7 +161,6 @@ export const useCartStore = defineStore('cart', {
     }
   },
 
-  // Persist the cart so items stay after refresh
   persist: {
     key: 'user-cart',
     storage: localStorage,

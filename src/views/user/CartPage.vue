@@ -32,7 +32,7 @@
 
             <CartItem
               v-for="(item, index) in cartStore.items"
-              :key="item._id || item.id" 
+              :key="item._id" 
               :item="item"
               @increase="cartStore.increaseQuantity(index)"
               @decrease="cartStore.decreaseQuantity(index)"
@@ -76,7 +76,6 @@ const goToShopping = () => {
 }
 
 const handleRemoveItem = (index: number) => {
-  // Use a cleaner modal if you have one, otherwise confirm works
   if (confirm('Remove this item from your cart?')) {
     cartStore.removeFromCart(index)
   }
