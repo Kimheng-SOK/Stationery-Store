@@ -1,38 +1,52 @@
 import type { CustomersResponse, Customer } from '@/types/customer'
-import { customers } from '@/data/customers'
+import axios from 'axios'
+
+// Configure axios
+axios.defaults.withCredentials = true
+const API_URL = 'http://localhost:5000'
 
 export const customerDataService = {
   getCustomers: async (page: number = 1, pageSize: number = 20): Promise<CustomersResponse> => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 300))
+    try {
+      const response = await axios.get(`${API_URL}/api/auth/customers`, {
+        params: { page, pageSize },
+        withCredentials: true
+      })
 
-    const start = (page - 1) * pageSize
-    const end = start + pageSize
-    const paginatedData = customers.slice(start, end)
-
-    return {
-      data: paginatedData,
-      total: customers.length,
-      page,
-      pageSize,
+      return {
+        data: response.data.data,
+        total: response.data.total,
+        page: response.data.page || page,
+        pageSize: pageSize,
+      }
+    } catch (error) {
+      console.error('Error fetching customers:', error)
+      throw error
     }
   },
 
   searchCustomers: async (query: string): Promise<Customer[]> => {
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 200))
-
-    const lowerQuery = query.toLowerCase()
-    return customers.filter(
-      (customer) =>
-        customer.name.toLowerCase().includes(lowerQuery) ||
-        customer.email.toLowerCase().includes(lowerQuery) ||
-        customer.phone.includes(query),
-    )
+    try {
+      const response = await axios.get(`${API_URL}/api/auth/customers`, {
+        params: { search: query },
+        withCredentials: true
+      })
+      return response.data.data
+    } catch (error) {
+      console.error('Error searching customers:', error)
+      throw error
+    }
   },
 
   getCustomerById: async (id: string): Promise<Customer | null> => {
-    await new Promise((resolve) => setTimeout(resolve, 100))
-    return customers.find((customer) => customer.id === id) || null
+    try {
+      const response = await axios.get(`${API_URL}/api/auth/customers/${id}`, {
+        withCredentials: true
+      })
+      return response.data.data
+    } catch (error) {
+      console.error('Error fetching customer:', error)
+      return null
+    }
   },
 }

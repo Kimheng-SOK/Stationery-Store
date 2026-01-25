@@ -5,22 +5,22 @@
 
     <!-- Free Shipping Banner -->
     <div class="d-flex align-items-start gap-2 mb-3 p-3 rounded position-relative">
-      <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width="42" 
-        height="22" 
-        fill="currentColor" 
-        class="bi bi-check-circle-fill text-success position-absolute start-0 top-2" 
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="42"
+        height="22"
+        fill="currentColor"
+        class="bi bi-check-circle-fill text-success position-absolute start-0 top-2"
         viewBox="0 0 16 16"
       >
         <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
       </svg>
-      <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        width="48" 
-        height="42" 
-        fill="currentColor" 
-        class="bi bi-truck text-secondary" 
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="48"
+        height="42"
+        fill="currentColor"
+        class="bi bi-truck text-secondary"
         viewBox="0 0 16 16"
       >
         <path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h9A1.5 1.5 0 0 1 12 3.5V5h1.02a1.5 1.5 0 0 1 1.17.563l1.481 1.85a1.5 1.5 0 0 1 .329.938V10.5a1.5 1.5 0 0 1-1.5 1.5H14a2 2 0 1 1-4 0H5a2 2 0 1 1-3.998-.085A1.5 1.5 0 0 1 0 10.5zm1.294 7.456A2 2 0 0 1 4.732 11h5.536a2 2 0 0 1 .732-.732V3.5a.5.5 0 0 0-.5-.5h-9a.5.5 0 0 0-.5.5v7a.5.5 0 0 0 .294.456M12 10a2 2 0 0 1 1.732 1h.768a.5.5 0 0 0 .5-.5V8.35a.5.5 0 0 0-.11-.312l-1.48-1.85A.5.5 0 0 0 13.02 6H12zm-9 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2m9 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2"/>
@@ -46,10 +46,10 @@
       <!-- Shipping Options -->
       <div class="d-flex justify-content-between align-items-center mb-2">
         <div class="d-flex align-items-center gap-2">
-          <input 
-            type="radio" 
-            name="shipping" 
-            value="shipping" 
+          <input
+            type="radio"
+            name="shipping"
+            value="shipping"
             v-model="localShippingMethod"
             @change="$emit('update:shippingMethod', 'shipping')"
             id="shipping-option"
@@ -62,9 +62,9 @@
       </div>
       <div class="d-flex justify-content-between align-items-center mb-3">
         <div class="d-flex align-items-center gap-2">
-          <input 
-            type="radio" 
-            name="shipping" 
+          <input
+            type="radio"
+            name="shipping"
             value="pickup"
             v-model="localShippingMethod"
             @change="$emit('update:shippingMethod', 'pickup')"
@@ -79,24 +79,40 @@
 
       <!-- Coupon Input -->
       <div class="d-flex mb-3 coupon-wrapper position-relative">
-        <input 
-          type="text" 
-          class="form-control fw-bold px-5" 
-          style="background-color:#eef0fb; width: 90%; height: 50px;" 
-          placeholder="Coupon code" 
+        <input
+          type="text"
+          class="form-control fw-bold px-5"
+          style="background-color:#eef0fb; width: 90%; height: 50px;"
+          placeholder="Coupon code"
           v-model="localCouponCode"
+          :disabled="isApplyingCoupon"
+          @keyup.enter="handleApplyCoupon"
         >
-        <button 
-          class="w-25 btn btn-primary px-4 position-absolute end-0 coupon-apply-btn" 
+        <button
+          class="w-25 btn btn-primary px-4 position-absolute end-0 coupon-apply-btn"
           style="height: 50px;"
-          @click="$emit('applyCoupon', localCouponCode)"
+          @click="handleApplyCoupon"
+          :disabled="isApplyingCoupon || !localCouponCode.trim()"
         >
-          Apply
+          <span v-if="isApplyingCoupon" class="spinner-border spinner-border-sm me-1"></span>
+          {{ isApplyingCoupon ? 'Applying...' : 'Apply' }}
         </button>
       </div>
 
+      <!-- Coupon Error Message -->
+      <div v-if="couponError" class="alert alert-danger py-2 px-3 small mb-3">
+        <i class="bi bi-exclamation-circle me-1"></i>
+        {{ couponError }}
+      </div>
+
+      <!-- Coupon Success Message -->
+      <div v-if="couponSuccess" class="alert alert-success py-2 px-3 small mb-3">
+        <i class="bi bi-check-circle me-1"></i>
+        {{ couponSuccess }}
+      </div>
+
       <hr class="opacity-100" style="border-top: 2px solid var(--main-color2);">
-      
+
       <!-- Grand Total -->
       <div class="d-flex justify-content-between align-items-center pt-3" style="color: var(--main-color2);">
         <span class="h5 fw-bold mb-0 text-main-color2">Grand Total</span>
@@ -106,9 +122,9 @@
 
     <!-- Deliver Together Option -->
     <div class="form-check mb-3">
-      <input 
-        class="form-check-input" 
-        type="checkbox" 
+      <input
+        class="form-check-input"
+        type="checkbox"
         :checked="deliverTogether"
         @change="$emit('update:deliverTogether', ($event.target as HTMLInputElement).checked)"
         id="deliverTogether"
@@ -124,7 +140,7 @@
         <i class="bi bi-truck me-1"></i>
         Estimated delivery by {{ estimatedDelivery }}
       </p>
-      <button 
+      <button
         class="btn checkout-btn fw-bold fs-5"
         @click="$emit('checkout')"
         :disabled="totalItems === 0"
@@ -139,6 +155,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import { useCartStore } from '@/stores/cartStore'
 
 interface Props {
   totalItems: number
@@ -160,8 +177,12 @@ const emit = defineEmits<{
   'checkout': []
 }>()
 
+const cartStore = useCartStore()
 const localShippingMethod = ref(props.shippingMethod)
 const localCouponCode = ref(props.couponCode)
+const isApplyingCoupon = ref(false)
+const couponError = ref('')
+const couponSuccess = ref('')
 
 watch(() => props.shippingMethod, (newVal) => {
   localShippingMethod.value = newVal
@@ -170,6 +191,33 @@ watch(() => props.shippingMethod, (newVal) => {
 watch(() => props.couponCode, (newVal) => {
   localCouponCode.value = newVal
 })
+
+const handleApplyCoupon = async () => {
+  if (!localCouponCode.value.trim()) {
+    return
+  }
+
+  isApplyingCoupon.value = true
+  couponError.value = ''
+  couponSuccess.value = ''
+
+  try {
+    const result = await cartStore.applyCoupon(localCouponCode.value)
+    if (result && result.success) {
+      couponSuccess.value = result.message
+      setTimeout(() => {
+        couponSuccess.value = ''
+      }, 5000)
+    }
+  } catch (error: any) {
+    couponError.value = error.message || 'Failed to apply coupon'
+    setTimeout(() => {
+      couponError.value = ''
+    }, 5000)
+  } finally {
+    isApplyingCoupon.value = false
+  }
+}
 
 const estimatedDelivery = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   .toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })
