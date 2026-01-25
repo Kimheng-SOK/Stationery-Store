@@ -4,7 +4,7 @@
       <span v-if="product.isNew" class="badge badge-new">
         NEW
       </span>
-      
+
       <span v-if="product.discount && product.discount > 0" class="badge badge-discount">
         -{{ product.discount }}%
       </span>
@@ -27,9 +27,9 @@
 
     <div class="product-info">
       <p class="product-category text-uppercase">{{ product.categoryName }}</p>
-      
+
       <h6 class="product-title" @click="viewDetails">{{ product.name }}</h6>
-      
+
       <div class="product-rating mb-3">
         <span class="stars">{{ renderStars(Math.round(product.rating)) }}</span>
         <span class="rating-count">({{ product.reviewCount }})</span>
@@ -42,10 +42,9 @@
             ${{ product.originalPrice }}
           </span>
         </div>
-
-        <button 
-          class="btn-add-cart" 
-          @click.stop="addToCart"
+        <button
+          class="btn btn-sm btn-outline-primary"
+          @click="addToCart"
           :disabled="!product.inStock || addingToCart"
           :class="{ 'loading': addingToCart }"
         >
@@ -54,11 +53,14 @@
       </div>
     </div>
 
-    <Transition name="fade">
-      <div v-if="showSuccessMessage" class="success-toast">
-        <i class="bi bi-check2-circle me-2"></i> Added to cart
-      </div>
-    </Transition>
+    <!-- Success Toast Message -->
+    <div
+      v-if="showSuccessMessage"
+      class="success-toast"
+    >
+      <i class="bi bi-check-circle-fill me-2"></i>
+      Added to cart!
+    </div>
   </div>
 </template>
 
@@ -69,7 +71,7 @@ import { useCartStore } from '@/stores/cartStore'
 
 // Note: We use 'any' here because the Store formatter adds displayPrice/showStrikePrice
 interface Props {
-  product: any 
+  product: any
 }
 
 const props = defineProps<Props>()
@@ -88,16 +90,29 @@ const addToCart = async () => {
 
   addingToCart.value = true
   try {
-    await cartStore.addToCart(props.product, 1)
+    addingToCart.value = true
+
+    // Add to cart with quantity of 1
+    cartStore.addToCart(props.product, 1)
+
+    // Show success message
     showSuccessMessage.value = true
-    setTimeout(() => { showSuccessMessage.value = false }, 2000)
+
+    // Hide message after 2 seconds
+    setTimeout(() => {
+      showSuccessMessage.value = false
+    }, 2000)
+  } catch (err) {
+    if (err instanceof Error) {
+      alert(err.message)
+    }
   } finally {
     addingToCart.value = false
   }
 }
 
 const viewDetails = () => {
-  router.push({ name: 'ProductDetail', params: { id: props.product.id || props.product._id } })
+  router.push({ name: 'ProductDetail', params: { id: props.product._id } })
 }
 </script>
 
@@ -287,6 +302,14 @@ const viewDetails = () => {
   z-index: 100;
 }
 
-.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
 </style>

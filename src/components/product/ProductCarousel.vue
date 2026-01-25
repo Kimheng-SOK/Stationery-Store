@@ -64,7 +64,7 @@
 import { ref, onMounted, computed, onUnmounted } from 'vue'
 
 interface Props {
-  items: any[]
+  items: unknown[]
   itemsPerSlide?: number
   gap?: number
   showNavigation?: boolean
@@ -146,9 +146,17 @@ const startDrag = (e: MouseEvent | TouchEvent) => {
   isDragging.value = true
   sliderRef.value.style.cursor = 'grabbing'
 
-  const pageX = e instanceof MouseEvent ? e.pageX : e.touches[0].pageX
-  startX.value = pageX - sliderRef.value.offsetLeft
-  scrollLeft.value = sliderRef.value.scrollLeft
+  let pageX: number
+  if (e instanceof MouseEvent) {
+    pageX = e.pageX
+  } else if ('touches' in e && Array.isArray(e.touches) ? e.touches.length > 0 : (e.touches && e.touches.length > 0)) {
+    pageX = e.touches && e.touches[0] ? e.touches[0].pageX : 0
+    if (!e.touches || !e.touches[0]) return
+  } else {
+    return
+  }
+  startX.value = pageX - (sliderRef.value.offsetLeft ?? 0)
+  scrollLeft.value = sliderRef.value.scrollLeft ?? 0
 }
 
 const drag = (e: MouseEvent | TouchEvent) => {
@@ -156,7 +164,14 @@ const drag = (e: MouseEvent | TouchEvent) => {
 
   e.preventDefault()
 
-  const pageX = e instanceof MouseEvent ? e.pageX : e.touches[0].pageX
+  let pageX: number
+  if (e instanceof MouseEvent) {
+    pageX = e.pageX
+  } else if ('touches' in e && Array.isArray(e.touches) && e.touches.length > 0) {
+    pageX = e.touches[0].pageX
+  } else {
+    return
+  }
   const x = pageX - sliderRef.value.offsetLeft
   const walk = (x - startX.value) * 2
   sliderRef.value.scrollLeft = scrollLeft.value - walk

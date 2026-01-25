@@ -14,7 +14,7 @@
         <template #item="{ item }">
           <ProductCard
             :product="item"
-            @add-to-cart="handleAddToCart(item)"
+            @add-to-cart="handleAddToCart(item as Product)"
           />
         </template>
       </ProductCarousel>
@@ -37,6 +37,7 @@ import { computed, onMounted } from 'vue'
 import { useProductStore } from '@/stores/product'
 import ProductCarousel from '@/components/product/ProductCarousel.vue'
 import ProductCard from '@/components/product/ProductCard.vue'
+import type { Product } from '@/types/product'
 
 const productStore = useProductStore()
 
@@ -47,7 +48,7 @@ const featuredProducts = computed(() => {
     .map(p => productStore.formatProduct(p)) // Apply image/price formatting
 })
 
-const handleAddToCart = (product: any) => {
+const handleAddToCart = (product: Product) => {
   console.log('Featured product added to cart:', product.name)
 }
 

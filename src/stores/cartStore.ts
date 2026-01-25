@@ -1,3 +1,4 @@
+import type { Product } from '@/types/product';
 import { defineStore } from 'pinia'
 
 // Updated interface to handle backend _id (string)
@@ -5,7 +6,7 @@ export interface CartItem {
   _id: string;
   name: string;
   price: number;
-  originalPrice?: number;
+  originalPrice: number;
   image: string;
   quantity: number;
   sku: string;
@@ -86,14 +87,14 @@ export const useCartStore = defineStore('cart', {
           image: formattedImage || '/placeholder.jpg',
           quantity: quantity,
           sku: product.sku || 'N/A',
-          category: product.categoryName || product.category || 'General',
+          category: typeof product.category === 'object' && product.category !== null ? product.category.name : product.category || 'General',
           brand: product.brand || 'Premium',
           badge: product.isNew ? 'New' : undefined,
           description: product.description || 'Quality Stationery Product',
           delivery: this.calculateDeliveryDate(),
           stock: product.stock || 999
         }
-        
+
         this.items.push(cartItem)
       }
     },

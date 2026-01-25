@@ -18,7 +18,7 @@
       :min="min"
       :max="max"
       :step="step"
-      @input="$emit('update:modelValue', $event.target.value)"
+      @input="if ($event.target) $emit('update:modelValue', ($event.target as HTMLInputElement).value)"
       @blur="$emit('blur')"
     />
 
@@ -26,13 +26,13 @@
     <textarea
       v-else-if="type === 'textarea'"
       :id="fieldId"
-      :value="modelValue"
+      :value="props.modelValue as string"
       :placeholder="placeholder"
       :class="['form-control', { 'is-invalid': !!error }]"
       :required="required"
       :disabled="disabled"
       :rows="rows"
-      @input="$emit('update:modelValue', $event.target.value)"
+      @input="if ($event.target) $emit('update:modelValue', ($event.target as HTMLTextAreaElement).value)"
       @blur="$emit('blur')"
     ></textarea>
 
@@ -44,7 +44,7 @@
       :class="['form-select', { 'is-invalid': !!error }]"
       :required="required"
       :disabled="disabled"
-      @change="$emit('update:modelValue', $event.target.value)"
+      @change="if ($event.target) $emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
       @blur="$emit('blur')"
     >
       <option v-if="placeholder" value="">{{ placeholder }}</option>
@@ -58,11 +58,11 @@
       <input
         :id="fieldId"
         type="checkbox"
-        :checked="modelValue"
+        :checked="!!modelValue"
         :class="['form-check-input', { 'is-invalid': !!error }]"
         :required="required"
         :disabled="disabled"
-        @change="$emit('update:modelValue', $event.target.checked)"
+        @change="if ($event.target) $emit('update:modelValue', ($event.target as HTMLInputElement).checked)"
       />
       <label :for="fieldId" class="form-check-label">{{ label }}</label>
     </div>
@@ -76,7 +76,7 @@
       :class="['form-control', { 'is-invalid': !!error }]"
       :required="required"
       :disabled="disabled"
-      @input="$emit('update:modelValue', $event.target.value)"
+      @input="if ($event.target) $emit('update:modelValue', ($event.target as HTMLInputElement).value)"
       @blur="$emit('blur')"
     />
 
@@ -100,7 +100,7 @@ interface SelectOption {
 }
 
 interface Props {
-  modelValue: any
+  modelValue: unknown
   type?: 'text' | 'email' | 'password' | 'number' | 'url' | 'textarea' | 'select' | 'checkbox' | 'date'
   label?: string
   placeholder?: string
@@ -129,8 +129,8 @@ const props = withDefaults(defineProps<Props>(), {
   rows: 3,
 })
 
-const emit = defineEmits<{
-  'update:modelValue': [value: any]
+defineEmits<{
+  'update:modelValue': [value: unknown]
   blur: []
 }>()
 
