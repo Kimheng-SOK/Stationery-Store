@@ -83,12 +83,24 @@ const createProduct = async (req, res) => {
       }
     }
 
+    let price = originalPrice ? parseFloat(originalPrice) : 0;
+    if (discount && parseFloat(discount) > 0) {
+      // Use percentage discount
+      price = price * (1 - parseFloat(discount) / 100);
+    }
+
+    if (req.body.originalPrice && req.body.discount) {
+      const price = parseFloat(req.body.originalPrice) * (1 - parseFloat(req.body.discount) / 100);
+      req.body.price = price;
+    }
+
     // Create product
     const product = await Product.create({
       name,
       sku: sku.toUpperCase(),
       stock: stock ? parseInt(stock) : 0,
       originalPrice: originalPrice ? parseFloat(originalPrice) : undefined,
+      price: price,
       discount: discount ? parseFloat(discount) : undefined,
       brand: brand || undefined,
       category: category,
@@ -310,6 +322,11 @@ const updateProduct = async (req, res) => {
         });
       }
       req.body.images = [req.file.filename]; // Changed from 'image' to 'images'
+    } 
+
+    if (req.body.originalPrice && req.body.discount) {
+      const price = parseFloat(req.body.originalPrice) * (1 - parseFloat(req.body.discount) / 100);
+      req.body.price = price;
     }
 
     // Update product
