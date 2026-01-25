@@ -2,7 +2,7 @@
   <div class="w-100 min-vh-100 bg-white" style="font-family: Quicksand, sans-serif;">
     <div class="border-bottom py-3">
       <div class="container-fluid px-4">
-        <button 
+        <button
           class="btn btn-link text-dark text-decoration-none d-flex align-items-center gap-2 p-0"
           @click="goToShopping"
         >
@@ -14,7 +14,7 @@
 
     <div class="container-fluid py-4 px-4">
       <div class="row g-4">
-        <div class="col-lg-7">
+        <div class="col-lg-8">
           <div v-if="cartStore.items.length === 0" class="text-center py-5">
             <i class="bi bi-cart-x text-muted" style="font-size: 5rem;"></i>
             <h3 class="text-muted mt-3">Your cart is empty</h3>
@@ -32,7 +32,7 @@
 
             <CartItem
               v-for="(item, index) in cartStore.items"
-              :key="item._id" 
+              :key="item._id"
               :item="item"
               @increase="cartStore.increaseQuantity(index)"
               @decrease="cartStore.decreaseQuantity(index)"
@@ -41,7 +41,7 @@
           </template>
         </div>
 
-        <div class="col-lg-5">
+        <div class="col-lg-4 ms-auto">
           <OrderSummary
             :total-items="cartStore.totalItems"
             :item-total="cartStore.itemTotal"
@@ -68,7 +68,7 @@
           </div>
           <h4 class="fw-bold mb-2" style="color: #141B3E;">Please Login</h4>
           <p class="text-muted mb-4">You need to be logged in to continue with your purchase.</p>
-          
+
           <div class="d-grid gap-2">
             <button class="btn btn-primary py-2 fw-bold" style="background-color: #141B3E; border: none;" @click="router.push('/signin')">
               Login
@@ -111,11 +111,11 @@ const handleRemoveItem = (index: number) => {
 // Updated handleCheckout only
 const handleCheckout = () => {
   if (cartStore.items.length === 0) return
-  
+
   if (!authStore.isAuthenticated) {
     showAuthModal.value = true
   } else {
-    router.push('/checkout') 
+    router.push('/checkout')
   }
 }
 </script>
