@@ -1,52 +1,8 @@
 <template>
   <div class="file-upload-container">
-    <!-- Upload Tabs -->
-    <div class="upload-tabs">
-      <button
-        :class="['tab-btn', { active: uploadMode === 'url' }]"
-        @click="uploadMode = 'url'"
-      >
-        <i class="bi bi-link-45deg"></i>
-        <span>From URL</span>
-      </button>
-      <button
-        :class="['tab-btn', { active: uploadMode === 'device' }]"
-        @click="uploadMode = 'device'"
-      >
-        <i class="bi bi-upload"></i>
-        <span>From Device</span>
-      </button>
-    </div>
-
-    <!-- URL Upload Mode -->
-    <div v-if="uploadMode === 'url'" class="upload-section">
-      <label class="form-label fw-semibold">Image URL</label>
-      <div class="url-input-group">
-        <input
-          v-model="urlInput"
-          type="url"
-          placeholder="https://example.com/image.jpg"
-          class="form-control"
-          @keyup.enter="addFromUrl"
-        />
-        <button
-          @click="addFromUrl"
-          class="btn btn-primary"
-          :disabled="!urlInput || isLoading"
-          type="button"
-        >
-          <i v-if="isLoading" class="bi bi-hourglass-split spinner"></i>
-          <i v-else class="bi bi-plus"></i>
-          <span>{{ isLoading ? 'Loading...' : 'Add' }}</span>
-        </button>
-      </div>
-      <small class="text-muted d-block mt-2">
-        Enter a valid image URL. Supported formats: JPG, PNG, GIF, WebP
-      </small>
-    </div>
 
     <!-- Device Upload Mode -->
-    <div v-else class="upload-section">
+    <div class="upload-section">
       <label class="form-label fw-semibold">Choose File</label>
       <div
         :class="['file-drop-zone', { 'drag-over': isDragging }]"
@@ -121,11 +77,9 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
 
-const uploadMode = ref<'url' | 'device'>('device')
-const urlInput = ref('')
-const fileInput = ref<HTMLInputElement | null>(null)
+
+const fileInput = ref<HTMLInputElement>()
 const isDragging = ref(false)
-const isLoading = ref(false)
 const imagePreview = ref(props.modelValue)
 const errorMessage = ref('')
 
@@ -136,42 +90,6 @@ watch(
   }
 )
 
-const validateImageUrl = async (url: string): Promise<boolean> => {
-  try {
-    const response = await fetch(url, { method: 'HEAD' })
-    const contentType = response.headers.get('content-type')
-    return contentType?.startsWith('image/') ?? false
-  } catch {
-    return false
-  }
-}
-
-const addFromUrl = async () => {
-  if (!urlInput.value) {
-    errorMessage.value = 'Please enter a URL'
-    return
-  }
-
-  try {
-    errorMessage.value = ''
-    isLoading.value = true
-
-    const isValid = await validateImageUrl(urlInput.value)
-    if (!isValid) {
-      errorMessage.value = 'Invalid image URL or image is not accessible'
-      return
-    }
-
-    imagePreview.value = urlInput.value
-    emit('update:modelValue', urlInput.value)
-    urlInput.value = ''
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
-    errorMessage.value = 'Failed to load image from URL'
-  } finally {
-    isLoading.value = false
-  }
-}
 
 const handleFileSelect = (event: Event) => {
   const target = event.target as HTMLInputElement
@@ -218,7 +136,6 @@ const processFile = (file: File) => {
 const clearImage = () => {
   imagePreview.value = ''
   emit('update:modelValue', '')
-  urlInput.value = ''
   errorMessage.value = ''
   if (fileInput.value) {
     fileInput.value.value = ''

@@ -59,6 +59,7 @@
             <div class="rating-section mb-3 d-flex align-items-center">
               <div class="stars text-warning me-2">
                 <i v-for="i in 5" :key="i"
+                   :class="i <= product.rating ? 'bi bi-star-fill' : 'bi bi-star'">
                    :class="i <= Math.round(reviewStore.averageRating) ? 'bi bi-star-fill' : 'bi bi-star'">
                 </i>
               </div>
@@ -139,7 +140,8 @@
                 @click="addToCart"
                 :disabled="product.stock <= 0"
               >
-                <i class="bi bi-cart-plus"></i> Add to Cart
+                <i class="bi bi-cart-plus"></i>
+                {{ addingToCart ? 'Adding...' : 'Add to Cart' }}
               </button>
               <button
                 class="btn btn-outline-secondary btn-lg"
@@ -149,6 +151,18 @@
               </button>
             </div>
 
+            <!-- Success Message -->
+            <div v-if="showSuccessMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+              <i class="bi bi-check-circle-fill"></i>
+              {{ quantity }} {{ product.name }}(s) added to cart!
+              <button
+                type="button"
+                class="btn-close"
+                @click="showSuccessMessage = false"
+              ></button>
+            </div>
+
+            <!-- Product Description -->
             <div class="product-description">
               <h5 class="mb-3">Product Description</h5>
               <p class="text-muted">
@@ -164,7 +178,7 @@
         <div class="row g-4">
           <div
             v-for="relatedProduct in relatedProducts"
-            :key="relatedProduct._id || relatedProduct.id"
+            :key="relatedProduct.id"
             class="col-md-3 col-sm-6"
           >
             <div class="card h-100">
@@ -275,19 +289,14 @@ onMounted(async () => {
 const loadProduct = async () => {
   try {
     loading.value = true
-    error.value = null
-    const id = route.params.id as string
+    const productId = Number(route.params.id)
 
-    if (!productStore.isFetched) {
-      await productStore.fetchProducts()
-    }
-
-    const foundProduct = productStore.products.find(p => String(p._id) === String(id))
+    const foundProduct = products.find(p => p.id === productId)
 
     if (foundProduct) {
-      product.value = productStore.formatProduct(foundProduct)
-      selectedImage.value = product.value.image
-      quantity.value = 1
+      product.value = foundProduct
+      selectedImage.value = foundProduct.image
+
     } else {
       error.value = 'Product not found'
     }
@@ -325,6 +334,21 @@ const decreaseQuantity = () => {
 const addToCart = () => {
   if (product.value) {
     cartStore.addToCart(product.value, quantity.value)
+
+    // Show success message
+    showSuccessMessage.value = true
+    setTimeout(() => {
+      showSuccessMessage.value = false
+    }, 3000)
+
+    // Reset quantity
+    quantity.value = 1
+  } catch (err) {
+    if (err instanceof Error) {
+      alert(err.message)
+    }
+  } finally {
+    addingToCart.value = false
     console.log(`${quantity.value} ${product.value.name}(s) added to cart!`)
   }
 }
@@ -337,6 +361,17 @@ const navigateToProduct = (id: string | number) => {
   router.push({ name: 'ProductDetail', params: { id } })
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
+
+const formatDate = (dateString: string) => {
+  if (!dateString) return 'N/A'
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
+}
+
 </script>
 
 <style scoped>
