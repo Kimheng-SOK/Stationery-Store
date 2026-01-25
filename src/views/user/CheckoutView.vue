@@ -298,11 +298,15 @@ import { ref, reactive, computed } from 'vue'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cartStore'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const cartStore = useCartStore()
+const authStore = useAuthStore()
 const step = ref(1)
 const isProcessing = ref(false)
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const form = reactive({
   firstName: '',
@@ -345,7 +349,7 @@ const applyCoupon = async () => {
   couponLoading.value = true
   try {
     const code = couponInput.value.trim().toUpperCase()
-    const res = await axios.get(`http://localhost:5000/api/coupons/code/${code}`)
+    const res = await axios.get(`${API_URL}/coupons/code/${code}`)
     if (res.data && res.data.success && res.data.data && res.data.data.length > 0) {
       appliedCoupon.value = res.data.data[0]
       couponApplied.value = true
@@ -364,7 +368,7 @@ const applyCoupon = async () => {
 const redeemCoupon = async () => {
   if (!appliedCoupon.value) return
   try {
-    await axios.post(`http://localhost:5000/api/coupons/redeem/${appliedCoupon.value.code}`)
+    await axios.post(`${API_URL}/coupons/redeem/${appliedCoupon.value.code}`)
   } catch (e) {
     // Ignore error, coupon will be expired if limit reached
   }
@@ -373,17 +377,119 @@ const redeemCoupon = async () => {
 const placeOrder = async () => {
   isProcessing.value = true
 
-  // Simulating real API delay
-  setTimeout(async () => {
-    isProcessing.value = false
-    // EMPTY THE CART HERE
+  try {
+    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+    const orderDate = new Date()
+    const deliveryDate = new Date()
+    deliveryDate.setDate(deliveryDate.getDate() + 7)
+
+    const shippingMethod = cartStore.shippingMethod || 'shipping'
+    const shippingCost = shippingMethod === 'pickup' ? 0 : (cartStore.shippingCost || 2.5)
+
+    const subtotalAll = cartStore.itemTotal
+    const discountPercentage = appliedCoupon.value?.discount || 0
+    const totalDiscountAmount = (subtotalAll * discountPercentage) / 100
+    const subtotalAfterDiscount = subtotalAll - totalDiscountAmount
+    const grandTotal = subtotalAfterDiscount + shippingCost
+
+    // Get logged-in user info
+    const currentUser = authStore.user
+    const userId = currentUser?.id || null
+    const userEmail = currentUser?.email || form.email || ''
+
+    const orderPromises = cartStore.items.map(async (item) => {
+      const itemSubtotal = (item.price || item.originalPrice) * item.quantity
+      const itemProportion = itemSubtotal / subtotalAll
+      const itemDiscountAmount = totalDiscountAmount * itemProportion
+      const itemShippingCost = shippingCost * itemProportion
+      const itemTotal = itemSubtotal - itemDiscountAmount + itemShippingCost
+
+      // Get product image URL
+      const productImage = getProductImageUrl(item)
+
+      const orderData = {
+        orderNumber: `${orderNumber}-${item._id}`,
+        user: userId,
+        product: item._id,
+        productName: item.name,
+        productImage: productImage, // Add product image
+        quantity: item.quantity,
+        customerName: `${form.firstName} ${form.lastName}`,
+        customerEmail: userEmail,
+        customerLocation: `${form.address}, ${form.city}, ${form.zip}, ${userEmail}`,
+        amount: itemSubtotal,
+        shippingMethod: shippingMethod,
+        shippingCost: parseFloat(itemShippingCost.toFixed(2)),
+        couponCode: appliedCoupon.value?.code || '',
+        discountPercent: discountPercentage,
+        discountAmount: parseFloat(itemDiscountAmount.toFixed(2)),
+        subtotal: parseFloat(itemSubtotal.toFixed(2)),
+        totalAmount: parseFloat(itemTotal.toFixed(2)),
+        paymentMethod: form.paymentMethod,
+        orderDate: orderDate.toISOString(),
+        orderTime: orderDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        deliveryDate: deliveryDate.toISOString(),
+        deliveryTime: shippingMethod === 'pickup' ? 'Pickup from store' : '10:00 AM - 6:00 PM',
+        status: 'pending'
+      }
+
+      return axios.post(`${API_URL}/orders`, orderData)
+    })
+
+    await Promise.all(orderPromises)
+
+    if (appliedCoupon.value) {
+      await redeemCoupon()
+    }
+
     cartStore.$reset()
-    // Redeem coupon if applied
-    if (appliedCoupon.value) await redeemCoupon()
-    // NAVIGATE TO SUCCESS PAGE
-    router.push('/order-success')
-  }, 1800)
+
+    setTimeout(() => {
+      isProcessing.value = false
+      router.push({
+        name: 'OrderSuccess',
+        query: {
+          orderNumber,
+          total: grandTotal.toFixed(2)
+        }
+      })
+    }, 1000)
+
+  } catch (error: any) {
+    isProcessing.value = false
+    console.error('Order placement failed:', error)
+
+    const errorMsg = error.response?.data?.message || 'Failed to place order. Please try again.'
+    alert(errorMsg)
+
+    if (errorMsg.includes('Insufficient stock')) {
+      setTimeout(() => {
+        window.location.reload()
+      }, 2000)
+    }
+  }
 }
+
+// Helper function to get product image URL
+const getProductImageUrl = (item: any): string => {
+  // If image is a full URL, return it
+  if (item.image && typeof item.image === 'string') {
+    if (item.image.startsWith('http')) return item.image
+    // If image is a filename, build the backend URL
+    return `http://localhost:5000/uploads/products/${item.image}`
+  }
+  // If images array exists and has at least one image
+  if (item.images && Array.isArray(item.images) && item.images.length > 0) {
+    const img = item.images[0]
+    if (typeof img === 'string') {
+      if (img.startsWith('http')) return img
+      return `http://localhost:5000/uploads/products/${img}`
+    }
+  }
+  // Fallback to placeholder
+  return '/placeholder-image.jpg'
+}
+
 </script>
 
 <style scoped>

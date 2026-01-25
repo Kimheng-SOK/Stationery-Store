@@ -1,12 +1,20 @@
 export interface Customer {
-  id: string
+  _id?: string
+  id?: string
   name: string
-  phone: string
   email: string
+  phone?: string
+  avatar?: string
   memberSince: string
-  purchasedItems: number
-  rewardPoints: number
-  avatar: string
+  purchasedItems?: number
+  rewardPoints?: number
+  stats?: {
+    totalOrders: number
+    totalRevenue: number
+    completedOrders: number
+    isActive: boolean
+    rewardPoints?: number
+  }
 }
 
 export interface CustomersResponse {

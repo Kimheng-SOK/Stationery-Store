@@ -71,7 +71,7 @@
                     <div class="stat-value">{{ stats.activeMembers }}</div>
                     <div class="stat-badge">
                       <i class="bi bi-arrow-up"></i>
-                      <span>This Month</span>
+                      <span>Last 30 Days</span>
                     </div>
                   </div>
                 </div>
@@ -91,7 +91,7 @@
                     <div class="stat-value">{{ stats.totalOrders }}</div>
                     <div class="stat-badge">
                       <i class="bi bi-graph-up"></i>
-                      <span>Purchases</span>
+                      <span>All Time</span>
                     </div>
                   </div>
                 </div>
@@ -99,18 +99,18 @@
             </div>
 
             <div class="col-sm-6 col-xl-3">
-              <div class="stat-card stat-rewards">
+              <div class="stat-card stat-revenue">
                 <div class="stat-card-inner">
                   <div class="stat-icon-wrapper">
                     <div class="stat-icon">
-                      <i class="bi bi-star-fill"></i>
+                      <i class="bi bi-currency-dollar"></i>
                     </div>
                   </div>
                   <div class="stat-content">
-                    <div class="stat-label">Reward Points</div>
-                    <div class="stat-value">{{ stats.totalRewards }}</div>
+                    <div class="stat-label">Total Revenue</div>
+                    <div class="stat-value">${{ stats.totalRevenue.toFixed(2) }}</div>
                     <div class="stat-badge">
-                      <i class="bi bi-award"></i>
+                      <i class="bi bi-cash-stack"></i>
                       <span>Earned</span>
                     </div>
                   </div>
@@ -121,7 +121,7 @@
         </div>
       </div>
 
-      <!-- Table Section -->
+      <!-- Table Section with Activity Status -->
       <div class="table-responsive rounded-2 border border-top bg-white">
         <table class="table table-hover mb-0">
           <thead>
@@ -130,8 +130,9 @@
               <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Phone Number</th>
               <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Email Address</th>
               <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Member Since</th>
-              <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Purchased Items</th>
-              <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Reward Point</th>
+              <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Total Orders</th>
+              <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Revenue</th>
+              <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -165,10 +166,16 @@
               <td class="px-4 py-3 text-dark small">{{ customer.email }}</td>
               <td class="px-4 py-3 text-dark small">{{ customer.memberSince }}</td>
               <td class="px-4 py-3 text-dark small">
-                <span class="badge bg-primary">{{ customer.purchasedItems }} Items</span>
+                <span class="badge bg-primary">{{ customer.stats?.totalOrders || customer.purchasedItems }} Orders</span>
               </td>
               <td class="px-4 py-3 text-dark small">
-                <span class="badge bg-warning text-dark">{{ customer.rewardPoints }}</span>
+                <span class="fw-bold text-success">${{ (customer.stats?.totalRevenue || 0).toFixed(2) }}</span>
+              </td>
+              <td class="px-4 py-3 text-dark small">
+                <span :class="['badge', customer.stats?.isActive ? 'bg-success' : 'bg-secondary']">
+                  <i :class="customer.stats?.isActive ? 'bi bi-check-circle' : 'bi bi-circle'"></i>
+                  {{ customer.stats?.isActive ? 'Active' : 'Inactive' }}
+                </span>
               </td>
             </tr>
           </tbody>
@@ -206,139 +213,132 @@
       </div>
     </div>
 
-    <!-- Profile Modal -->
-    <div
-      v-if="showModal"
-      class="modal fade show d-block"
-      tabindex="-1"
-      style="background-color: rgba(0, 0, 0, 0.6)"
-      @click.self="closeModal"
-    >
-      <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 800px">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden">
+    <!-- Enhanced Profile Modal with Stats -->
+    <div v-if="showModal" class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0, 0, 0, 0.6)" @click.self="closeModal">
+      <!-- Profile Header Section with Dark Navy Background -->
+      <div class="position-relative" style="background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%); padding: 40px 50px">
+        <button
+          type="button"
+          class="btn-close btn-close-white position-absolute top-0 end-0 m-3"
+          @click="closeModal"
+          aria-label="Close"
+        ></button>
 
-          <!-- Profile Header Section with Dark Navy Background -->
-          <div class="position-relative" style="background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%); padding: 40px 50px">
-            <button
-              type="button"
-              class="btn-close btn-close-white position-absolute top-0 end-0 m-3"
-              @click="closeModal"
-              aria-label="Close"
-            ></button>
+        <div class="d-flex align-items-center gap-4" v-if="selectedCustomer">
+          <!-- Avatar with Camera Icon and fallback to grey default -->
+          <div class="position-relative">
+            <!-- Default grey avatar if no image -->
+            <div
+              v-if="!selectedCustomer.avatar"
+              class="rounded-circle bg-light d-flex align-items-center justify-content-center border border-4 border-white"
+              style="width: 140px; height: 140px"
+            >
+              <i class="bi bi-person-fill text-secondary" style="font-size: 4rem"></i>
+            </div>
+            <!-- User avatar if exists -->
+            <img
+              v-else
+              :src="selectedCustomer.avatar"
+              :alt="selectedCustomer.name"
+              class="rounded-circle border border-4 border-white"
+              style="width: 140px; height: 140px; object-fit: cover"
+            />
 
-            <div class="d-flex align-items-center gap-4" v-if="selectedCustomer">
-              <!-- Avatar with Camera Icon and fallback to grey default -->
-              <div class="position-relative">
-                <!-- Default grey avatar if no image -->
-                <div
-                  v-if="!selectedCustomer.avatar"
-                  class="rounded-circle bg-light d-flex align-items-center justify-content-center border border-4 border-white"
-                  style="width: 140px; height: 140px"
-                >
-                  <i class="bi bi-person-fill text-secondary" style="font-size: 4rem"></i>
+          </div>
+
+          <!-- Name and Email -->
+          <div class="text-white">
+            <h3 class="fw-bold mb-2">{{ selectedCustomer.name }}</h3>
+            <p class="mb-0 opacity-75">{{ selectedCustomer.email }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Body with Enhanced Stats -->
+      <div class="modal-body p-4" v-if="selectedCustomer" style="background-color: #f8f9fa">
+        <!-- Stats Cards -->
+        <div class="row g-3 mb-4">
+          <div class="col-6">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body p-4">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="bg-primary bg-opacity-10 rounded-3 p-3">
+                    <i class="bi bi-bag-check-fill text-primary" style="font-size: 1.5rem"></i>
+                  </div>
+                  <div>
+                    <h2 class="fw-bold mb-0">{{ selectedCustomer.stats?.totalOrders || selectedCustomer.purchasedItems }}</h2>
+                    <p class="text-muted mb-0 small">Total Orders</p>
+                    <p class="text-success mb-0 small fw-semibold">
+                      {{ selectedCustomer.stats?.completedOrders || 0 }} Completed
+                    </p>
+                  </div>
                 </div>
-                <!-- User avatar if exists -->
-                <img
-                  v-else
-                  :src="selectedCustomer.avatar"
-                  :alt="selectedCustomer.name"
-                  class="rounded-circle border border-4 border-white"
-                  style="width: 140px; height: 140px; object-fit: cover"
-                />
-
-              </div>
-
-              <!-- Name and Email -->
-              <div class="text-white">
-                <h3 class="fw-bold mb-2">{{ selectedCustomer.name }}</h3>
-                <p class="mb-0 opacity-75">{{ selectedCustomer.email }}</p>
               </div>
             </div>
           </div>
 
-          <!-- Modal Body -->
-          <div class="modal-body p-4" v-if="selectedCustomer" style="background-color: #f8f9fa">
-
-            <!-- Stats Cards -->
-            <div class="row g-3 mb-4">
-              <div class="col-6">
-                <div class="card border-0 shadow-sm h-100">
-                  <div class="card-body p-4">
-                    <div class="d-flex align-items-start gap-3">
-                      <div class="bg-primary bg-opacity-10 rounded-3 p-3">
-                        <i class="bi bi-bag-check-fill text-primary" style="font-size: 1.5rem"></i>
-                      </div>
-                      <div>
-                        <h2 class="fw-bold mb-0">{{ selectedCustomer.purchasedItems }}</h2>
-                        <p class="text-muted mb-0 small">Total Orders</p>
-                        <p class="text-success mb-0 small fw-semibold">+3 this month</p>
-                      </div>
-                    </div>
+          <div class="col-6">
+            <div class="card border-0 shadow-sm h-100">
+              <div class="card-body p-4">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="bg-success bg-opacity-10 rounded-3 p-3">
+                    <i class="bi bi-currency-dollar text-success" style="font-size: 1.5rem"></i>
                   </div>
-                </div>
-              </div>
-
-              <div class="col-6">
-                <div class="card border-0 shadow-sm h-100">
-                  <div class="card-body p-4">
-                    <div class="d-flex align-items-start gap-3">
-                      <div class="bg-success bg-opacity-10 rounded-3 p-3">
-                        <i class="bi bi-wallet-fill text-success" style="font-size: 1.5rem"></i>
-                      </div>
-                      <div>
-                        <h2 class="fw-bold mb-0">${{ (selectedCustomer.rewardPoints * 0.4).toFixed(0) }}</h2>
-                        <p class="text-muted mb-0 small">Total Spent</p>
-                        <p class="text-muted mb-0 small">Gold Member Status</p>
-                      </div>
-                    </div>
+                  <div>
+                    <h2 class="fw-bold mb-0">${{ (selectedCustomer.stats?.totalRevenue || 0).toFixed(2) }}</h2>
+                    <p class="text-muted mb-0 small">Total Spent</p>
+                    <p class="text-muted mb-0 small">
+                      <i :class="selectedCustomer.stats?.isActive ? 'bi bi-circle-fill text-success' : 'bi bi-circle text-secondary'" style="font-size: 0.5rem;"></i>
+                      {{ selectedCustomer.stats?.isActive ? 'Active Member' : 'Inactive' }}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            <!-- Personal Information Card -->
-            <div class="card border-0 shadow-sm">
-              <div class="card-body p-4">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                  <h5 class="fw-bold mb-0">Personal Information</h5>
+        <!-- Personal Information Card -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h5 class="fw-bold mb-0">Personal Information</h5>
+            </div>
+
+            <div class="row g-4">
+              <!-- Full Name -->
+              <div class="col-md-6">
+                <label class="text-muted small mb-2 d-block">Full Name</label>
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-person-fill text-muted"></i>
+                  <span class="fw-medium">{{ selectedCustomer.name }}</span>
                 </div>
+              </div>
 
-                <div class="row g-4">
-                  <!-- Full Name -->
-                  <div class="col-md-6">
-                    <label class="text-muted small mb-2 d-block">Full Name</label>
-                    <div class="d-flex align-items-center gap-2">
-                      <i class="bi bi-person-fill text-muted"></i>
-                      <span class="fw-medium">{{ selectedCustomer.name }}</span>
-                    </div>
-                  </div>
+              <!-- Email Address -->
+              <div class="col-md-6">
+                <label class="text-muted small mb-2 d-block">Email Address</label>
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-envelope-fill text-muted"></i>
+                  <span class="fw-medium">{{ selectedCustomer.email }}</span>
+                </div>
+              </div>
 
-                  <!-- Email Address -->
-                  <div class="col-md-6">
-                    <label class="text-muted small mb-2 d-block">Email Address</label>
-                    <div class="d-flex align-items-center gap-2">
-                      <i class="bi bi-envelope-fill text-muted"></i>
-                      <span class="fw-medium">{{ selectedCustomer.email }}</span>
-                    </div>
-                  </div>
+              <!-- Phone Number -->
+              <div class="col-md-6">
+                <label class="text-muted small mb-2 d-block">Phone Number</label>
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-telephone-fill text-muted"></i>
+                  <span class="fw-medium">{{ selectedCustomer.phone }}</span>
+                </div>
+              </div>
 
-                  <!-- Phone Number -->
-                  <div class="col-md-6">
-                    <label class="text-muted small mb-2 d-block">Phone Number</label>
-                    <div class="d-flex align-items-center gap-2">
-                      <i class="bi bi-telephone-fill text-muted"></i>
-                      <span class="fw-medium">{{ selectedCustomer.phone }}</span>
-                    </div>
-                  </div>
-
-                  <!-- Member Since -->
-                  <div class="col-md-6">
-                    <label class="text-muted small mb-2 d-block">Member Since</label>
-                    <div class="d-flex align-items-center gap-2">
-                      <i class="bi bi-calendar-check-fill text-muted"></i>
-                      <span class="fw-medium">{{ selectedCustomer.memberSince }}</span>
-                    </div>
-                  </div>
+              <!-- Member Since -->
+              <div class="col-md-6">
+                <label class="text-muted small mb-2 d-block">Member Since</label>
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-calendar-check-fill text-muted"></i>
+                  <span class="fw-medium">{{ selectedCustomer.memberSince }}</span>
                 </div>
               </div>
             </div>
@@ -352,7 +352,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import type { Customer } from '@/types/customer'
-import { customerDataService } from '@/stores/customerService'
+import axios from 'axios'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const customers = ref<Customer[]>([])
 const searchQuery = ref('')
@@ -366,11 +368,11 @@ const selectedCustomer = ref<Customer | null>(null)
 const totalPages = computed(() => Math.ceil(totalCustomers.value / pageSize.value))
 const displayedCustomers = computed(() => customers.value)
 
-// Add stats computed property
+// Update stats to show real data from backend
 const stats = computed(() => ({
-  activeMembers: customers.value.filter(c => c.purchasedItems > 0).length,
-  totalOrders: customers.value.reduce((sum, c) => sum + c.purchasedItems, 0),
-  totalRewards: customers.value.reduce((sum, c) => sum + c.rewardPoints, 0)
+  activeMembers: customers.value.filter(c => c.stats?.isActive).length,
+  totalOrders: customers.value.reduce((sum, c) => sum + (c.stats?.totalOrders || 0), 0),
+  totalRevenue: customers.value.reduce((sum, c) => sum + (c.stats?.totalRevenue || 0), 0),
 }))
 
 const showProfile = (customer: Customer) => {
@@ -384,16 +386,28 @@ const closeModal = () => {
 }
 
 const handleSearch = async () => {
+  if (searchQuery.value.trim()) {
+    await searchCustomers()
+  } else {
+    await loadCustomers(1)
+  }
+}
+
+const searchCustomers = async () => {
   isLoading.value = true
   try {
-    if (searchQuery.value.trim()) {
-      const results = await customerDataService.searchCustomers(searchQuery.value)
-      customers.value = results
-      totalCustomers.value = results.length
-      currentPage.value = 1
-    } else {
-      await loadCustomers(1)
-    }
+    const { data } = await axios.get(`${API_URL}/users/stats`)
+    const query = searchQuery.value.toLowerCase()
+    const filtered = data.data.filter((customer: Customer) =>
+      customer.name.toLowerCase().includes(query) ||
+      customer.email.toLowerCase().includes(query) ||
+      (customer.phone && customer.phone.toLowerCase().includes(query))
+    )
+    customers.value = filtered
+    totalCustomers.value = filtered.length
+    currentPage.value = 1
+  } catch (error) {
+    console.error('Search failed:', error)
   } finally {
     isLoading.value = false
   }
@@ -402,10 +416,17 @@ const handleSearch = async () => {
 const loadCustomers = async (page: number) => {
   isLoading.value = true
   try {
-    const response = await customerDataService.getCustomers(page, pageSize.value)
-    customers.value = response.data
-    totalCustomers.value = response.total
+    const { data } = await axios.get(`${API_URL}/users/stats`)
+
+    // Calculate pagination
+    const start = (page - 1) * pageSize.value
+    const end = start + pageSize.value
+
+    customers.value = data.data.slice(start, end)
+    totalCustomers.value = data.count || data.data.length
     currentPage.value = page
+  } catch (error) {
+    console.error('Failed to load customers:', error)
   } finally {
     isLoading.value = false
   }
@@ -546,6 +567,7 @@ loadCustomers(1)
 .stat-active { color: #10b981; }
 .stat-orders { color: #f59e0b; }
 .stat-rewards { color: #8b5cf6; }
+.stat-revenue { color: #8b5cf6; }
 
 .stat-card-inner {
   display: flex;
@@ -583,6 +605,11 @@ loadCustomers(1)
 }
 
 .stat-rewards .stat-icon {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.stat-revenue .stat-icon {
   background: rgba(139, 92, 246, 0.1);
   color: #8b5cf6;
 }

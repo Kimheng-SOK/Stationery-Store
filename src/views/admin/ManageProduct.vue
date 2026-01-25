@@ -1021,7 +1021,7 @@ function onImagesChange(event: Event) {
   }
 }
 
-// Add stats computed property
+// Add stats computed property BEFORE onMounted
 const stats = computed(() => ({
   total: products.value.length,
   active: products.value.filter(p => p.status === 'active').length,
