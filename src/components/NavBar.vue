@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3 sticky-top main-navbar">
     <div class="container-fluid px-4" style="max-width: 1400px; margin: 0 auto">
-      
+
       <router-link to="/" class="navbar-brand d-flex align-items-center">
         <img
           src="/logo.png"
@@ -61,10 +61,10 @@
                 <div v-if="!authStore.user?.avatar" class="avatar-circle">
                   {{ getInitials(authStore.user?.name || 'User') }}
                 </div>
-                <img 
-                  v-else 
-                  :src="authStore.user.avatar" 
-                  alt="Avatar" 
+                <img
+                  v-else
+                  :src="authStore.user.avatar"
+                  alt="Avatar"
                   class="avatar-circle-img"
                 />
                 <div class="user-meta text-start">
@@ -81,7 +81,7 @@
                   <li class="dropdown-header border-bottom pb-2 mb-2">
                     <span class="text-uppercase fw-bold text-muted small">Account Overview</span>
                   </li>
-                  
+
                   <li>
                     <router-link to="/profile" class="dropdown-item d-flex align-items-center" @click="closeDropdown">
                       <img src="/images/icons/profile.jpg" class="drop-icon me-3" />
@@ -205,7 +205,7 @@
 
     <div class="offcanvas-body p-0">
       <div class="p-4"><SearchBar /></div>
-      
+
       <div class="mobile-menu-list">
         <div class="menu-group-label px-4 text-muted small text-uppercase fw-bold mb-2">Store</div>
         <router-link to="/shop" class="mobile-link" active-class="active" @click="closeMobileSidebar">Shop All</router-link>
@@ -244,7 +244,7 @@
             <img src="/images/icons/logout.jpg" class="drop-icon me-3 rounded" /> Sign Out
           </a>
         </template>
-        
+
         <div v-else class="p-4 mt-2">
           <router-link to="/signin" class="btn btn-primary w-100 rounded-pill py-3" @click="closeMobileSidebar">Sign In / Register</router-link>
         </div>
@@ -274,15 +274,15 @@ const orderCount = ref(0)
 const getInitials = (name: string): string => {
   if (!name) return 'U'
   const parts = name.trim().split(' ').filter(part => part.length > 0)
-  
+
   if (parts.length === 0) return 'U'
   if (parts.length === 1) {
     return parts[0]?.[0]?.toUpperCase() || 'U'
   }
-  
+
   const firstInitial = parts[0]?.[0]?.toUpperCase() || ''
   const lastInitial = parts[parts.length - 1]?.[0]?.toUpperCase() || ''
-  
+
   return (firstInitial + lastInitial) || 'U'
 }
 
@@ -314,7 +314,7 @@ const toggleMobileSidebar = () => {
   if (mobileSidebarRef.value) {
     mobileSidebarRef.value.classList.add('show')
     document.body.style.overflow = 'hidden'
-    
+
     // Add backdrop
     const backdrop = document.createElement('div')
     backdrop.className = 'offcanvas-backdrop fade show'
@@ -327,7 +327,7 @@ const closeMobileSidebar = () => {
   if (mobileSidebarRef.value) {
     mobileSidebarRef.value.classList.remove('show')
     document.body.style.overflow = ''
-    
+
     // Remove backdrop
     const backdrop = document.querySelector('.offcanvas-backdrop')
     if (backdrop) {
@@ -352,7 +352,7 @@ const loadOrderCount = async () => {
     if (saved) {
       const orders = JSON.parse(saved)
       // Count only processing/shipped orders
-      orderCount.value = orders.filter((order: any) => 
+      orderCount.value = orders.filter((order: any) =>
         order.status === 'Processing' || order.status === 'Shipped'
       ).length
     } else {
@@ -388,17 +388,19 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
   } else {
     orderCount.value = 0
   }
-const handleLogout = () => {
-  authStore.logout()
-  router.push('/signin')
-}
-const searchQuery = ref((route.query.search as string) || '')
+})
 
+// const handleLogout = () => {
+//   authStore.logout()
+//   router.push('/signin')
+// }
+
+const searchQuery = ref((route.query.search as string) || '')
 // Watch searchQuery and push to URL for live filtering
 watch(searchQuery, (newVal) => {
-  router.push({ 
-    path: '/shop', 
-    query: { ...route.query, search: newVal.trim() || undefined } 
+  router.push({
+    path: '/shop',
+    query: { ...route.query, search: newVal.trim() || undefined }
   })
 })
 
@@ -636,7 +638,7 @@ watch(() => route.query.search, (newSearch) => {
     width: 35px !important;
     height: 35px !important;
   }
-  
+
   .navbar-brand .brand-text span {
     font-size: 1rem;
   }
