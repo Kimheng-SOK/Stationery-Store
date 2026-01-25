@@ -197,6 +197,13 @@
         >
           Hots
         </router-link>
+        <router-link
+          to="/about-us"
+          class="px-4 py-3 text-white text-decoration-none hover-bg"
+          active-class="active-mobile-link"
+        >
+          About Us
+        </router-link>
 
         <template v-if="authStore.isAuthenticated">
           <hr class="border-secondary mx-3">

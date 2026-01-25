@@ -44,7 +44,8 @@ export default [
       { path: '/cart', name: 'Cart', component: CartView},
       { path: '/product/:id', name: 'ProductDetail', component: ProductDetailView},
       { path: '/about-us', name: 'AboutUs', component: AboutUsPage },
-      { path: '/order-success', name: 'OrderSuccess', component: OrderSuccessPage },
+      { path: '/order-success', name: 'OrderSuccess', component: OrderSuccessPage }, 
+      { path: '/checkout', name: 'Checkout', component: Checkout, meta: { requiresAuth: true } },
 
       { path: '/profile', name: 'Profile', component: ProfileMain },
       { path: '/profile/edit', name: 'ProfileEdit', component: EditProfile },

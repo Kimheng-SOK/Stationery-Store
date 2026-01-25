@@ -1,13 +1,13 @@
 <template>
   <div class="new-arrival-view">
-    <div class="container-fluid px-4">
+    <div class="container-fluid px-2 px-md-4">
       <div v-if="productStore.loading" class="text-center py-5">
         <div class="spinner-border text-success" role="status"></div>
         <p class="mt-2 text-muted">Fetching latest arrivals...</p>
       </div>
 
-      <div v-else class="row">
-        <aside class="col-lg-3 col-md-4 mb-4">
+      <div v-else class="row g-2 g-md-4">
+        <aside class="col-lg-3 col-md-12 mb-4">
           <SidebarFilter
             v-model:selected-category="selectedCategoryName"
             v-model:selected-brand="selectedBrand"
@@ -19,8 +19,8 @@
           />
         </aside>
 
-        <main class="col-lg-9 col-md-8">
-          <div class="page-header mb-4">
+        <main class="col-lg-9 col-md-12">
+          <div class="page-header mb-4 text-center text-lg-start">
             <h3 class="mb-2">New Arrivals</h3>
             <p class="text-muted mb-0">Shop our freshest drops and latest stationery</p>
           </div>
@@ -31,11 +31,11 @@
             :total-count="newArrivals.length"
           />
 
-          <div v-if="paginatedProducts.length > 0" class="row g-4 mb-4">
+          <div v-if="paginatedProducts.length > 0" class="row g-2 g-md-3 mb-4">
             <div
               v-for="product in paginatedProducts"
               :key="product._id"
-              class="col-lg-4 col-md-6 col-sm-6"
+              class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-6"
             >
               <ProductCard
                 :product="productStore.formatProduct(product)"
@@ -45,15 +45,15 @@
           </div>
 
           <div v-else class="text-center py-5">
-            <i class="bi bi-box-seam" style="font-size: 4rem; color: #ccc"></i>
+            <i class="bi bi-box-seam" style="font-size: 3rem; color: #ccc"></i>
             <h5 class="mt-3 text-muted">No new arrivals found</h5>
             <p class="text-muted">Try adjusting your filters or check back later!</p>
           </div>
 
           <nav v-if="totalPages > 1" aria-label="Product pagination" class="mt-4">
-            <ul class="pagination justify-content-center">
+            <ul class="pagination pagination-sm justify-content-center flex-wrap">
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                <a class="page-link" href="#" @click.prevent="changePage(currentPage - 1)">Previous</a>
+                <a class="page-link" href="#" @click.prevent="changePage(currentPage - 1)">&lt;</a>
               </li>
               <li
                 v-for="page in displayPages"
@@ -64,7 +64,7 @@
                 <a class="page-link" href="#" @click.prevent="changePage(page)">{{ page }}</a>
               </li>
               <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-                <a class="page-link" href="#" @click.prevent="changePage(currentPage + 1)">Next</a>
+                <a class="page-link" href="#" @click.prevent="changePage(currentPage + 1)">&gt;</a>
               </li>
             </ul>
           </nav>
@@ -85,7 +85,6 @@ import ProductCard from '@/components/product/ProductCard.vue'
 const productStore = useProductStore()
 const categoryStore = useCategoryStore()
 
-// UI State
 const selectedCategoryName = ref('')
 const selectedBrand = ref('')
 const selectedRating = ref(0)
@@ -94,17 +93,12 @@ const sortBy = ref('newest')
 const currentPage = ref(1)
 const itemsPerPage = 9
 
-// Map categories from backend for the sidebar
 const categoryOptions = computed(() => categoryStore.categories.map(c => c.name))
 const selectedCategoryId = computed(() => 
   categoryStore.categories.find(c => c.name === selectedCategoryName.value)?._id
 )
 
-/**
- * Filter logic: Get products from store, then filter for isNew = true
- */
 const newArrivals = computed(() => {
-  // First, use the professional filter we built in the store
   const allFiltered = productStore.getFilteredProducts({
     categoryId: selectedCategoryId.value,
     brand: selectedBrand.value,
@@ -112,14 +106,10 @@ const newArrivals = computed(() => {
     priceRange: priceRange.value,
     sortBy: sortBy.value
   })
-
-  // Second, restrict strictly to new arrivals
   return allFiltered.filter(p => p.isNew === true)
 })
 
-// Pagination Logic
 const totalPages = computed(() => Math.ceil(newArrivals.value.length / itemsPerPage))
-
 const paginatedProducts = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage
   return newArrivals.value.slice(start, start + itemsPerPage)
@@ -131,7 +121,6 @@ const displayPages = computed(() => {
   return pages
 })
 
-// Methods
 const changePage = (page: number) => {
   if (page >= 1 && page <= totalPages.value) {
     currentPage.value = page
@@ -152,17 +141,15 @@ const clearFilters = () => {
   currentPage.value = 1
 }
 
-// Fetch data on load
 onMounted(async () => {
   await categoryStore.fetchCategories()
-  // Fetch all active products from backend
   await productStore.fetchProducts({ status: 'active' })
 })
 </script>
 
 <style scoped>
 .new-arrival-view {
-  padding: 2rem 0;
+  padding: 1.5rem 0;
   min-height: 80vh;
   background-color: #f8f9fa;
 }
@@ -180,5 +167,30 @@ onMounted(async () => {
 
 .page-link {
   color: #4a5568;
+}
+
+/* Specific styling to match your screenshot layout */
+@media (max-width: 576px) {
+  .new-arrival-view {
+    padding: 0.75rem 0;
+  }
+  /* Tighten spacing between cards */
+  .row.g-2 {
+    --bs-gutter-x: 0.5rem;
+  }
+  .page-header h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
+  }
+  .page-header p {
+    font-size: 0.85rem;
+  }
+  /* Reduce font sizes inside the card to keep them proportional */
+  :deep(.product-card) {
+    padding: 0;
+  }
+  :deep(.product-card .card-body) {
+    padding: 0.5rem;
+  }
 }
 </style>

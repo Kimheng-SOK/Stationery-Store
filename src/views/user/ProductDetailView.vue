@@ -1,113 +1,257 @@
 <template>
   <div class="product-detail-page">
     <div class="container py-5">
+      <!-- Breadcrumb -->
       <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><router-link to="/">Home</router-link></li>
-          <li class="breadcrumb-item"><router-link to="/shop">Shop</router-link></li>
-          <li class="breadcrumb-item active" aria-current="page">{{ displayProduct?.name }}</li>
+          <li class="breadcrumb-item">
+            <router-link to="/home">Home</router-link>
+          </li>
+          <li class="breadcrumb-item">
+            <router-link to="/shop">Shop</router-link>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">{{ product?.name }}</li>
         </ol>
       </nav>
 
-      <div v-if="productStore.loading" class="text-center py-5">
-        <div class="spinner-border text-primary" role="status"></div>
-      </div>
-
-      <div v-else-if="error" class="alert alert-danger text-center">
-        <i class="bi bi-exclamation-triangle me-2"></i> {{ error }}
-        <div class="mt-3">
-          <button class="btn btn-outline-danger btn-sm" @click="router.push('/shop')">Back to Shop</button>
+      <!-- Loading State -->
+      <div v-if="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
         </div>
       </div>
 
-      <div v-else-if="rawProduct" class="row">
+      <!-- Error State -->
+      <div v-else-if="error" class="alert alert-danger">
+        {{ error }}
+      </div>
+
+      <!-- Product Details -->
+      <div v-else-if="product" class="row">
+        <!-- Product Images -->
         <div class="col-lg-6 mb-4">
           <div class="product-images">
-            <div class="main-image-container mb-3 position-relative">
+            <div class="main-image-container mb-3">
               <img 
-                :src="selectedImage || displayProduct.image" 
-                :alt="displayProduct.name" 
+                :src="selectedImage || product.image" 
+                :alt="product.name" 
                 class="main-image img-fluid rounded"
               />
-              <div class="badges-overlay">
-                <span v-if="rawProduct.isNew" class="badge bg-success">NEW</span>
-                <span v-if="rawProduct.discount" class="badge bg-primary">-{{ rawProduct.discount }}%</span>
-                <span v-if="rawProduct.rating >= 4.5" class="badge bg-warning text-dark">POPULAR</span>
+              <!-- Badges -->
+              <div class="position-absolute top-0 start-0 p-3">
+                <span v-if="product.isNew" class="badge bg-success me-2">New</span>
+                <span v-if="calculateDiscount() > 0" class="badge bg-danger">
+                  -{{ calculateDiscount() }}%
+                </span>
               </div>
             </div>
 
+            <!-- Thumbnail Images (if you have multiple images) -->
             <div class="thumbnail-images d-flex gap-2">
               <img 
-                :src="displayProduct.image" 
+                :src="product.image" 
+                alt="Thumbnail" 
                 class="thumbnail-image img-thumbnail"
-                :class="{ active: !selectedImage || selectedImage === displayProduct.image }"
-                @click="selectedImage = displayProduct.image"
+                :class="{ active: selectedImage === product.image }"
+                @click="selectedImage = product.image"
               />
             </div>
           </div>
         </div>
 
+        <!-- Product Info -->
         <div class="col-lg-6">
-          <div class="product-info shadow-sm border-0">
-            <h1 class="product-name mb-2">{{ displayProduct.name }}</h1>
-            
+          <div class="product-info">
+            <!-- Product Name -->
+            <h1 class="product-name mb-3">{{ product.name }}</h1>
+
+            <!-- Rating & Reviews -->
             <div class="rating-section mb-3 d-flex align-items-center">
               <div class="stars text-warning me-2">
                 <i v-for="i in 5" :key="i" 
-                   :class="i <= Math.round(rawProduct.rating) ? 'bi bi-star-fill' : 'bi bi-star'">
+                   :class="i <= (product.rating || 0) ? 'bi bi-star-fill' : 'bi bi-star'">
                 </i>
               </div>
-              <span class="text-muted small">({{ rawProduct.reviewCount || 0 }} reviews)</span>
+              <span class="text-muted">({{ product.reviewCount || 0 }} reviews)</span>
             </div>
 
+            <!-- SKU & Brand -->
+            <div class="product-meta mb-3">
+              <p class="mb-1"><strong>SKU:</strong> {{ product.sku }}</p>
+              <p class="mb-1" v-if="product.brand">
+                <strong>Brand:</strong> {{ product.brand }}
+              </p>
+              <p class="mb-1"><strong>Category:</strong> {{ product.categoryName }}</p>
+            </div>
+
+            <!-- Price -->
             <div class="price-section mb-4">
-              <h3 class="current-price text-success mb-0">
-                ${{ displayProduct.displayPrice }}
-              </h3>
-              <div v-if="displayProduct.showStrikePrice" class="mt-1">
-                <span class="text-muted text-decoration-line-through me-2">${{ rawProduct.originalPrice }}</span>
-                <span class="badge bg-danger-subtle text-danger">Save ${{ (rawProduct.originalPrice - rawProduct.price).toFixed(2) }}</span>
-              </div>
-            </div>
-
-            <p class="product-description text-muted mb-4">
-              {{ rawProduct.description || 'No description available for this premium stationery item.' }}
-            </p>
-
-            <div class="product-meta-grid mb-4">
-              <div class="meta-item"><strong>Brand:</strong> {{ rawProduct.brand || 'Stationery Co' }}</div>
-              <div class="meta-item"><strong>Category:</strong> {{ rawProduct.categoryName || 'General' }}</div>
-              <div class="meta-item"><strong>In Stock:</strong> {{ rawProduct.stock }} units</div>
-            </div>
-
-            <div class="d-flex align-items-end gap-3 mb-4">
-              <div class="quantity-wrapper">
-                <label class="form-label small fw-bold">Quantity</label>
-                <div class="input-group">
-                  <button class="btn btn-outline-secondary btn-sm" @click="quantity > 1 ? quantity-- : null">-</button>
-                  <input type="number" class="form-control text-center bg-white" v-model="quantity" readonly style="max-width: 60px;">
-                  <button class="btn btn-outline-secondary btn-sm" @click="quantity < rawProduct.stock ? quantity++ : null">+</button>
+              <template v-if="!product.price || product.price === 0">
+                <h3 class="current-price text-primary mb-2">
+                  ${{ (product.originalPrice || 0).toFixed(2) }}
+                </h3>
+              </template>
+              <template v-else>
+                <h3 class="current-price text-primary mb-2">
+                  ${{ product.price.toFixed(2) }}
+                </h3>
+                <div v-if="product.originalPrice && product.originalPrice > product.price">
+                  <span class="original-price text-muted text-decoration-line-through me-2">
+                    ${{ product.originalPrice.toFixed(2) }}
+                  </span>
+                  <span class="save-amount text-success">
+                    Save ${{ (product.originalPrice - product.price).toFixed(2) }}
+                  </span>
                 </div>
-              </div>
+              </template>
+            </div>
 
+            <!-- Stock Status -->
+            <div class="stock-status mb-4">
+              <span v-if="product.stock > 0" class="badge bg-success-subtle text-success">
+                <i class="bi bi-check-circle"></i> In Stock ({{ product.stock }} available)
+              </span>
+              <span v-else class="badge bg-danger-subtle text-danger">
+                <i class="bi bi-x-circle"></i> Out of Stock
+              </span>
+            </div>
+
+            <!-- Quantity Selector -->
+            <div class="quantity-section mb-4">
+              <label class="form-label fw-semibold">Quantity:</label>
+              <div class="input-group w-50">
+                <button 
+                  class="btn btn-outline-secondary" 
+                  type="button"
+                  @click="decreaseQuantity"
+                  :disabled="quantity <= 1"
+                >
+                  <i class="bi bi-dash"></i>
+                </button>
+                <input 
+                  type="number" 
+                  class="form-control text-center" 
+                  v-model.number="quantity"
+                  min="1"
+                  :max="product.stock"
+                />
+                <button 
+                  class="btn btn-outline-secondary" 
+                  type="button"
+                  @click="increaseQuantity"
+                  :disabled="quantity >= product.stock"
+                >
+                  <i class="bi bi-plus"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons d-flex gap-3 mb-4">
               <button 
                 class="btn btn-primary btn-lg flex-grow-1"
-                @click="handleAddToCart"
-                :disabled="!rawProduct.inStock || addingToCart"
+                @click="addToCart"
+                :disabled="product.stock <= 0"
               >
-                <i :class="addingToCart ? 'bi bi-arrow-repeat spin' : 'bi bi-cart-plus'"></i>
-                {{ addingToCart ? 'Adding...' : 'Add to Cart' }}
+                <i class="bi bi-cart-plus"></i> Add to Cart
               </button>
+              <button 
+                class="btn btn-outline-secondary btn-lg"
+                @click="toggleWishlist"
+              >
+                <i :class="isInWishlist ? 'bi bi-heart-fill' : 'bi bi-heart'"></i>
+              </button>
+            </div>
+
+            <!-- Product Description -->
+            <div class="product-description">
+              <h5 class="mb-3">Product Description</h5>
+              <p class="text-muted">
+                {{ product.description || 'High-quality stationery product perfect for your office or school needs. Durable, reliable, and designed to meet your everyday requirements.' }}
+              </p>
+            </div>
+
+            <!-- Additional Info -->
+            <div class="additional-info mt-4">
+              <div class="accordion" id="productAccordion">
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button 
+                      class="accordion-button collapsed" 
+                      type="button" 
+                      data-bs-toggle="collapse" 
+                      data-bs-target="#specifications"
+                    >
+                      Specifications
+                    </button>
+                  </h2>
+                  <div id="specifications" class="accordion-collapse collapse" data-bs-parent="#productAccordion">
+                    <div class="accordion-body">
+                      <ul class="list-unstyled">
+                        <li><strong>Product ID:</strong> {{ product._id || product.id }}</li>
+                        <li><strong>Added Date:</strong> {{ formatDate(product.createdAt || product.addedDate) }}</li>
+                        <li><strong>Category:</strong> {{ product.categoryName }}</li>
+                        <li v-if="product.brand"><strong>Brand:</strong> {{ product.brand }}</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="accordion-item">
+                  <h2 class="accordion-header">
+                    <button 
+                      class="accordion-button collapsed" 
+                      type="button" 
+                      data-bs-toggle="collapse" 
+                      data-bs-target="#shipping"
+                    >
+                      Shipping & Returns
+                    </button>
+                  </h2>
+                  <div id="shipping" class="accordion-collapse collapse" data-bs-parent="#productAccordion">
+                    <div class="accordion-body">
+                      <p>Free shipping on orders over $50.</p>
+                      <p>30-day return policy. Items must be unused and in original packaging.</p>
+                      <p>Express shipping available at checkout.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div v-if="relatedProducts.length > 0" class="mt-5">
-        <h4 class="mb-4 fw-bold">You Might Also Like</h4>
+      <!-- Related Products Section -->
+      <div v-if="relatedProducts.length > 0" class="related-products mt-5">
+        <h3 class="mb-4">Related Products</h3>
         <div class="row g-4">
-          <div v-for="rp in relatedProducts" :key="rp._id" class="col-md-3 col-6">
-            <ProductCard :product="productStore.formatProduct(rp)" />
+          <div 
+            v-for="relatedProduct in relatedProducts" 
+            :key="relatedProduct._id || relatedProduct.id"
+            class="col-md-3 col-sm-6"
+          >
+            <div class="card h-100">
+              <img 
+                :src="relatedProduct.image" 
+                class="card-img-top" 
+                :alt="relatedProduct.name"
+                style="height: 200px; object-fit: cover; cursor: pointer;"
+                @click="navigateToProduct(relatedProduct._id || relatedProduct.id)"
+              />
+              <div class="card-body">
+                <h6 class="card-title">{{ relatedProduct.name }}</h6>
+                <p class="card-text text-primary fw-bold">
+                  ${{ (relatedProduct.displayPrice || 0).toFixed(2) }}
+                </p>
+                <button 
+                  class="btn btn-sm btn-outline-primary w-100"
+                  @click="navigateToProduct(relatedProduct._id || relatedProduct.id)"
+                >
+                  View Details
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -116,91 +260,279 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useProductStore } from '@/stores/product'
 import { useCartStore } from '@/stores/cartStore'
-import ProductCard from '@/components/product/ProductCard.vue'
+import { useProductStore } from '@/stores/product'
 
 const route = useRoute()
 const router = useRouter()
-const productStore = useProductStore()
 const cartStore = useCartStore()
+const productStore = useProductStore()
 
-const rawProduct = ref<any>(null)
+const product = ref<any>(null)
+const loading = ref(true)
 const error = ref<string | null>(null)
 const quantity = ref(1)
-const selectedImage = ref('')
-const addingToCart = ref(false)
+const selectedImage = ref<string>('')
+const isInWishlist = ref(false)
 
-// Use the store's formatter for UI display logic
-const displayProduct = computed(() => {
-  return rawProduct.value ? productStore.formatProduct(rawProduct.value) : null
+// Related products based on category - first 5 products
+const relatedProducts = computed(() => {
+  console.log('=== RELATED PRODUCTS DEBUG ===')
+  console.log('Product loaded:', !!product.value)
+  console.log('Product:', product.value)
+  console.log('Total products in store:', productStore.products.length)
+  
+  if (!product.value) {
+    console.log('No product - returning empty array')
+    return []
+  }
+  
+  const currentCategoryId = typeof product.value.category === 'object' 
+    ? product.value.category._id 
+    : product.value.category
+  console.log('Current category ID:', currentCategoryId)
+  console.log('Current product ID:', product.value._id)
+  
+  const filtered = productStore.products.filter(p => {
+    const pCategoryId = typeof p.category === 'object' ? p.category._id : p.category
+    const isSameCategory = String(pCategoryId) === String(currentCategoryId)
+    const isNotCurrentProduct = String(p._id) !== String(product.value._id)
+    
+    if (isSameCategory && isNotCurrentProduct) {
+      console.log('Match found:', p.name, '- Category:', pCategoryId)
+    }
+    
+    return isSameCategory && isNotCurrentProduct
+  })
+  
+  console.log('Filtered results:', filtered.length)
+  console.log('Final related products:', filtered.slice(0, 5).map(p => p.name))
+  
+  return filtered.slice(0, 5).map(p => productStore.formatProduct(p))
 })
 
-// Find products in the same category
-const relatedProducts = computed(() => {
-  if (!rawProduct.value) return []
-  return productStore.products
-    .filter(p => p.category === rawProduct.value.category && p._id !== rawProduct.value._id)
-    .slice(0, 4)
+// Watch route params to reload product when navigating between products
+watch(() => route.params.id, () => {
+  if (route.params.id) {
+    loadProduct()
+  }
+})
+
+onMounted(() => {
+  loadProduct()
 })
 
 const loadProduct = async () => {
   try {
+    loading.value = true
     error.value = null
-    const id = route.params.id as string
+    const productId = route.params.id as string
     
-    // Ensure store is populated
+    // Fetch products if not already fetched
     if (!productStore.isFetched) {
       await productStore.fetchProducts()
     }
-
-    const found = productStore.products.find(p => p._id === id || p.id === id)
-    if (found) {
-      rawProduct.value = found
-      selectedImage.value = '' // reset for new product
+    
+    // Find product by _id
+    const foundProduct = productStore.products.find(p => String(p._id) === String(productId))
+    
+    if (foundProduct) {
+      // Format the product using the store's getter
+      product.value = productStore.formatProduct(foundProduct)
+      selectedImage.value = product.value.image
       quantity.value = 1
     } else {
-      error.value = "Product not found."
+      error.value = 'Product not found'
     }
   } catch (err) {
-    error.value = "Could not load product details."
-  }
-}
-
-const handleAddToCart = async () => {
-  addingToCart.value = true
-  try {
-    await cartStore.addToCart(rawProduct.value, quantity.value)
-    alert('Added to cart successfully!')
+    error.value = 'Failed to load product'
+    console.error('Error loading product:', err)
   } finally {
-    addingToCart.value = false
+    loading.value = false
   }
 }
 
-// Watch for route changes (e.g., clicking a related product)
-watch(() => route.params.id, () => loadProduct())
+const calculateDiscount = () => {
+  if (!product.value?.originalPrice || !product.value?.price) return 0
+  if (product.value.originalPrice <= product.value.price) return 0
+  return Math.round(((product.value.originalPrice - product.value.price) / product.value.originalPrice) * 100)
+}
 
-onMounted(() => loadProduct())
+const increaseQuantity = () => {
+  if (product.value && quantity.value < product.value.stock) {
+    quantity.value++
+  }
+}
+
+const decreaseQuantity = () => {
+  if (quantity.value > 1) {
+    quantity.value--
+  }
+}
+
+const addToCart = () => {
+  if (product.value) {
+    cartStore.addToCart(product.value, quantity.value)
+    alert(`${quantity.value} ${product.value.name}(s) added to cart!`)
+  }
+}
+
+const toggleWishlist = () => {
+  isInWishlist.value = !isInWishlist.value
+  const message = isInWishlist.value 
+    ? 'Added to wishlist' 
+    : 'Removed from wishlist'
+  console.log(message)
+}
+
+const navigateToProduct = (productId: string | number) => {
+  router.push({ name: 'ProductDetail', params: { id: productId } })
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+const formatDate = (dateString: string) => {
+  if (!dateString) return 'N/A'
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  })
+}
 </script>
 
 <style scoped>
-.product-detail-page { background-color: #fbfcfd; min-height: 100vh; }
-.main-image-container { background: white; border-radius: 12px; overflow: hidden; height: 500px; display: flex; align-items: center; justify-content: center; border: 1px solid #edf2f7; }
-.main-image { max-height: 100%; object-fit: contain; }
-.badges-overlay { position: absolute; top: 15px; left: 15px; display: flex; gap: 8px; }
-.product-info { background: white; padding: 40px; border-radius: 16px; height: 100%; }
-.product-name { font-weight: 800; color: #1a202c; font-size: 2.2rem; }
-.current-price { font-size: 2.5rem; font-weight: 800; }
-.thumbnail-image { width: 80px; height: 80px; cursor: pointer; object-fit: cover; border-radius: 8px; }
-.thumbnail-image.active { border: 2px solid #10b981; }
-.product-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.95rem; border-top: 1px solid #edf2f7; padding-top: 20px; }
-.spin { animation: spin 1s linear infinite; display: inline-block; }
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.product-detail-page {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
 
-@media (max-width: 991px) {
-  .product-name { font-size: 1.8rem; }
-  .main-image-container { height: 350px; }
+.breadcrumb {
+  background-color: transparent;
+  padding: 0;
+}
+
+.breadcrumb-item a {
+  color: #6c757d;
+  text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+  color: #0d6efd;
+}
+
+.main-image-container {
+  position: relative;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.main-image {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: contain;
+}
+
+.thumbnail-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.thumbnail-image:hover,
+.thumbnail-image.active {
+  border-color: #0d6efd;
+}
+
+.product-info {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.product-name {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.stars i {
+  font-size: 1.1rem;
+}
+
+.current-price {
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+
+.original-price {
+  font-size: 1.5rem;
+}
+
+.save-amount {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.quantity-section input[type="number"]::-webkit-inner-spin-button,
+.quantity-section input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+.action-buttons .btn-lg {
+  padding: 12px 24px;
+  font-size: 1.1rem;
+}
+
+.product-description p {
+  line-height: 1.8;
+  font-size: 1rem;
+}
+
+.accordion-button:not(.collapsed) {
+  background-color: #e7f1ff;
+  color: #0d6efd;
+}
+
+.related-products {
+  padding: 40px 0;
+}
+
+.related-products .card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.related-products .card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+@media (max-width: 768px) {
+  .product-name {
+    font-size: 1.5rem;
+  }
+  
+  .current-price {
+    font-size: 2rem;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .action-buttons .btn-lg {
+    width: 100%;
+  }
 }
 </style>

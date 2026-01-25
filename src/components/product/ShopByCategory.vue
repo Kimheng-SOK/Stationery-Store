@@ -1,7 +1,6 @@
 <template>
   <section class="shop-by-category py-5 bg-light">
     <div class="container">
-      <!-- Section Header -->
       <div class="text-center mb-5">
         <h2 class="section-title mb-2">Shop by Category</h2>
         <p class="section-subtitle text-muted">
@@ -9,7 +8,6 @@
         </p>
       </div>
 
-      <!-- Category Carousel -->
       <ProductCarousel :items="categoryCards">
         <template #item="{ item }">
           <div class="category-card" @click="goToCategory(item)">
@@ -74,8 +72,6 @@ const goToCategory = (category: CategoryCard) => {
   })
 }
 </script>
-
-
 
 <style scoped>
 .shop-by-category {
