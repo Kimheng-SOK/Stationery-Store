@@ -1,43 +1,25 @@
 <template>
   <section class="banner-slider">
-    <!-- Loading State -->
-    <div v-if="isLoading" class="loading-container">
-      <div class="spinner"></div>
-    </div>
-
-    <!-- No Banners State -->
-    <div v-else-if="heroSlides.length === 0" class="no-banners">
-      <p>No active banners available</p>
-    </div>
-
-    <!-- Carousel -->
-    <div v-else class="carousel-container">
+    <div class="carousel-container">
       <!-- Banner Slides -->
       <div class="slides-wrapper">
-        <div
-          v-for="(slide, index) in heroSlides"
-          :key="slide.id"
+        <div 
+          v-for="(banner, index) in banners" 
+          :key="banner.id"
           class="slide"
           :class="{ active: currentSlide === index }"
         >
-          <img
-            :src="slide.image"
-            :alt="`Banner ${index + 1}`"
-            class="slide-image"
-            @error="handleImageError"
-          >
+          <img :src="banner.image" :alt="banner.title" class="slide-image">
           <div class="slide-overlay"></div>
           <div class="slide-content">
             <div class="container">
               <div class="row">
                 <div class="col-lg-7">
                   <div class="content-box">
-                    <h1 class="slide-title">
-                      Fresh & Organic <span class="highlight">Products</span>
-                    </h1>
-                    <p class="slide-subtitle">Special offers on premium quality products</p>
-                    <button class="btn btn-shop" @click="goToLink(slide.link)">
-                      Shop Now
+                    <h1 class="slide-title" v-html="banner.title"></h1>
+                    <p class="slide-subtitle">{{ banner.subtitle }}</p>
+                    <button class="btn btn-shop" @click="goToLink(banner.link)">
+                      {{ banner.buttonText }}
                       <i class="bi bi-arrow-right ms-2"></i>
                     </button>
                   </div>
@@ -49,28 +31,18 @@
       </div>
 
       <!-- Navigation Arrows -->
-      <button
-        v-if="heroSlides.length > 1"
-        class="nav-btn nav-btn-prev"
-        @click="prevSlide"
-        aria-label="Previous slide"
-      >
+      <button class="nav-btn nav-btn-prev" @click="prevSlide" aria-label="Previous slide">
         <i class="bi bi-chevron-left"></i>
       </button>
-      <button
-        v-if="heroSlides.length > 1"
-        class="nav-btn nav-btn-next"
-        @click="nextSlide"
-        aria-label="Next slide"
-      >
+      <button class="nav-btn nav-btn-next" @click="nextSlide" aria-label="Next slide">
         <i class="bi bi-chevron-right"></i>
       </button>
 
       <!-- Dots Indicator -->
-      <div v-if="heroSlides.length > 1" class="dots-container">
+      <div class="dots-container">
         <button
-          v-for="(slide, index) in heroSlides"
-          :key="`dot-${slide.id}`"
+          v-for="(banner, index) in banners"
+          :key="`dot-${banner.id}`"
           class="dot"
           :class="{ active: currentSlide === index }"
           @click="goToSlide(index)"
@@ -82,100 +54,93 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useHeroSectionStore } from '@/stores/heroSection';
+
+interface Banner {
+  id: number;
+  title: string;
+  subtitle: string;
+  image: string;
+  link: string;
+  buttonText: string;
+}
 
 const router = useRouter();
-const heroStore = useHeroSectionStore();
-
 const currentSlide = ref(0);
 let autoPlayInterval: number | null = null;
 
-// Get data from store
-const heroSlides = computed(() => heroStore.heroSlides);
-const isLoading = computed(() => heroStore.isLoading);
-
-const handleImageError = (event: Event) => {
-  console.error('Image failed to load:', (event.target as HTMLImageElement).src);
-};
+const banners = ref<Banner[]>([
+  {
+    id: 1,
+    title: 'Welcome to<br><span class="highlight">StationeryBox Shop</span>',
+    subtitle: 'Discover premium notebooks, elegant pens, and thoughtfully designed desk accessories for the modern professional',
+    image: '/public/images/banner/ban1.jpg',
+    link: '/shop',
+    buttonText: 'Shop Collection'
+  },
+  {
+    id: 2,
+    title: 'New Arrival<br><span class="highlight">Collection 2025</span>',
+    subtitle: 'Discover our latest premium notebooks and pens designed for creativity and productivity',
+    image: '/public/images/banner/ban2.jpg',
+    link: '/new-arrival',
+    buttonText: 'Explore New Arrivals'
+  },
+  {
+    id: 3,
+    title: 'Premium Quality<br><span class="highlight">Art Supplies</span>',
+    subtitle: 'Unleash your creativity with professional-grade materials and artistic tools',
+    image: '/public/images/banner/ban3.jpg',
+    link: '/shop',
+    buttonText: 'Shop Art Supplies'
+  },
+  {
+    id: 4,
+    title: 'Up to 50% OFF<br><span class="highlight">Limited Time Offer</span>',
+    subtitle: 'Save big on selected office supplies and premium stationery items',
+    image: '/public/images/banner/ban4.jpg',
+    link: '/shop',
+    buttonText: 'Shop Sale'
+  }
+]);
 
 const nextSlide = () => {
-  if (heroSlides.value.length === 0) return;
-  currentSlide.value = (currentSlide.value + 1) % heroSlides.value.length;
-  console.log('Next slide:', currentSlide.value);
+  currentSlide.value = (currentSlide.value + 1) % banners.value.length;
 };
 
 const prevSlide = () => {
-  if (heroSlides.value.length === 0) return;
-  currentSlide.value = currentSlide.value === 0
-    ? heroSlides.value.length - 1
+  currentSlide.value = currentSlide.value === 0 
+    ? banners.value.length - 1 
     : currentSlide.value - 1;
-  console.log('Previous slide:', currentSlide.value);
 };
 
 const goToSlide = (index: number) => {
-  stopAutoPlay(); // Stop autoplay when user manually clicks
   currentSlide.value = index;
-  console.log('🎯 Clicked dot, go to slide:', index);
-
-  // Restart autoplay after 3 seconds of inactivity
-  setTimeout(() => {
-    startAutoPlay();
-  }, 3000);
 };
 
 const goToLink = (link: string) => {
-  if (link) {
-    router.push(link);
-  }
+  router.push(link);
 };
 
 const startAutoPlay = () => {
-  if (heroSlides.value.length <= 1) return;
-  stopAutoPlay(); // Clear any existing interval
   autoPlayInterval = window.setInterval(() => {
     nextSlide();
   }, 5000);
-  console.log('▶️ Autoplay started');
 };
 
 const stopAutoPlay = () => {
   if (autoPlayInterval) {
     clearInterval(autoPlayInterval);
     autoPlayInterval = null;
-    console.log('⏸️ Autoplay stopped');
   }
 };
 
-// Watch for changes in slides and restart autoplay
-watch(heroSlides, (newSlides) => {
-  console.log('📊 Slides changed:', newSlides.length);
-  if (newSlides.length > 0) {
-    currentSlide.value = 0;
-    startAutoPlay();
-  }
-}, { immediate: false });
-
-onMounted(async () => {
-  console.log('🎬 Carousel component mounted');
-
-  // Fetch banners from API
-  await heroStore.fetchBanners();
-
-  console.log('📊 Total slides loaded:', heroSlides.value.length);
-  console.log('🖼️ Slides data:', heroSlides.value);
-
-  // Start autoplay if we have slides
-  if (heroSlides.value.length > 0) {
-    startAutoPlay();
-  } else {
-    console.warn('⚠️ No slides available to display');
-  }
+onMounted(() => {
+  startAutoPlay();
 });
 
 onUnmounted(() => {
-  console.log('🛑 Carousel component unmounted');
   stopAutoPlay();
 });
 </script>
@@ -357,37 +322,6 @@ onUnmounted(() => {
   background: white;
   width: 28px;
   border-radius: 5px;
-}
-
-.loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 500px;
-  background: #f8f9fa;
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px solid #e5e7eb;
-  border-top-color: #10b981;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.no-banners {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 500px;
-  background: #f8f9fa;
-  color: #6b7280;
-  font-size: 1.1rem;
 }
 
 /* Responsive Design */
