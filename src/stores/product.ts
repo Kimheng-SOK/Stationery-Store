@@ -34,7 +34,8 @@ export const useProductStore = defineStore('product', {
       brand?: string,
       rating?: number,
       priceRange?: { min: number, max: number },
-      sortBy?: string
+      sortBy?: string,
+      searchTerm?: string
     }) => {
       let result = state.products.filter(p => p.status === 'active')
 
@@ -66,12 +67,23 @@ export const useProductStore = defineStore('product', {
         result = result.filter(p => Math.floor(Number(p.rating)) === Number(filters.rating))
       }
 
+      if (filters.searchTerm && filters.searchTerm.trim()) {
+        const q = filters.searchTerm.trim().toLowerCase()
+        result = result.filter(p => {
+          const name = String(p.name || '').toLowerCase()
+          const brand = String(p.brand || '').toLowerCase()
+          const catName = (typeof p.category === 'object' && p.category ? String(p.category.name || '') : '').toLowerCase()
+          const sku = String((p as any).sku || '').toLowerCase()
+          return name.includes(q) || brand.includes(q) || catName.includes(q) || sku.includes(q)
+        })
+      }
+
       const sorted = [...result]
       switch (filters.sortBy) {
         case 'price-asc': sorted.sort((a, b) => Number(a.price || a.originalPrice) - Number(b.price || b.originalPrice)); break
         case 'price-desc': sorted.sort((a, b) => Number(b.price || b.originalPrice) - Number(a.price || a.originalPrice)); break
-        case 'rating': sorted.sort((a, b) => Number(b.rating) - Number(a.rating)); break
-        case 'newest': sorted.sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime()); break
+        case 'rating': sorted.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0)); break
+        case 'newest': sorted.sort((a, b) => Number(new Date(b.createdAt as any)) - Number(new Date(a.createdAt as any))); break
       }
       return sorted
     },
