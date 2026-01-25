@@ -25,8 +25,8 @@ const bannerSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['active', 'inactive', 'pending', 'expired'],
-      default: 'pending'
+      enum: ['active', 'inactive'],
+      default: 'inactive'
     }
   },
   {
@@ -38,13 +38,12 @@ const bannerSchema = new mongoose.Schema(
 bannerSchema.pre('save', function(next) {
   const now = new Date();
 
-  if (this.startDate <= now && this.endDate >= now && this.status === 'pending') {
+  if (this.startDate <= now && this.endDate >= now) {
     this.status = 'active';
+  } else {
+    this.status = 'inactive';
   }
-
-  if (this.endDate < now && this.status === 'active') {
-    this.status = 'expired';
-  } 
+  
   next();
 });
 
@@ -52,9 +51,10 @@ bannerSchema.virtual('currentStatus').get(function() {
   const now = new Date();
 
   if (this.endDate < now) return 'expired';
-  if (this.startDate <= now) return 'active';
-  return 'pending'; 
+  if (this.startDate <= now && this.endDate >= now) return 'active';
+  return 'inactive'; 
 }); 
+
 bannerSchema.set('toJSON', { virtuals: true });
 bannerSchema.set('toObject', { virtuals: true });
 
