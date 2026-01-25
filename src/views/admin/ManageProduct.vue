@@ -120,10 +120,7 @@
               <td class="px-4 py-3 text-dark small">{{ product.stock }}</td>
               <td class="px-4 py-3">
                 <span
-                  :class="[
-                    'badge',
-                    product.status === 'active' ? 'bg-success' : product.status === 'inactive' ? 'bg-danger' : 'bg-secondary'
-                  ]"
+                  :class="['badge', product.status === 'active' ? 'bg-success' : product.status === 'inactive' ? 'bg-danger' : 'bg-secondary']"
                 >
                   {{ product.status || 'active' }}
                 </span>
@@ -509,7 +506,7 @@
             </div>
 
             <!-- MVP Card Section: Badges -->
-            <div class="card shadow-sm mb-4">
+            <!-- <div class="card shadow-sm mb-4">
               <div class="card-header bg-white border-bottom-0">
                 <span class="fw-semibold"><i class="bi bi-bookmark-star me-2"></i>Badges</span>
               </div>
@@ -529,7 +526,7 @@
                   </span>
                 </div>
               </div>
-            </div>
+            </div> -->
 
             <!-- MVP Card Section: Description -->
             <div class="card shadow-sm mb-4">
