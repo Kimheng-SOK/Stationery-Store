@@ -10,15 +10,16 @@
 
       <ProductCarousel :items="categoryCards">
         <template #item="{ item }">
-          <div class="category-card" @click="goToCategory(item)">
+          <div class="category-card" @click="goToCategory(item as CategoryCard)">
             <div class="category-image-wrapper">
               <img
-                :src="item.image"
-                :alt="item.name"
+                :src="(item as CategoryCard).image"
+                :alt="(item as CategoryCard).name"
                 class="category-image"
+                loading="lazy"
               />
             </div>
-            <h5 class="category-name">{{ item.name }}</h5>
+            <h5 class="category-name">{{ (item as CategoryCard).name }}</h5>
           </div>
         </template>
       </ProductCarousel>
@@ -44,9 +45,13 @@ const router = useRouter()
 const categoryStore = useCategoryStore()
 
 // Fetch categories from API
-onMounted(() => {
-  if (!categoryStore.isFetched) {
-    categoryStore.fetchCategories()
+onMounted(async () => {
+  if (categoryStore.categories.length === 0) {
+    try {
+      await categoryStore.fetchCategories()
+    } catch (error) {
+      console.error('Failed to fetch categories:', error)
+    }
   }
 })
 
