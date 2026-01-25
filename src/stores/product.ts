@@ -40,7 +40,13 @@ export const useProductStore = defineStore('product', {
 
       if (filters.categoryId) {
         result = result.filter(p => {
-          const pCatId = typeof p.category === 'object' && p.category !== null ? p.category._id : p.category
+          let pCatId
+          if (typeof p.category === 'object' && p.category !== null) {
+            // Handle both { _id: ... } and { $oid: ... }
+            pCatId = p.category._id || p.category.$oid
+          } else {
+            pCatId = p.category
+          }
           return String(pCatId) === String(filters.categoryId)
         })
       }

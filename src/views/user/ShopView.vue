@@ -20,10 +20,10 @@
         </aside>
 
         <main class="col-lg-9 col-md-12">
-          <SortBar 
-            v-model:sortBy="sortBy" 
-            :shown-count="paginatedProducts.length" 
-            :total-count="filteredProducts.length" 
+          <SortBar
+            v-model:sortBy="sortBy"
+            :shown-count="paginatedProducts.length"
+            :total-count="filteredProducts.length"
           />
 
           <div v-if="paginatedProducts.length > 0" class="row g-2 g-md-4 mb-4">
@@ -90,7 +90,7 @@ const sortBy = ref('default')
 const currentPage = ref(1)
 
 const categoryOptions = computed(() => categoryStore.categories.map(c => c.name))
-const selectedCategoryId = computed(() => 
+const selectedCategoryId = computed(() =>
   categoryStore.categories.find(c => c.name === selectedCategoryName.value)?._id
 )
 
@@ -146,7 +146,7 @@ const clearFilters = () => {
 
 onMounted(async () => {
   await categoryStore.fetchCategories()
-  await productStore.fetchProducts({ status: 'active' })
+  await productStore.fetchProducts()
   syncQuery()
 })
 </script>
