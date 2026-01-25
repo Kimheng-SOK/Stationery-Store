@@ -77,40 +77,6 @@
         <span class="fw-medium">Free</span>
       </div>
 
-      <!-- Coupon Input -->
-      <div class="d-flex mb-3 coupon-wrapper position-relative">
-        <input
-          type="text"
-          class="form-control fw-bold px-5"
-          style="background-color:#eef0fb; width: 90%; height: 50px;"
-          placeholder="Coupon code"
-          v-model="localCouponCode"
-          :disabled="isApplyingCoupon"
-          @keyup.enter="handleApplyCoupon"
-        >
-        <button
-          class="w-25 btn btn-primary px-4 position-absolute end-0 coupon-apply-btn"
-          style="height: 50px;"
-          @click="handleApplyCoupon"
-          :disabled="isApplyingCoupon || !localCouponCode.trim()"
-        >
-          <span v-if="isApplyingCoupon" class="spinner-border spinner-border-sm me-1"></span>
-          {{ isApplyingCoupon ? 'Applying...' : 'Apply' }}
-        </button>
-      </div>
-
-      <!-- Coupon Error Message -->
-      <div v-if="couponError" class="alert alert-danger py-2 px-3 small mb-3">
-        <i class="bi bi-exclamation-circle me-1"></i>
-        {{ couponError }}
-      </div>
-
-      <!-- Coupon Success Message -->
-      <div v-if="couponSuccess" class="alert alert-success py-2 px-3 small mb-3">
-        <i class="bi bi-check-circle me-1"></i>
-        {{ couponSuccess }}
-      </div>
-
       <hr class="opacity-100" style="border-top: 2px solid var(--main-color2);">
 
       <!-- Grand Total -->

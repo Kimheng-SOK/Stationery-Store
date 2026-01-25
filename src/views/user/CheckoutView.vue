@@ -30,7 +30,7 @@
               </div>
             </div>
           </div>
-          
+
           <div class="col-4 text-end">
              <span class="small fw-bold d-none d-md-inline">Secured Checkout</span>
           </div>
@@ -41,7 +41,7 @@
     <main class="container py-4 py-md-5">
       <div class="row g-4">
         <div class="col-lg-8">
-          
+
           <div v-if="step === 1" class="checkout-card slide-in">
             <h4 class="fw-bold mb-4">Shipping Address</h4>
             <form @submit.prevent="nextStep">
@@ -77,8 +77,8 @@
             <h4 class="fw-bold mb-4">Payment Method</h4>
             <div class="payment-grid">
               <!-- Credit Card Option -->
-              <div 
-                class="payment-option" 
+              <div
+                class="payment-option"
                 :class="{ 'active': form.paymentMethod === 'card' }"
                 @click="form.paymentMethod = 'card'"
               >
@@ -95,8 +95,8 @@
               </div>
 
               <!-- Cash on Delivery Option -->
-              <div 
-                class="payment-option" 
+              <div
+                class="payment-option"
                 :class="{ 'active': form.paymentMethod === 'cash' }"
                 @click="form.paymentMethod = 'cash'"
               >
@@ -113,8 +113,8 @@
               </div>
 
               <!-- QR Code Option -->
-              <div 
-                class="payment-option" 
+              <div
+                class="payment-option"
                 :class="{ 'active': form.paymentMethod === 'qr' }"
                 @click="form.paymentMethod = 'qr'"
               >
@@ -166,8 +166,8 @@
             <div v-if="form.paymentMethod === 'qr'" class="mt-4 p-4 bg-light rounded border border-2 text-center">
               <p class="fw-bold mb-3">Scan to Pay</p>
               <div class="qr-code-container mx-auto mb-3">
-                <img 
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Payment:${{ cartStore.grandTotal.toFixed(2) }}" 
+                <img
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Payment:${{ cartStore.grandTotal.toFixed(2) }}"
                   alt="QR Code for Payment"
                   class="w-100 h-100"
                   style="object-fit: contain;"
@@ -234,6 +234,37 @@
           <aside class="sticky-summary">
             <div class="card border-0 shadow-sm p-4 rounded-4">
               <h5 class="fw-bold mb-4">Order Summary</h5>
+              <!-- Coupon Input -->
+              <div class="mb-3">
+                <label class="form-label fw-bold">Coupon Code</label>
+                <div class="input-group">
+                  <input
+                    v-model="couponInput"
+                    type="text"
+                    class="form-control"
+                    placeholder="Enter coupon code"
+                    :disabled="couponLoading || couponApplied"
+                  />
+                  <button
+                    class="btn btn-outline-primary"
+                    @click="applyCoupon"
+                    :disabled="couponLoading || couponApplied || !couponInput"
+                  >
+                    <span v-if="couponLoading" class="spinner-border spinner-border-sm"></span>
+                    <span v-else>{{ couponApplied ? 'Applied' : 'Apply' }}</span>
+                  </button>
+                </div>
+                <div v-if="couponMessage" :class="['mt-2', couponMessage.type === 'success' ? 'text-success' : 'text-danger', 'small']">
+                  <template v-if="couponMessage.type === 'success' && appliedCoupon">
+                    <i class="bi bi-check-circle"></i>
+                    Coupon '<b>{{ appliedCoupon.code }}</b>' applied: -{{ appliedCoupon.discount }}%
+                  </template>
+                  <template v-else>
+                    {{ couponMessage.text }}
+                  </template>
+                </div>
+              </div>
+              <!-- Order Summary -->
               <div class="d-flex justify-content-between mb-2">
                 <span class="text-muted">Subtotal</span>
                 <span class="fw-bold">${{ cartStore.itemTotal.toFixed(2) }}</span>
@@ -242,9 +273,9 @@
                 <span class="text-muted">Shipping</span>
                 <span class="text-success fw-bold">{{ cartStore.shippingCost === 0 ? 'Free' : '$' + cartStore.shippingCost }}</span>
               </div>
-              <div v-if="cartStore.discount > 0" class="d-flex justify-content-between mb-2">
+              <div v-if="discountAmount > 0" class="d-flex justify-content-between mb-2">
                 <span class="text-muted">Discount</span>
-                <span class="text-danger fw-bold">-${{ cartStore.discount.toFixed(2) }}</span>
+                <span class="text-danger fw-bold">-${{ discountAmount.toFixed(2) }}</span>
               </div>
               <hr class="my-3">
               <div class="d-flex justify-content-between align-items-end mb-0">
@@ -252,7 +283,7 @@
                   <span class="fw-bold h5 mb-0">Total</span>
                   <p class="text-muted small mb-0">Inc. taxes</p>
                 </div>
-                <span class="fw-bold h3 text-primary mb-0">${{ cartStore.grandTotal.toFixed(2) }}</span>
+                <span class="fw-bold h3 text-primary mb-0">${{ finalTotal.toFixed(2) }}</span>
               </div>
             </div>
           </aside>
@@ -263,7 +294,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
+import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cartStore'
 
@@ -281,6 +313,23 @@ const form = reactive({
   paymentMethod: 'card'
 })
 
+const couponInput = ref('')
+const couponLoading = ref(false)
+const couponApplied = ref(false)
+const couponMessage = ref<{ type: 'success' | 'danger', text: string } | null>(null)
+const appliedCoupon = ref<any>(null)
+
+const discountAmount = computed(() => {
+  if (appliedCoupon.value && appliedCoupon.value.discount) {
+    return (cartStore.itemTotal * appliedCoupon.value.discount) / 100
+  }
+  return 0
+})
+
+const finalTotal = computed(() => {
+  return cartStore.itemTotal + cartStore.shippingCost - discountAmount.value
+})
+
 const goBack = () => {
   if (step.value > 1) step.value--
   else router.push('/cart')
@@ -291,16 +340,46 @@ const nextStep = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+const applyCoupon = async () => {
+  couponMessage.value = null
+  couponLoading.value = true
+  try {
+    const code = couponInput.value.trim().toUpperCase()
+    const res = await axios.get(`http://localhost:5000/api/coupons/code/${code}`)
+    if (res.data && res.data.success && res.data.data && res.data.data.length > 0) {
+      appliedCoupon.value = res.data.data[0]
+      couponApplied.value = true
+      couponMessage.value = { type: 'success', text: '' }
+    } else {
+      couponMessage.value = { type: 'danger', text: 'Coupon not found.' }
+    }
+  } catch (err: any) {
+    couponMessage.value = { type: 'danger', text: err.response?.data?.message || 'Coupon not found.' }
+  } finally {
+    couponLoading.value = false
+  }
+}
+
+// Redeem coupon after order placed
+const redeemCoupon = async () => {
+  if (!appliedCoupon.value) return
+  try {
+    await axios.post(`http://localhost:5000/api/coupons/redeem/${appliedCoupon.value.code}`)
+  } catch (e) {
+    // Ignore error, coupon will be expired if limit reached
+  }
+}
+
 const placeOrder = async () => {
   isProcessing.value = true
-  
+
   // Simulating real API delay
-  setTimeout(() => {
+  setTimeout(async () => {
     isProcessing.value = false
-    
     // EMPTY THE CART HERE
-    cartStore.$reset() 
-    
+    cartStore.$reset()
+    // Redeem coupon if applied
+    if (appliedCoupon.value) await redeemCoupon()
     // NAVIGATE TO SUCCESS PAGE
     router.push('/order-success')
   }, 1800)
@@ -315,7 +394,7 @@ const placeOrder = async () => {
 
 .sticky-summary {
   position: sticky;
-  top: 90px; 
+  top: 90px;
   z-index: 1000;
 }
 
@@ -425,7 +504,7 @@ const placeOrder = async () => {
 /* Responsive Fixes */
 @media (max-width: 991.98px) {
   .sticky-summary {
-    position: static; 
+    position: static;
     margin-top: 2rem;
   }
   .checkout-card {
