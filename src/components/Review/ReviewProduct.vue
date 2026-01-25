@@ -1,105 +1,71 @@
 <template>
-  <div class="container py-5">
-    <div class="row">
-      <!-- Left: Form (Sticky) -->
-      <div class="col-lg-5 mb-4">
-        <div class="sticky-form">
-          <ReviewProductForm 
-            :productId="productId"
-            @submit-review="addReview"
-            @cancel="showForm = false"
-          />
+  <div class="card shadow-sm">
+    <div class="card-body p-4">
+      <h4 class="card-title mb-4">Write a Review</h4>
+      <form @submit.prevent="handleSubmit">
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Your Rating *</label>
+          <div class="star-rating">
+            <i v-for="star in 5" :key="star" class="bi fs-4 me-1"
+               :class="star <= rating ? 'bi-star-fill text-warning' : 'bi-star'"
+               @click="rating = star" style="cursor: pointer;"></i>
+          </div>
         </div>
-      </div>
 
-      <!-- Right: Show All Reviews -->
-      <div class="col-lg-6">
-        <ReviewProductCard 
-          :reviews="allReviews"
-          :averageRating="average"
-          :totalReviews="allReviews.length"
-          :ratingDistribution="distribution"
-        />
-      </div>
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Review Title *</label>
+          <input type="text" class="form-control" v-model="formData.title" 
+                 placeholder="Summarize your experience" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Review *</label>
+          <textarea class="form-control" v-model="formData.text" rows="4" 
+                    placeholder="Write your thoughts here..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-success px-4" :disabled="isSubmitting">
+          {{ isSubmitting ? 'Posting...' : 'Submit Review' }}
+        </button>
+      </form>
     </div>
-    
   </div>
-
 </template>
 
 <script>
-import ReviewProductForm from './ReviewProductForm.vue'
-import ReviewProductCard from './ReviewProductCard.vue'
-import ReviewWebForm from './ReviewWebForm.vue'
-import ReviewWebCard from './ReviewWebCard.vue'
-
 export default {
-  components: { ReviewProductForm, ReviewProductCard, ReviewWebCard, ReviewWebForm },
+  props: ['productId', 'user'], // Receiving user from parent
   data() {
     return {
-      productId: 'PROD123',
-      showForm: true,
-      allReviews: []
-    }
-  },
-  computed: {
-    average() {
-      if (this.allReviews.length === 0) return 0
-      const sum = this.allReviews.reduce((a, r) => a + r.rating, 0)
-      return (sum / this.allReviews.length).toFixed(1)
-    },
-    distribution() {
-      return {
-        5: this.allReviews.filter(r => r.rating === 5).length,
-        4: this.allReviews.filter(r => r.rating === 4).length,
-        3: this.allReviews.filter(r => r.rating === 3).length,
-        2: this.allReviews.filter(r => r.rating === 2).length,
-        1: this.allReviews.filter(r => r.rating === 1).length
-      }
+      rating: 0,
+      formData: { 
+        title: '', 
+        text: '' 
+      },
+      isSubmitting: false
     }
   },
   methods: {
-    addReview(reviewData) {
-      const imageUrls = reviewData.images.map(file => URL.createObjectURL(file))
+    async handleSubmit() {
+      if (this.rating === 0) return alert('Please select a rating');
+      
+      this.isSubmitting = true;
+      
+      const payload = {
+        productId: this.productId,
+        rating: this.rating,
+        title: this.formData.title,
+        text: this.formData.text,
+        author: this.user?.name || 'Anonymous', // Auto-fill from Auth
+        email: this.user?.email || ''
+      };
 
-      const newReview = {
-        id: Date.now(),
-        name: reviewData.name,
-        rating: reviewData.rating,
-        title: reviewData.title,
-        content: reviewData.content,
-        createdAt: new Date().toISOString().split('T')[0],
-        verified: false,
-        images: imageUrls,
-        helpfulCount: 0
-      }
-
-      this.allReviews.unshift(newReview)
-      alert('Thank you! Your review is now visible below 👇')
+      this.$emit('submit', payload);
+      
+      this.isSubmitting = false;
+      this.rating = 0;
+      this.formData = { title: '', text: '' };
     }
   }
 }
 </script>
-
-<style scoped>
-.container { 
-  max-width: 1400px;
-  padding: 60px 30px; /* Bigger margin */
-}
-
-.row {
-  gap: 40px; /* Space between columns */
-}
-
-.sticky-form {
-  position: sticky;
-  top: 20px; /* Distance from top when scrolling */
-  z-index: 10;
-}
-
-@media (max-width: 991px) {
-  .sticky-form {
-    position: static; /* Remove sticky on mobile */
-  }
-}
-</style>
