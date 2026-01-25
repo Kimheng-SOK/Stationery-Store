@@ -9,6 +9,7 @@ import ManageAdvertisement from '../views/admin/ManageBanner.vue'
 import ManageRewards from '../views/admin/ManageCoupons.vue'
 import Team from '../views/admin/ManageTeams.vue'
 
+
 export default [
   {
     path: '/admin',
