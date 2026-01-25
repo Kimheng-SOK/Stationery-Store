@@ -59,7 +59,6 @@
             <div class="rating-section mb-3 d-flex align-items-center">
               <div class="stars text-warning me-2">
                 <i v-for="i in 5" :key="i"
-                   :class="i <= product.rating ? 'bi bi-star-fill' : 'bi bi-star'">
                    :class="i <= Math.round(reviewStore.averageRating) ? 'bi bi-star-fill' : 'bi bi-star'">
                 </i>
               </div>
@@ -140,8 +139,7 @@
                 @click="addToCart"
                 :disabled="product.stock <= 0"
               >
-                <i class="bi bi-cart-plus"></i>
-                {{ addingToCart ? 'Adding...' : 'Add to Cart' }}
+                <i class="bi bi-cart-plus"></i> Add to Cart
               </button>
               <button
                 class="btn btn-outline-secondary btn-lg"
@@ -149,17 +147,6 @@
               >
                 <i :class="isInWishlist ? 'bi bi-heart-fill' : 'bi bi-heart'"></i>
               </button>
-            </div>
-
-            <!-- Success Message -->
-            <div v-if="showSuccessMessage" class="alert alert-success alert-dismissible fade show" role="alert">
-              <i class="bi bi-check-circle-fill"></i>
-              {{ quantity }} {{ product.name }}(s) added to cart!
-              <button
-                type="button"
-                class="btn-close"
-                @click="showSuccessMessage = false"
-              ></button>
             </div>
 
             <!-- Product Description -->
@@ -178,7 +165,7 @@
         <div class="row g-4">
           <div
             v-for="relatedProduct in relatedProducts"
-            :key="relatedProduct.id"
+            :key="relatedProduct._id || relatedProduct.id"
             class="col-md-3 col-sm-6"
           >
             <div class="card h-100">
@@ -187,7 +174,7 @@
                 class="card-img-top"
                 :alt="relatedProduct.name"
                 style="height: 200px; object-fit: cover; cursor: pointer;"
-                @click="navigateToProduct(relatedProduct._id)"
+                @click="navigateToProduct(relatedProduct._id || relatedProduct.id)"
               />
               <div class="card-body">
                 <h6 class="card-title">{{ relatedProduct.name }}</h6>
@@ -289,13 +276,21 @@ onMounted(async () => {
 const loadProduct = async () => {
   try {
     loading.value = true
-    const productId = Number(route.params.id)
+    error.value = null
+    const id = route.params.id as string
 
-    const foundProduct = products.find(p => p.id === productId)
+    if (!productStore.isFetched) {
+      await productStore.fetchProducts()
+    }
+
+    const foundProduct = productStore.products.find(p => String(p._id) === String(id))
 
     if (foundProduct) {
-      product.value = foundProduct
-      selectedImage.value = foundProduct.image
+      product.value = productStore.formatProduct(foundProduct)
+      selectedImage.value = product.value.image
+      quantity.value = 1
+      // product.value = foundProduct
+      // selectedImage.value = foundProduct.image
 
     } else {
       error.value = 'Product not found'
@@ -334,21 +329,6 @@ const decreaseQuantity = () => {
 const addToCart = () => {
   if (product.value) {
     cartStore.addToCart(product.value, quantity.value)
-
-    // Show success message
-    showSuccessMessage.value = true
-    setTimeout(() => {
-      showSuccessMessage.value = false
-    }, 3000)
-
-    // Reset quantity
-    quantity.value = 1
-  } catch (err) {
-    if (err instanceof Error) {
-      alert(err.message)
-    }
-  } finally {
-    addingToCart.value = false
     console.log(`${quantity.value} ${product.value.name}(s) added to cart!`)
   }
 }
@@ -362,15 +342,15 @@ const navigateToProduct = (id: string | number) => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-const formatDate = (dateString: string) => {
-  if (!dateString) return 'N/A'
-  const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })
-}
+// const formatDate = (dateString: string) => {
+//   if (!dateString) return 'N/A'
+//   const date = new Date(dateString)
+//   return date.toLocaleDateString('en-US', {
+//     year: 'numeric',
+//     month: 'long',
+//     day: 'numeric'
+//   })
+// }
 
 </script>
 
