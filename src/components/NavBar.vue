@@ -46,10 +46,10 @@
         </ul>
 
         <div class="d-flex align-items-center flex-grow-1 mx-lg-4 d-none d-lg-flex" style="max-width: 400px">
-          <SearchBar />
+          <SearchBar v-model="searchQuery" />
         </div>
 
-        <div class="d-none d-lg-flex align-items-center gap-3">
+        <div class="d-none d-lg-flex align-items-center gap-2">
           <template v-if="authStore.isAuthenticated">
             <div class="dropdown profile-dropdown-container" ref="dropdownRef">
               <button
@@ -163,9 +163,23 @@
       </div>
 
       <div class="d-lg-none d-flex align-items-center gap-2">
+        <template v-if="authStore.isAuthenticated">
+          <button @click="handleLogout" class="btn btn-link p-2 text-danger border-0 mobile-icon-btn">
+            <i class="bi bi-box-arrow-right mobile-icon"></i>
+          </button>
+        </template>
+        <template v-else>
+          <router-link to="/signin" class="btn btn-link p-2 text-white border-0 mobile-icon-btn">
+            <i class="bi bi-person-circle mobile-icon"></i>
+          </router-link>
+        </template>
+
         <router-link to="/cart" class="text-white position-relative p-2">
           <i class="bi bi-cart3 fs-3"></i>
-          <span v-if="cartStore.totalItems > 0" class="cart-badge-count small">
+          <span
+            v-if="cartStore.totalItems > 0"
+            class="cart-badge-count small"
+          >
             {{ cartStore.totalItems }}
           </span>
         </router-link>
@@ -243,12 +257,13 @@
 import SearchBar from '@/components/SearchBar.vue'
 import { useAuthStore } from '@/stores/auth'
 import { useCartStore } from '@/stores/cartStore'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const router = useRouter()
+const route = useRoute()
 
 const showDropdown = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
@@ -373,6 +388,23 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
   } else {
     orderCount.value = 0
   }
+const handleLogout = () => {
+  authStore.logout()
+  router.push('/signin')
+}
+const searchQuery = ref((route.query.search as string) || '')
+
+// Watch searchQuery and push to URL for live filtering
+watch(searchQuery, (newVal) => {
+  router.push({ 
+    path: '/shop', 
+    query: { ...route.query, search: newVal.trim() || undefined } 
+  })
+})
+
+// Sync search bar if URL changes (like clicking clear filters)
+watch(() => route.query.search, (newSearch) => {
+  searchQuery.value = (newSearch as string) || ''
 })
 </script>
 
@@ -385,6 +417,7 @@ watch(() => authStore.isAuthenticated, (isAuth) => {
   z-index: 1050;
 }
 
+/* Desktop Nav Links */
 .nav-link {
   color: rgba(255, 255, 255, 0.7) !important;
   transition: all 0.3s ease;

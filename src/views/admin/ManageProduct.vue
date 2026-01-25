@@ -33,7 +33,7 @@
         </div>
         <select v-model="filters.category" class="form-select form-select-sm w-25" @change="loadProducts">
           <option value="">All Categories</option>
-          <option v-for="cat in categories" :key="cat._id || cat.id" :value="cat._id || cat.id">
+          <option v-for="cat in categories" :key="cat._id" :value="cat._id">
             {{ cat.name }}
           </option>
         </select>
@@ -91,7 +91,7 @@
           <tbody>
             <tr
               v-for="product in products"
-              :key="product._id || product.id"
+              :key="product._id"
               @dblclick="viewProductDetails(product)"
               style="cursor: pointer"
             >
@@ -120,10 +120,7 @@
               <td class="px-4 py-3 text-dark small">{{ product.stock }}</td>
               <td class="px-4 py-3">
                 <span
-                  :class="[
-                    'badge',
-                    product.status === 'active' ? 'bg-success' : product.status === 'inactive' ? 'bg-danger' : 'bg-secondary'
-                  ]"
+                  :class="['badge', product.status === 'active' ? 'bg-success' : product.status === 'inactive' ? 'bg-danger' : 'bg-secondary']"
                 >
                   {{ product.status || 'active' }}
                 </span>
@@ -153,7 +150,8 @@
                     <i class="bi bi-pencil-square" style="height: auto; width: auto"></i>
                   </button>
                   <button
-                    @click="deleteProduct(product._id || product.id)"
+                  v-if="product._id !== null && product._id !== undefined"
+                    @click="deleteProduct(product._id)"
                     title="Delete Product"
                     class="btn btn-sm btn-outline-danger"
                   >
@@ -230,8 +228,15 @@
             </div>
             <div class="d-flex align-items-center gap-2 mb-4">
               <div class="d-flex align-items-center gap-1">
-                <svg class="text-warning" style="width: 20px; height: 20px" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                <svg
+                  class="text-warning"
+                  style="width: 20px; height: 20px"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                  />
                 </svg>
                 <span class="h6 fw-semibold text-dark mb-0">{{ selectedProduct.rating }}</span>
               </div>
@@ -283,7 +288,8 @@
       <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
           <div class="modal-header bg-light">
-            <h3 class="modal-title">
+            <h3 class="modal-title d-flex align-items-center gap-2">
+              <i class="bi bi-box-seam"></i>
               {{ editingProduct ? 'Edit Product' : 'Add New Product' }}
             </h3>
             <button
@@ -301,182 +307,300 @@
               {{ submitMessage.text }}
             </div>
 
-            <!-- Product Name & SKU -->
-            <div class="row g-3 mb-4">
-              <div class="col-md-6">
-                <label class="form-label">Product Name <span class="text-danger">*</span></label>
-                <input
-                  v-model="formData.name"
-                  type="text"
-                  :class="['form-control', { 'is-invalid': errors.name }]"
-                  placeholder="Enter product name"
-                />
-                <small v-if="errors.name" class="text-danger">{{ errors.name }}</small>
+            <!-- MVP Card Section: Basic Info -->
+            <div class="card shadow-sm mb-4">
+              <div class="card-header bg-white border-bottom-0">
+                <span class="fw-semibold"><i class="bi bi-info-circle me-2"></i>Basic Info</span>
               </div>
-              <div class="col-md-6">
-                <label class="form-label">SKU <span class="text-danger">*</span></label>
-                <input
-                  v-model="formData.sku"
-                  type="text"
-                  :class="['form-control', { 'is-invalid': errors.sku }]"
-                  placeholder="Enter SKU"
-                />
-                <small v-if="errors.sku" class="text-danger">{{ errors.sku }}</small>
-              </div>
-            </div>
-
-            <!-- Price & Category -->
-            <div class="row g-3 mb-4">
-              <div class="col-md-6">
-                <label class="form-label">Price ($) <span class="text-danger">*</span></label>
-                <input
-                  v-model.number="formData.price"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  :class="['form-control', { 'is-invalid': errors.price }]"
-                />
-                <small v-if="errors.price" class="text-danger">{{ errors.price }}</small>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Category <span class="text-danger">*</span></label>
-                <select
-                  v-model="formData.category"
-                  :class="['form-select', { 'is-invalid': errors.category }]"
-                >
-                  <option value="">Select a category</option>
-                  <option v-for="cat in categories" :key="cat._id || cat.id" :value="cat._id || cat.id">
-                    {{ cat.name }}
-                  </option>
-                </select>
-                <small v-if="errors.category" class="text-danger">{{ errors.category }}</small>
-              </div>
-            </div>
-
-            <!-- Stock & Rating -->
-            <div class="row g-3 mb-4">
-              <div class="col-md-6">
-                <label class="form-label">Stock <span class="text-danger">*</span></label>
-                <input
-                  v-model.number="formData.stock"
-                  type="number"
-                  min="0"
-                  :class="['form-control', { 'is-invalid': errors.stock }]"
-                />
-                <small v-if="errors.stock" class="text-danger">{{ errors.stock }}</small>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Rating (0-5)</label>
-                <input
-                  v-model.number="formData.rating"
-                  type="number"
-                  min="0"
-                  max="5"
-                  step="0.1"
-                  :class="['form-control', { 'is-invalid': errors.rating }]"
-                />
-                <small v-if="errors.rating" class="text-danger">{{ errors.rating }}</small>
-              </div>
-            </div>
-
-            <!-- Additional Fields -->
-            <div class="row g-3 mb-4">
-              <div class="col-md-6">
-                <label class="form-label">Brand</label>
-                <input v-model="formData.brand" type="text" class="form-control" placeholder="Enter brand name" />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Original Price ($)</label>
-                <input
-                  v-model.number="formData.originalPrice"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  class="form-control"
-                />
-              </div>
-            </div>
-
-            <div class="row g-3 mb-4">
-              <div class="col-md-6">
-                <label class="form-label">Discount (%)</label>
-                <input
-                  v-model.number="formData.discount"
-                  type="number"
-                  min="0"
-                  max="100"
-                  class="form-control"
-                />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Status</label>
-                <select v-model="formData.status" class="form-select">
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="draft">Draft</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="row g-3 mb-4">
-              <div class="col-md-12">
-                <label class="form-label">Description</label>
-                <textarea
-                  v-model="formData.description"
-                  class="form-control"
-                  rows="3"
-                  placeholder="Enter product description"
-                ></textarea>
-              </div>
-            </div>
-
-            <div class="row g-3 mb-4">
-              <div class="col-md-6">
-                <div class="d-flex gap-3">
-                  <div class="form-check">
-                    <input
-                      v-model="formData.isNew"
-                      type="checkbox"
-                      class="form-check-input"
-                      id="isNew"
-                    />
-                    <label class="form-check-label" for="isNew">New Product</label>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <div class="form-floating">
+                      <input
+                        v-model="formData.name"
+                        type="text"
+                        class="form-control"
+                        id="productName"
+                        placeholder="Product Name"
+                        :class="{ 'is-invalid': errors.name }"
+                      />
+                      <label for="productName">Product Name</label>
+                      <small v-if="errors.name" class="text-danger">{{ errors.name }}</small>
+                    </div>
                   </div>
-                  <div class="form-check">
-                    <input
-                      v-model="formData.inStock"
-                      type="checkbox"
-                      class="form-check-input"
-                      id="inStock"
-                    />
-                    <label class="form-check-label" for="inStock">In Stock</label>
+                  <div class="col-md-6">
+                    <div class="form-floating">
+                      <input
+                        v-model="formData.sku"
+                        type="text"
+                        class="form-control"
+                        id="productSKU"
+                        placeholder="SKU"
+                        :class="{ 'is-invalid': errors.sku }"
+                      />
+                      <label for="productSKU">SKU</label>
+                      <small v-if="errors.sku" class="text-danger">{{ errors.sku }}</small>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Image Upload -->
-            <div class="mb-4">
-              <label class="form-label fw-semibold">Product Image <span class="text-danger">*</span></label>
-              <FileUpload
-                v-model="formData.image"
-                alt-text="Product image"
-                @update:model-value="(val) => (formData.image = val)"
-              />
-              <small v-if="errors.image" class="text-danger d-block mt-2">{{ errors.image }}</small>
+            <!-- MVP Card Section: Pricing & Category -->
+            <div class="card shadow-sm mb-4">
+              <div class="card-header bg-white border-bottom-0">
+                <span class="fw-semibold"><i class="bi bi-cash-coin me-2"></i>Pricing & Category</span>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <!-- <div class="col-md-4">
+                    <div class="form-floating">
+                      <input
+                        v-model.number="formData.price"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        class="form-control"
+                        id="productPrice"
+                        placeholder="Price"
+                        :class="{ 'is-invalid': errors.price }"
+                      />
+                      <label for="productPrice">Price ($)</label>
+                      <small v-if="errors.price" class="text-danger">{{ errors.price }}</small>
+                    </div>
+                  </div> -->
+                  <div class="col-md-4">
+                    <div class="form-floating">
+                      <input
+                        v-model.number="formData.originalPrice"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        class="form-control"
+                        id="productOriginalPrice"
+                        placeholder="Original Price"
+                      />
+                      <label for="productOriginalPrice">Original Price ($)</label>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-floating">
+                      <select
+                        v-model="formData.category"
+                        class="form-select"
+                        id="productCategory"
+                        :class="{ 'is-invalid': errors.category }"
+                      >
+                        <option value="">Select a category</option>
+                        <option v-for="cat in categories" :key="cat._id" :value="cat._id">
+                          {{ cat.name }}
+                        </option>
+                      </select>
+                      <label for="productCategory">Category</label>
+                      <small v-if="errors.category" class="text-danger">{{ errors.category }}</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="row g-3 mt-2">
+                  <div class="col-md-4">
+                    <div class="form-floating">
+                      <input
+                        v-model.number="formData.discount"
+                        type="number"
+                        min="0"
+                        max="100"
+                        class="form-control"
+                        id="productDiscount"
+                        placeholder="Discount"
+                      />
+                      <label for="productDiscount">Discount (%)</label>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-floating">
+                      <input
+                        v-model="formData.brand"
+                        type="text"
+                        class="form-control"
+                        id="productBrand"
+                        placeholder="Brand"
+                      />
+                      <label for="productBrand">Brand</label>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-floating">
+                      <select v-model="formData.status" class="form-select" id="productStatus">
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                        <option value="draft">Draft</option>
+                      </select>
+                      <label for="productStatus">Status</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div class="modal-footer mt-4">
+            <!-- MVP Card Section: Inventory & Rating -->
+            <div class="card shadow-sm mb-4">
+              <div class="card-header bg-white border-bottom-0">
+                <span class="fw-semibold"><i class="bi bi-archive me-2"></i>Inventory & Rating</span>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <div class="form-floating">
+                      <input
+                        v-model.number="formData.stock"
+                        type="number"
+                        min="0"
+                        class="form-control"
+                        id="productStock"
+                        placeholder="Stock"
+                        :class="{ 'is-invalid': errors.stock }"
+                      />
+                      <label for="productStock">Stock</label>
+                      <small v-if="errors.stock" class="text-danger">{{ errors.stock }}</small>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="form-floating">
+                      <input
+                        v-model.number="formData.rating"
+                        type="number"
+                        min="0"
+                        max="5"
+                        step="0.1"
+                        class="form-control"
+                        id="productRating"
+                        placeholder="Rating"
+                        :class="{ 'is-invalid': errors.rating }"
+                      />
+                      <label for="productRating">Rating (0-5)</label>
+                      <small v-if="errors.rating" class="text-danger">{{ errors.rating }}</small>
+                    </div>
+                  </div>
+                  <div class="col-md-4 d-flex align-items-center gap-4">
+                    <div class="form-check">
+                      <input
+                        v-model="formData.isNew"
+                        type="checkbox"
+                        class="form-check-input"
+                        id="isNew"
+                      />
+                      <label class="form-check-label" for="isNew"><i class="bi bi-star-fill text-warning"></i> New Product</label>
+                    </div>
+                    <div class="form-check">
+                      <input
+                        v-model="formData.inStock"
+                        type="checkbox"
+                        class="form-check-input"
+                        id="inStock"
+                      />
+                      <label class="form-check-label" for="inStock"><i class="bi bi-check-circle text-success"></i> In Stock</label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- MVP Card Section: Badges -->
+            <!-- <div class="card shadow-sm mb-4">
+              <div class="card-header bg-white border-bottom-0">
+                <span class="fw-semibold"><i class="bi bi-bookmark-star me-2"></i>Badges</span>
+              </div>
+              <div class="card-body">
+                <div class="mb-2">
+                  <label class="form-label">Select Badges</label>
+                  <select v-model="formData.badges" class="form-select" multiple>
+                    <option v-for="badge in BADGE_OPTIONS" :key="badge" :value="badge">
+                      {{ badge }}
+                    </option>
+                  </select>
+                  <small class="text-muted">Hold Ctrl (Windows) or Cmd (Mac) to select multiple badges.</small>
+                </div>
+                <div class="mt-2">
+                  <span v-for="badge in formData.badges" :key="badge" class="badge rounded-pill bg-primary me-2">
+                    <i class="bi bi-bookmark"></i> {{ badge }}
+                  </span>
+                </div>
+              </div>
+            </div> -->
+
+            <!-- MVP Card Section: Description -->
+            <div class="card shadow-sm mb-4">
+              <div class="card-header bg-white border-bottom-0">
+                <span class="fw-semibold"><i class="bi bi-card-text me-2"></i>Description</span>
+              </div>
+              <div class="card-body">
+                <div class="form-floating">
+                  <textarea
+                    v-model="formData.description"
+                    class="form-control"
+                    id="productDescription"
+                    style="min-height: 80px"
+                    placeholder="Enter product description"
+                  ></textarea>
+                  <label for="productDescription">Description</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- MVP Card Section: Image Upload -->
+            <div class="card shadow-sm mb-4">
+              <div class="card-header bg-white border-bottom-0">
+                <span class="fw-semibold"><i class="bi bi-image me-2"></i>Product Images</span>
+              </div>
+              <div class="card-body">
+                <div class="mb-3">
+                  <label class="form-label fw-semibold">Upload Images <span class="text-danger">*</span></label>
+                  <input
+                    type="file"
+                    class="form-control"
+                    multiple
+                    @change="onImagesChange"
+                  />
+                  <small v-if="errors.images" class="text-danger d-block mt-2">{{ errors.images }}</small>
+                </div>
+                <div v-if="formData.images && formData.images.length" class="d-flex flex-wrap gap-3 mt-2">
+                  <div v-for="(img, idx) in formData.images" :key="idx" class="text-center">
+                    <img
+                      v-if="img && typeof img === 'object' && 'type' in img && img.type && img.type.startsWith('image/')"
+                      :src="window.URL.createObjectURL(img)"
+                      alt="Preview"
+                      class="rounded border"
+                      style="max-width: 120px; max-height: 120px; object-fit: cover"
+                    />
+                    <img
+                      v-else-if="typeof img === 'string' && (img.endsWith('.jpg') || img.endsWith('.jpeg') || img.endsWith('.png') || img.endsWith('.gif') || img.endsWith('.webp') || img.endsWith('.bmp') || img.endsWith('.svg'))"
+                      :src="img"
+                      alt="Preview"
+                      class="rounded border"
+                      style="max-width: 120px; max-height: 120px; object-fit: cover"
+                    />
+                    <div v-else class="text-muted small mt-1">
+                      <i class="bi bi-file-earmark"></i> {{ img?.name || img }}
+                    </div>
+                    <div class="text-muted small mt-1">File {{ idx + 1 }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- MVP Card Section: Actions -->
+            <div class="d-flex justify-content-end gap-2 mt-3">
               <button
                 @click="closeModal"
                 type="button"
-                class="btn btn-secondary"
+                class="btn btn-outline-secondary"
                 :disabled="isSubmitting"
               >
-                Cancel
+                <i class="bi bi-x-lg"></i> Cancel
               </button>
               <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
                 <span v-if="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+                <i :class="editingProduct ? 'bi bi-save' : 'bi bi-plus-lg'"></i>
                 {{ editingProduct ? 'Update' : 'Add' }}
               </button>
             </div>
@@ -489,18 +613,17 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import type { Product, Category } from '@/types/product'
-import FileUpload from '@/components/common/FileUpload.vue'
+import type { Product, BadgeType } from '@/types/product'
 import { useFormState } from '@/composables/useFormState'
 import { useProductApi } from '@/composables/useProductApi'
 import { useCategoryApi } from '@/composables/useCategoryApi'
 
 const productApi = useProductApi()
 const categoryApi = useCategoryApi()
+const categories = computed(() => categoryApi.categories.value)
 
 const products = ref<Product[]>([])
-const categories = ref<Category[]>([])
-const pagination = ref<any>(null)
+const pagination = ref<unknown>(null)
 const showAddModal = ref(false)
 const editingProduct = ref<Product | null>(null)
 const selectedProduct = ref<Product | null>(null)
@@ -516,10 +639,11 @@ const filters = ref({
   sortOrder: 'desc' as 'asc' | 'desc',
 })
 
+const BADGE_OPTIONS: BadgeType[] = ['new', 'popular', 'instock', 'discount']
+
 const initialFormData = {
   name: '',
   sku: '',
-  price: 0,
   originalPrice: 0,
   discount: 0,
   isNew: false,
@@ -528,9 +652,10 @@ const initialFormData = {
   category: '',
   stock: 0,
   rating: 0,
-  image: '',
+  images: [] as File[],
   description: '',
   status: 'active' as 'active' | 'inactive' | 'draft',
+  badges: [] as BadgeType[],
 }
 
 const {
@@ -549,22 +674,48 @@ const {
 const loadProducts = async () => {
   try {
     const response = await productApi.getProducts(filters.value)
-    if (response.success && response.data) {
-      products.value = response.data.data || []
-      pagination.value = response.data.pagination
+    if (!response) {
+      products.value = []
+      pagination.value = null
+      return
     }
-  } catch (error: any) {
-    showError(error.message || 'Failed to load products')
+
+    let items: Product[] = []
+    let pag: any = null
+
+    if (Array.isArray(response.data)) {
+      items = response.data
+      pag = response.pagination ?? null
+    } else if (response.data && Array.isArray(response.data.data)) {
+      items = response.data.data
+      pag = response.data.pagination ?? response.pagination ?? null
+    } else {
+      items = Array.isArray(response) ? response : []
+      pag = null
+    }
+
+    products.value = items || []
+    pagination.value = pag
+  } catch (error: unknown) {
+    // ignore aborted/canceled requests (axios uses code 'ERR_CANCELED')
+    const errAny = error as any
+    const isCanceled = errAny?.code === 'ERR_CANCELED' || errAny?.name === 'CanceledError' || errAny?.name === 'AbortError'
+    if (!isCanceled) {
+      showError(error instanceof Error ? error.message : 'Failed to load products')
+    } else {
+      // silent ignore of canceled request
+    }
   }
 }
 
 // Load categories from API
 const loadCategories = async () => {
   try {
-    // Change from getCategories to fetchCategories
+    // Let categoryApi handle its internal categories state.
     await categoryApi.fetchCategories()
-  } catch (error: any) {
-    console.error('Failed to load categories:', error.message)
+    // No assignment to `categories.value` since `categories` is a computed wrapper
+  } catch (error: unknown) {
+    console.error('Failed to load categories:', error instanceof Error ? error.message : 'Unknown error')
   }
 }
 
@@ -604,7 +755,6 @@ const editProduct = (product: Product) => {
   Object.assign(formData, {
     name: product.name,
     sku: product.sku,
-    price: product.price,
     originalPrice: product.originalPrice ?? 0,
     discount: product.discount ?? 0,
     isNew: product.isNew ?? false,
@@ -613,9 +763,10 @@ const editProduct = (product: Product) => {
     category: categoryId || '',
     stock: product.stock,
     rating: product.rating,
-    image: getProductImageUrl(product),
     description: product.description || '',
     status: product.status || 'active',
+    badges: product.badges || [],
+    images: product.images || [],
   })
   clearErrors()
   showAddModal.value = true
@@ -629,8 +780,8 @@ const deleteProduct = async (id: string | number) => {
     await productApi.deleteProduct(String(id))
     showSuccess('Product deleted successfully')
     loadProducts()
-  } catch (error: any) {
-    showError(error.message || 'Failed to delete product')
+  } catch (error: unknown) {
+    showError(error instanceof Error ? error.message : 'Failed to delete product')
   }
 }
 
@@ -639,9 +790,16 @@ const saveProduct = async () => {
   const validationRules = {
     name: { required: true, minLength: 3, maxLength: 200 },
     sku: { required: true, minLength: 3 },
-    price: { required: true, min: 0 },
     category: { required: true },
     stock: { required: true, min: 0 },
+  }
+
+  if (!formData.images || formData.images.length === 0) {
+    errors.images = 'At least one product image/file is required'
+    showError('At least one product image/file is required')
+    return
+  } else {
+    errors.images = ''
   }
 
   if (!validateForm(validationRules)) {
@@ -656,34 +814,32 @@ const saveProduct = async () => {
     const formDataToSend = new FormData()
     formDataToSend.append('name', formData.name)
     formDataToSend.append('sku', formData.sku)
-    formDataToSend.append('price', String(formData.price))
+    // formDataToSend.append('price', String(formData.price))
     formDataToSend.append('stock', String(formData.stock))
     formDataToSend.append('category', formData.category)
-
+    formDataToSend.append('isNew', String(formData.isNew))
+    formDataToSend.append('inStock', String(formData.inStock))
+    formDataToSend.append('rating', String(formData.rating || 0))
+    formDataToSend.append('status', formData.status)
     if (formData.originalPrice) formDataToSend.append('originalPrice', String(formData.originalPrice))
     if (formData.discount) formDataToSend.append('discount', String(formData.discount))
     if (formData.brand) formDataToSend.append('brand', formData.brand)
     if (formData.description) formDataToSend.append('description', formData.description)
-    if (formData.status) formDataToSend.append('status', formData.status)
-    formDataToSend.append('isNew', String(formData.isNew))
-    formDataToSend.append('inStock', String(formData.inStock))
-    formDataToSend.append('rating', String(formData.rating || 0))
-
-    // Handle image upload
-    if (formData.image) {
-      // If image is a data URL, convert to File
-      if (formData.image.startsWith('data:')) {
-        const response = await fetch(formData.image)
-        const blob = await response.blob()
-        const file = new File([blob], 'product-image.jpg', { type: blob.type })
-        formDataToSend.append('image', file)
-      } else if (formData.image instanceof File) {
-        formDataToSend.append('image', formData.image)
-      }
+    // Handle badges as array
+    if (formData.badges && formData.badges.length > 0) {
+      formData.badges.forEach(badge => formDataToSend.append('badges[]', badge))
+    }
+    // Handle images array (multiple)
+    if (formData.images && Array.isArray(formData.images) && formData.images.length > 0) {
+      formData.images.forEach((img: any) => {
+        if (img instanceof File) {
+          formDataToSend.append('images', img)
+        }
+      })
     }
 
     if (editingProduct.value) {
-      const productId = editingProduct.value._id || editingProduct.value.id
+      const productId = editingProduct.value._id
       await productApi.updateProduct(String(productId), formDataToSend)
       showSuccess('Product updated successfully')
     } else {
@@ -712,16 +868,27 @@ const closeModal = () => {
 const getCategoryName = (category: any): string => {
   if (!category) return 'N/A'
   if (typeof category === 'string') {
-    const cat = categories.value.find(c => (c._id || c.id) === category)
+    const cat = categories.value.find(c => (c._id) === category)
     return cat?.name || category
   }
   return category.name || 'N/A'
 }
 
 const getProductImageUrl = (product: Product): string => {
-  if (!product.image) return '/placeholder-image.jpg'
-  if (product.image.startsWith('http')) return product.image
-  return `http://localhost:5000/uploads/products/${product.image}`
+  // If image is a full URL, use it
+  if (product.image && typeof product.image === 'string') {
+    if (product.image.startsWith('http')) return product.image
+    // If image is a filename, build the backend URL
+    return `http://localhost:5000/uploads/products/${product.image}`
+  }
+  // If images array exists and has at least one image
+  if (product.images && product.images.length > 0) {
+    const img = product.images[0]
+    if (typeof img === 'string' && img.startsWith('http')) return img
+    return `http://localhost:5000/uploads/products/${img}`
+  }
+  // Otherwise, fallback to placeholder
+  return '/placeholder-image.jpg'
 }
 
 const handleImageError = (event: Event) => {
@@ -732,6 +899,16 @@ const handleImageError = (event: Event) => {
 const formatDate = (date: string | undefined): string => {
   if (!date) return 'N/A'
   return new Date(date).toLocaleDateString()
+}
+
+function onImagesChange(event: Event) {
+  const input = event.target as HTMLInputElement
+  if (input.files && input.files.length > 0) {
+    formData.images = Array.from(input.files)
+    errors.images = ''
+  } else {
+    formData.images = []
+  }
 }
 
 // Initialize

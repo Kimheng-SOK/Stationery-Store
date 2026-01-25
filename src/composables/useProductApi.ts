@@ -1,11 +1,7 @@
-/**
- * Product API Composable
- * Handles all product-related API calls
- */
-
 import { ref } from 'vue'
-import { apiGet, apiPost, apiPut, apiDelete, type ApiResponse } from '@/services/api'
-import type { Product } from '@/types/product'
+import axios from 'axios'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 interface ProductFilters {
   page?: number
@@ -20,106 +16,104 @@ interface ProductFilters {
   sortOrder?: 'asc' | 'desc'
 }
 
-interface ProductResponse {
-  data: Product[]
-  pagination?: {
-    page: number
-    limit: number
-    total: number
-    totalPages: number
-    hasNextPage: boolean
-    hasPrevPage: boolean
-  }
-}
-
 export function useProductApi() {
   const loading = ref(false)
   const error = ref<string | null>(null)
+  const axiosInstance = axios.create({ baseURL: API_URL })
+  let currentController: AbortController | null = null
 
-  /**
-   * Get all products with filters
-   */
+  // Get all products with filters (cancels previous in-flight request)
   const getProducts = async (filters: ProductFilters = {}) => {
+    // cancel previous
+    if (currentController) {
+      try { currentController.abort() } catch { /* ignore */ }
+      currentController = null
+    }
+
+    currentController = new AbortController()
     loading.value = true
     error.value = null
-
     try {
-      const response = await apiGet<ProductResponse>('/products', filters)
-      return response
+      const res = await axiosInstance.get('/products', {
+        params: filters,
+        signal: currentController.signal,
+      })
+      return res.data
     } catch (err: any) {
-      error.value = err.message || 'Failed to fetch products'
+      // mark canceled requests with axios code
+      const isCanceled = err?.code === 'ERR_CANCELED' || err?.name === 'CanceledError' || err?.name === 'AbortError'
+      const message = isCanceled ? 'Request canceled' : err?.response?.data?.message || err?.message || 'Failed to fetch products'
+      if (!isCanceled) error.value = message
       throw err
     } finally {
       loading.value = false
+      currentController = null
     }
   }
 
-  /**
-   * Get single product by ID
-   */
+  // Get single product by ID
   const getProduct = async (id: string) => {
     loading.value = true
     error.value = null
-
     try {
-      const response = await apiGet<{ data: Product }>(`/products/${id}`)
-      return response.data
+      const res = await axiosInstance.get(`/products/${id}`)
+      return res.data // expected shape: { success: true, data: { ...product } } or similar
     } catch (err: any) {
-      error.value = err.message || 'Failed to fetch product'
-      throw err
+      const message = err?.response?.data?.message || err.message || 'Failed to fetch product'
+      error.value = message
+      throw new Error(message)
     } finally {
       loading.value = false
     }
   }
 
-  /**
-   * Create new product
-   */
+  // Create new product (multipart)
   const createProduct = async (productData: FormData) => {
     loading.value = true
     error.value = null
-
     try {
-      const response = await apiPost<{ data: Product }>('/products', productData, true)
-      return response.data
+      const res = await axiosInstance.post('/products', productData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      return res.data
     } catch (err: any) {
-      error.value = err.message || 'Failed to create product'
-      throw err
+      const message = err?.response?.data?.message || err.message || 'Failed to create product'
+      error.value = message
+      throw new Error(message)
     } finally {
       loading.value = false
     }
   }
 
-  /**
-   * Update product
-   */
+  // Update product (multipart)
   const updateProduct = async (id: string, productData: FormData) => {
     loading.value = true
     error.value = null
-
     try {
-      const response = await apiPut<{ data: Product }>(`/products/${id}`, productData, true)
-      return response.data
+      const res = await axiosInstance.put(`/products/${id}`, productData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
+      return res.data
     } catch (err: any) {
-      error.value = err.message || 'Failed to update product'
-      throw err
+      const message = err?.response?.data?.message || err.message || 'Failed to update product'
+      error.value = message
+      throw new Error(message)
     } finally {
       loading.value = false
     }
   }
 
-  /**
-   * Delete product
-   */
+  // Delete product
   const deleteProduct = async (id: string) => {
     loading.value = true
     error.value = null
-
     try {
-      await apiDelete(`/products/${id}`)
+      const res = await axiosInstance.delete(`/products/${id}`)
+      return res.data
     } catch (err: any) {
-      error.value = err.message || 'Failed to delete product'
-      throw err
+      const message = err?.response?.data?.message || err.message || 'Failed to delete product'
+      error.value = message
+      throw new Error(message)
     } finally {
       loading.value = false
     }
