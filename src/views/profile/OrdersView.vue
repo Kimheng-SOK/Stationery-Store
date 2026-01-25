@@ -57,6 +57,13 @@
             
             <div class="order-items">
               <div v-for="item in order.items" :key="item.id" class="order-item">
+                <!-- Add Product Image -->
+                <img
+                  :src="item.image || '/placeholder-image.jpg'"
+                  :alt="item.name"
+                  class="product-image"
+                  @error="handleImageError"
+                />
                 <div class="item-details">
                   <div class="item-name">{{ item.name }}</div>
                   <div class="item-meta">Qty: {{ item.quantity }} × ${{ item.price.toFixed(2) }}</div>
@@ -96,12 +103,17 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import axios from 'axios'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 interface OrderItem {
   id: number
   name: string
   price: number
   quantity: number
+  image?: string // Add image field
 }
 
 interface Order {
@@ -113,6 +125,7 @@ interface Order {
 }
 
 const router = useRouter()
+const authStore = useAuthStore()
 const activeTab = ref('all')
 const orders = ref<Order[]>([])
 const isLoading = ref(true)
@@ -129,16 +142,60 @@ onMounted(async () => {
 })
 
 async function loadOrders() {
+  isLoading.value = true
   try {
-    const saved = localStorage.getItem('orders')
-    if (saved) {
-      orders.value = JSON.parse(saved)
+    const { data } = await axios.get(`${API_URL}/orders`)
+    
+    if (!data.data || !Array.isArray(data.data)) {
+      orders.value = []
+      return
     }
+
+    const userEmail = authStore.user?.email?.toLowerCase()
+    if (!userEmail) {
+      orders.value = []
+      return
+    }
+
+    const userOrders = data.data.filter((order: any) => {
+      const orderEmail = order.customerEmail?.toLowerCase()
+      return orderEmail === userEmail
+    })
+
+    orders.value = userOrders
+      .map((order: any) => ({
+        id: order.orderNumber,
+        date: new Date(order.orderDate).toISOString(),
+        status: formatOrderStatus(order.status),
+        total: order.totalAmount || order.amount,
+        items: [
+          {
+            id: order._id,
+            name: order.productName,
+            price: order.amount / order.quantity,
+            quantity: order.quantity,
+            image: order.productImage || '/placeholder-image.jpg' // Add image
+          }
+        ]
+      }))
+      .sort((a: Order, b: Order) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
   } catch (error) {
     console.error('Failed to load orders:', error)
+    orders.value = []
   } finally {
     isLoading.value = false
   }
+}
+
+function formatOrderStatus(status: string): string {
+  const statusMap: Record<string, string> = {
+    'pending': 'Processing',
+    'in-progress': 'Shipped',
+    'completed': 'Delivered',
+    'cancelled': 'Cancelled'
+  }
+  return statusMap[status] || 'Processing'
 }
 
 const filteredOrders = computed(() => {
@@ -179,7 +236,16 @@ function viewOrderDetails(orderId: string) {
 }
 
 function reorder(orderId: string) {
-  alert('Reorder functionality coming soon!')
+  const order = orders.value.find(o => o.id === orderId)
+  if (order && order.items.length > 0) {
+    // Redirect to product page or add to cart
+    router.push('/shop')
+  }
+}
+
+function handleImageError(event: Event) {
+  const img = event.target as HTMLImageElement
+  img.src = '/placeholder-image.jpg'
 }
 </script>
 
@@ -313,19 +379,26 @@ function reorder(orderId: string) {
 
 .order-item {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
   padding: 0.75rem;
   border-radius: 8px;
   margin-bottom: 0.5rem;
   transition: background 0.2s;
 }
 
-.order-item:hover {
-  background: #f8f9fa;
+.product-image {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+  border: 1px solid #e9ecef;
 }
 
 .item-details {
   flex: 1;
+  min-width: 0;
 }
 
 .item-name {
@@ -449,14 +522,21 @@ function reorder(orderId: string) {
 }
 
 @media (max-width: 576px) {
+  .product-image {
+    width: 50px;
+    height: 50px;
+  }
+
   .order-item {
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: 0.5rem;
     align-items: flex-start;
   }
 
   .item-total {
-    align-self: flex-end;
+    width: 100%;
+    text-align: right;
+    margin-top: 0.5rem;
   }
 }
 </style>

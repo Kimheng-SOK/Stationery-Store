@@ -1,7 +1,6 @@
 <template>
   <div class="product-detail-page">
     <div class="container py-5">
-      <!-- Breadcrumb -->
       <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
           <li class="breadcrumb-item">
@@ -14,21 +13,17 @@
         </ol>
       </nav>
 
-      <!-- Loading State -->
       <div v-if="loading" class="text-center py-5">
         <div class="spinner-border text-primary" role="status">
           <span class="visually-hidden">Loading...</span>
         </div>
       </div>
 
-      <!-- Error State -->
       <div v-else-if="error" class="alert alert-danger">
         {{ error }}
       </div>
 
-      <!-- Product Details -->
       <div v-else-if="product" class="row">
-        <!-- Product Images -->
         <div class="col-lg-6 mb-4">
           <div class="product-images">
             <div class="main-image-container mb-3">
@@ -37,7 +32,6 @@
                 :alt="product.name"
                 class="main-image img-fluid rounded"
               />
-              <!-- Badges -->
               <div class="position-absolute top-0 start-0 p-3">
                 <span v-if="product.isNew" class="badge bg-success me-2">New</span>
                 <span v-if="calculateDiscount() > 0" class="badge bg-danger">
@@ -46,7 +40,6 @@
               </div>
             </div>
 
-            <!-- Thumbnail Images (if you have multiple images) -->
             <div class="thumbnail-images d-flex gap-2">
               <img
                 :src="product.image"
@@ -59,27 +52,21 @@
           </div>
         </div>
 
-        <!-- Product Info -->
         <div class="col-lg-6">
           <div class="product-info">
-            <!-- Product Name -->
             <h1 class="product-name mb-3">{{ product.name }}</h1>
 
-            <!-- Rating & Reviews -->
             <div class="rating-section mb-3 d-flex align-items-center">
               <div class="stars text-warning me-2">
                 <i v-for="i in 5" :key="i"
-<<<<<<< HEAD
                    :class="i <= product.rating ? 'bi bi-star-fill' : 'bi bi-star'">
-=======
-                   :class="i <= (product.rating || 0) ? 'bi bi-star-fill' : 'bi bi-star'">
->>>>>>> e74fec6dc00073df23c78ddf1dfa9a63af982ffb
+                   :class="i <= Math.round(reviewStore.averageRating) ? 'bi bi-star-fill' : 'bi bi-star'">
                 </i>
               </div>
-              <span class="text-muted">({{ product.reviewCount || 0 }} reviews)</span>
+              <span class="fw-bold me-1">{{ reviewStore.averageRating }}</span>
+              <span class="text-muted">({{ reviewStore.totalReviews }} reviews)</span>
             </div>
 
-            <!-- SKU & Brand -->
             <div class="product-meta mb-3">
               <p class="mb-1"><strong>SKU:</strong> {{ product.sku }}</p>
               <p class="mb-1" v-if="product.brand">
@@ -88,7 +75,6 @@
               <p class="mb-1"><strong>Category:</strong> {{ product.categoryName }}</p>
             </div>
 
-            <!-- Price -->
             <div class="price-section mb-4">
               <template v-if="!product.price || product.price === 0">
                 <h3 class="current-price text-primary mb-2">
@@ -110,7 +96,6 @@
               </template>
             </div>
 
-            <!-- Stock Status -->
             <div class="stock-status mb-4">
               <span v-if="product.stock > 0" class="badge bg-success-subtle text-success">
                 <i class="bi bi-check-circle"></i> In Stock ({{ product.stock }} available)
@@ -120,7 +105,6 @@
               </span>
             </div>
 
-            <!-- Quantity Selector -->
             <div class="quantity-section mb-4">
               <label class="form-label fw-semibold">Quantity:</label>
               <div class="input-group w-50">
@@ -150,19 +134,14 @@
               </div>
             </div>
 
-            <!-- Action Buttons -->
             <div class="action-buttons d-flex gap-3 mb-4">
               <button
                 class="btn btn-primary btn-lg flex-grow-1"
                 @click="addToCart"
                 :disabled="product.stock <= 0"
               >
-<<<<<<< HEAD
                 <i class="bi bi-cart-plus"></i>
                 {{ addingToCart ? 'Adding...' : 'Add to Cart' }}
-=======
-                <i class="bi bi-cart-plus"></i> Add to Cart
->>>>>>> e74fec6dc00073df23c78ddf1dfa9a63af982ffb
               </button>
               <button
                 class="btn btn-outline-secondary btn-lg"
@@ -172,7 +151,6 @@
               </button>
             </div>
 
-<<<<<<< HEAD
             <!-- Success Message -->
             <div v-if="showSuccessMessage" class="alert alert-success alert-dismissible fade show" role="alert">
               <i class="bi bi-check-circle-fill"></i>
@@ -184,78 +162,23 @@
               ></button>
             </div>
 
-=======
->>>>>>> e74fec6dc00073df23c78ddf1dfa9a63af982ffb
             <!-- Product Description -->
             <div class="product-description">
               <h5 class="mb-3">Product Description</h5>
               <p class="text-muted">
-                {{ product.description || 'High-quality stationery product perfect for your office or school needs. Durable, reliable, and designed to meet your everyday requirements.' }}
+                {{ product.description || 'High-quality stationery product perfect for your office or school needs.' }}
               </p>
-            </div>
-
-            <!-- Additional Info -->
-            <div class="additional-info mt-4">
-              <div class="accordion" id="productAccordion">
-                <div class="accordion-item">
-                  <h2 class="accordion-header">
-                    <button
-                      class="accordion-button collapsed"
-                      type="button"
-                      data-bs-toggle="collapse"
-                      data-bs-target="#specifications"
-                    >
-                      Specifications
-                    </button>
-                  </h2>
-                  <div id="specifications" class="accordion-collapse collapse" data-bs-parent="#productAccordion">
-                    <div class="accordion-body">
-                      <ul class="list-unstyled">
-                        <li><strong>Product ID:</strong> {{ product._id || product.id }}</li>
-                        <li><strong>Added Date:</strong> {{ formatDate(product.createdAt || product.addedDate) }}</li>
-                        <li><strong>Category:</strong> {{ product.categoryName }}</li>
-                        <li v-if="product.brand"><strong>Brand:</strong> {{ product.brand }}</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="accordion-item">
-                  <h2 class="accordion-header">
-                    <button
-                      class="accordion-button collapsed"
-                      type="button"
-                      data-bs-toggle="collapse"
-                      data-bs-target="#shipping"
-                    >
-                      Shipping & Returns
-                    </button>
-                  </h2>
-                  <div id="shipping" class="accordion-collapse collapse" data-bs-parent="#productAccordion">
-                    <div class="accordion-body">
-                      <p>Free shipping on orders over $50.</p>
-                      <p>30-day return policy. Items must be unused and in original packaging.</p>
-                      <p>Express shipping available at checkout.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Related Products Section -->
       <div v-if="relatedProducts.length > 0" class="related-products mt-5">
         <h3 class="mb-4">Related Products</h3>
         <div class="row g-4">
           <div
             v-for="relatedProduct in relatedProducts"
-<<<<<<< HEAD
             :key="relatedProduct.id"
-=======
-            :key="relatedProduct._id || relatedProduct.id"
->>>>>>> e74fec6dc00073df23c78ddf1dfa9a63af982ffb
             class="col-md-3 col-sm-6"
           >
             <div class="card h-100">
@@ -264,7 +187,7 @@
                 class="card-img-top"
                 :alt="relatedProduct.name"
                 style="height: 200px; object-fit: cover; cursor: pointer;"
-                @click="navigateToProduct(relatedProduct._id || relatedProduct.id)"
+                @click="navigateToProduct(relatedProduct._id)"
               />
               <div class="card-body">
                 <h6 class="card-title">{{ relatedProduct.name }}</h6>
@@ -273,13 +196,38 @@
                 </p>
                 <button
                   class="btn btn-sm btn-outline-primary w-100"
-                  @click="navigateToProduct(relatedProduct._id || relatedProduct.id)"
+                  @click="navigateToProduct(relatedProduct._id)"
                 >
                   View Details
                 </button>
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div class="row mt-5 border-top pt-5">
+        <div class="col-lg-5 mb-4">
+          <div v-if="authStore.isAuthenticated">
+            <ReviewProductForm
+              :productId="productId"
+              :user="authStore.user"
+              @submit="handleNewReview"
+            />
+          </div>
+          <div v-else class="card bg-light border-0 text-center p-5">
+             <i class="bi bi-lock fs-1 text-muted"></i>
+             <h5 class="mt-3">Log in to Review</h5>
+             <p class="text-muted small">You must be logged in to share your experience.</p>
+             <router-link to="/login" class="btn btn-sm btn-primary mt-2">Login Now</router-link>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <h3 class="mb-4">Customer Experience</h3>
+          <div v-if="reviewStore.loading" class="text-center">
+            <div class="spinner-border text-success" role="status"></div>
+          </div>
+          <ReviewProductCard v-else :reviews="reviewStore.reviews" />
         </div>
       </div>
     </div>
@@ -291,11 +239,17 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cartStore'
 import { useProductStore } from '@/stores/product'
+import { useReviewStore } from '@/stores/reviewStore'
+import { useAuthStore } from '@/stores/auth'
+import ReviewProductForm from '@/components/Review/ReviewProductForm.vue'
+import ReviewProductCard from '@/components/Review/ReviewProductCard.vue'
 
 const route = useRoute()
 const router = useRouter()
 const cartStore = useCartStore()
 const productStore = useProductStore()
+const reviewStore = useReviewStore()
+const authStore = useAuthStore()
 
 const product = ref<any>(null)
 const loading = ref(true)
@@ -304,57 +258,37 @@ const quantity = ref(1)
 const selectedImage = ref<string>('')
 const isInWishlist = ref(false)
 
-// Related products based on category - first 5 products
+const productId = computed(() => route.params.id as string)
+
 const relatedProducts = computed(() => {
-  console.log('=== RELATED PRODUCTS DEBUG ===')
-  console.log('Product loaded:', !!product.value)
-  console.log('Product:', product.value)
-  console.log('Total products in store:', productStore.products.length)
-
-  if (!product.value) {
-    console.log('No product - returning empty array')
-    return []
-  }
-
+  if (!product.value) return []
   const currentCategoryId = typeof product.value.category === 'object' && product.value.category !== null
     ? product.value.category._id
     : product.value.category
-  console.log('Current category ID:', currentCategoryId)
-  console.log('Current product ID:', product.value._id)
 
   const filtered = productStore.products.filter(p => {
     const pCategoryId = typeof p.category === 'object' && p.category !== null ? p.category._id : p.category
-    const isSameCategory = String(pCategoryId) === String(currentCategoryId)
-    const isNotCurrentProduct = String(p._id) !== String(product.value._id)
-
-    if (isSameCategory && isNotCurrentProduct) {
-      console.log('Match found:', p.name, '- Category:', pCategoryId)
-    }
-
-    return isSameCategory && isNotCurrentProduct
+    return String(pCategoryId) === String(currentCategoryId) && String(p._id) !== String(product.value._id)
   })
-
-  console.log('Filtered results:', filtered.length)
-  console.log('Final related products:', filtered.slice(0, 5).map(p => p.name))
-
-  return filtered.slice(0, 5).map(p => productStore.formatProduct(p))
+  return filtered.slice(0, 4).map(p => productStore.formatProduct(p))
 })
 
-// Watch route params to reload product when navigating between products
-watch(() => route.params.id, () => {
-  if (route.params.id) {
+watch(() => route.params.id, (newId) => {
+  if (newId) {
     loadProduct()
+    reviewStore.fetchReviews(newId as string)
   }
 })
 
-onMounted(() => {
+onMounted(async () => {
+  await authStore.initializeAuth()
   loadProduct()
+  reviewStore.fetchReviews(productId.value)
 })
 
 const loadProduct = async () => {
   try {
     loading.value = true
-<<<<<<< HEAD
     const productId = Number(route.params.id)
 
     const foundProduct = products.find(p => p.id === productId)
@@ -363,32 +297,23 @@ const loadProduct = async () => {
       product.value = foundProduct
       selectedImage.value = foundProduct.image
 
-=======
-    error.value = null
-    const productId = route.params.id as string
-
-    // Fetch products if not already fetched
-    if (!productStore.isFetched) {
-      await productStore.fetchProducts()
-    }
-
-    // Find product by _id
-    const foundProduct = productStore.products.find(p => String(p._id) === String(productId))
-
-    if (foundProduct) {
-      // Format the product using the store's getter
-      product.value = productStore.formatProduct(foundProduct)
-      selectedImage.value = product.value.image
-      quantity.value = 1
->>>>>>> e74fec6dc00073df23c78ddf1dfa9a63af982ffb
     } else {
       error.value = 'Product not found'
     }
   } catch (err) {
     error.value = 'Failed to load product'
-    console.error('Error loading product:', err)
   } finally {
     loading.value = false
+  }
+}
+
+const handleNewReview = async (payload: any) => {
+  const result = await reviewStore.submitReview(payload)
+  if (!result?.success) {
+    reviewStore.fetchReviews(productId.value)
+  } else {
+    loadProduct()
+    reviewStore.fetchReviews(productId.value)
   }
 }
 
@@ -399,21 +324,16 @@ const calculateDiscount = () => {
 }
 
 const increaseQuantity = () => {
-  if (product.value && quantity.value < product.value.stock) {
-    quantity.value++
-  }
+  if (product.value && quantity.value < product.value.stock) quantity.value++
 }
 
 const decreaseQuantity = () => {
-  if (quantity.value > 1) {
-    quantity.value--
-  }
+  if (quantity.value > 1) quantity.value--
 }
 
 const addToCart = () => {
   if (product.value) {
     cartStore.addToCart(product.value, quantity.value)
-<<<<<<< HEAD
 
     // Show success message
     showSuccessMessage.value = true
@@ -429,22 +349,16 @@ const addToCart = () => {
     }
   } finally {
     addingToCart.value = false
-=======
-    alert(`${quantity.value} ${product.value.name}(s) added to cart!`)
->>>>>>> e74fec6dc00073df23c78ddf1dfa9a63af982ffb
+    console.log(`${quantity.value} ${product.value.name}(s) added to cart!`)
   }
 }
 
 const toggleWishlist = () => {
   isInWishlist.value = !isInWishlist.value
-  const message = isInWishlist.value
-    ? 'Added to wishlist'
-    : 'Removed from wishlist'
-  console.log(message)
 }
 
-const navigateToProduct = (productId: string | number) => {
-  router.push({ name: 'ProductDetail', params: { id: productId } })
+const navigateToProduct = (id: string | number) => {
+  router.push({ name: 'ProductDetail', params: { id } })
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
@@ -458,139 +372,15 @@ const formatDate = (dateString: string) => {
   })
 }
 
-
 </script>
 
 <style scoped>
-.product-detail-page {
-  background-color: #f8f9fa;
-  min-height: 100vh;
-}
-
-.breadcrumb {
-  background-color: transparent;
-  padding: 0;
-}
-
-.breadcrumb-item a {
-  color: #6c757d;
-  text-decoration: none;
-}
-
-.breadcrumb-item a:hover {
-  color: #0d6efd;
-}
-
-.main-image-container {
-  position: relative;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.main-image {
-  width: 100%;
-  height: auto;
-  max-height: 500px;
-  object-fit: contain;
-}
-
-.thumbnail-image {
-  width: 80px;
-  height: 80px;
-  object-fit: cover;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
-}
-
-.thumbnail-image:hover,
-.thumbnail-image.active {
-  border-color: #0d6efd;
-}
-
-.product-info {
-  background-color: #fff;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.product-name {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #212529;
-}
-
-.stars i {
-  font-size: 1.1rem;
-}
-
-.current-price {
-  font-size: 2.5rem;
-  font-weight: 700;
-}
-
-.original-price {
-  font-size: 1.5rem;
-}
-
-.save-amount {
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.quantity-section input[type="number"]::-webkit-inner-spin-button,
-.quantity-section input[type="number"]::-webkit-outer-spin-button {
-  opacity: 1;
-}
-
-.action-buttons .btn-lg {
-  padding: 12px 24px;
-  font-size: 1.1rem;
-}
-
-.product-description p {
-  line-height: 1.8;
-  font-size: 1rem;
-}
-
-.accordion-button:not(.collapsed) {
-  background-color: #e7f1ff;
-  color: #0d6efd;
-}
-
-.related-products {
-  padding: 40px 0;
-}
-
-.related-products .card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.related-products .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-}
-
-@media (max-width: 768px) {
-  .product-name {
-    font-size: 1.5rem;
-  }
-
-  .current-price {
-    font-size: 2rem;
-  }
-
-  .action-buttons {
-    flex-direction: column;
-  }
-
-  .action-buttons .btn-lg {
-    width: 100%;
-  }
-}
+.product-detail-page { background-color: #f8f9fa; min-height: 100vh; }
+.main-image-container { position: relative; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.main-image { width: 100%; height: auto; max-height: 500px; object-fit: contain; }
+.thumbnail-image { width: 80px; height: 80px; object-fit: cover; cursor: pointer; border: 2px solid transparent; }
+.thumbnail-image.active { border-color: #0d6efd; }
+.product-info { background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.product-name { font-size: 2rem; font-weight: 600; }
+.current-price { font-size: 2.5rem; font-weight: 700; }
 </style>

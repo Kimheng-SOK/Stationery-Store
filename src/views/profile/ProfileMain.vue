@@ -11,20 +11,20 @@
                   <div v-if="!user.avatar" class="profile-avatar-placeholder">
                     {{ getInitials(user.name) }}
                   </div>
-                  <img 
+                  <img
                     v-else
-                    :src="user.avatar" 
+                    :src="user.avatar"
                     alt="Profile"
                     class="profile-avatar"
                   >
                   <button class="avatar-edit-btn" @click="triggerFileUpload">
                     <i class="bi bi-camera-fill"></i>
                   </button>
-                  <input 
-                    ref="fileInput" 
-                    type="file" 
-                    accept="image/*" 
-                    @change="handleAvatarUpload" 
+                  <input
+                    ref="fileInput"
+                    type="file"
+                    accept="image/*"
+                    @change="handleAvatarUpload"
                     style="display: none;"
                   />
                 </div>
@@ -152,6 +152,7 @@
               <table class="table table-hover mb-0">
                 <thead>
                   <tr>
+                    <th>Product</th>
                     <th>Order ID</th>
                     <th>Date</th>
                     <th>Items</th>
@@ -161,6 +162,19 @@
                 </thead>
                 <tbody>
                   <tr v-for="order in recentOrders" :key="order.id">
+                    <td>
+                      <div class="d-flex align-items-center gap-2">
+                        <img
+                          :src="order.image || '/placeholder-image.jpg'"
+                          :alt="order.productName"
+                          class="order-product-image"
+                          @error="handleImageError"
+                        />
+                        <span class="text-truncate" style="max-width: 150px;">
+                          {{ order.productName }}
+                        </span>
+                      </div>
+                    </td>
                     <td><strong>{{ order.id }}</strong></td>
                     <td>{{ order.date }}</td>
                     <td>{{ order.items }} items</td>
@@ -185,6 +199,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import axios from 'axios'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 interface ExtendedUser {
   name: string
@@ -203,6 +220,8 @@ interface Order {
   items: number
   total: number
   status: string
+  productName?: string
+  image?: string
 }
 
 const router = useRouter()
@@ -230,7 +249,7 @@ const stats = computed(() => {
   const now = new Date()
   const thisMonth = recentOrders.value.filter(order => {
     const orderDate = new Date(order.date)
-    return orderDate.getMonth() === now.getMonth() && 
+    return orderDate.getMonth() === now.getMonth() &&
            orderDate.getFullYear() === now.getFullYear()
   }).length
 
@@ -246,30 +265,64 @@ onMounted(async () => {
 })
 
 async function loadUserOrders() {
+  isLoading.value = true
   try {
-    const saved = localStorage.getItem('orders')
-    if (saved) {
-      recentOrders.value = JSON.parse(saved).slice(0, 3)
+    const { data } = await axios.get(`${API_URL}/orders`)
+
+    if (!data.data || !Array.isArray(data.data)) {
+      recentOrders.value = []
+      return
     }
+
+    const userEmail = user.value.email.toLowerCase()
+    const userOrders = data.data.filter((order: any) => {
+      const orderEmail = order.customerEmail?.toLowerCase()
+      return orderEmail === userEmail
+    })
+
+    recentOrders.value = userOrders
+      .map((order: any) => ({
+        id: order.orderNumber,
+        date: new Date(order.orderDate).toISOString(),
+        items: order.quantity || 1,
+        total: order.totalAmount || order.amount,
+        status: formatOrderStatus(order.status),
+        productName: order.productName,
+        image: order.productImage || '/placeholder-image.jpg'
+      }))
+      .sort((a: Order, b: Order) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 5)
+
   } catch (error) {
     console.error('Failed to load orders:', error)
+    recentOrders.value = []
   } finally {
     isLoading.value = false
   }
 }
 
+function formatOrderStatus(status: string): string {
+  const statusMap: Record<string, string> = {
+    'pending': 'Processing',
+    'in-progress': 'Shipped',
+    'completed': 'Delivered',
+    'cancelled': 'Cancelled'
+  }
+  return statusMap[status] || 'Processing'
+}
+
 function getInitials(name: string): string {
   if (!name) return 'U'
   const parts = name.trim().split(' ').filter(part => part.length > 0)
-  
+
   if (parts.length === 0) return 'U'
   if (parts.length === 1) {
     return parts[0]?.[0]?.toUpperCase() || 'U'
   }
-  
+
   const firstInitial = parts[0]?.[0]?.toUpperCase() || ''
   const lastInitial = parts[parts.length - 1]?.[0]?.toUpperCase() || ''
-  
+
   return (firstInitial + lastInitial) || 'U'
 }
 
@@ -286,9 +339,9 @@ function formatDate(dateString?: string): string {
   try {
     const date = new Date(dateString)
     if (isNaN(date.getTime())) return 'N/A'
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long' 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long'
     })
   } catch {
     return 'N/A'
@@ -300,8 +353,8 @@ function formatDateOfBirth(dateString?: string): string {
   try {
     const date = new Date(dateString)
     if (isNaN(date.getTime())) return 'Not provided'
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
       month: 'long',
       day: 'numeric'
     })
@@ -317,7 +370,7 @@ const triggerFileUpload = () => {
 const handleAvatarUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
-  
+
   if (file) {
     if (file.size > 5 * 1024 * 1024) {
       alert('File size must be less than 5MB')
@@ -352,6 +405,11 @@ const getStatusClass = (status: string) => {
     'Cancelled': 'bg-danger'
   }
   return statusMap[status] || 'bg-secondary'
+}
+
+function handleImageError(event: Event) {
+  const img = event.target as HTMLImageElement
+  img.src = '/placeholder-image.jpg'
 }
 </script>
 

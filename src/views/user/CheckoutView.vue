@@ -30,7 +30,7 @@
               </div>
             </div>
           </div>
-          
+
           <div class="col-4 text-end">
              <span class="small fw-bold d-none d-md-inline">Secured Checkout</span>
           </div>
@@ -41,7 +41,7 @@
     <main class="container py-4 py-md-5">
       <div class="row g-4">
         <div class="col-lg-8">
-          
+
           <div v-if="step === 1" class="checkout-card slide-in">
             <h4 class="fw-bold mb-4">Shipping Address</h4>
             <form @submit.prevent="nextStep">
@@ -77,8 +77,8 @@
             <h4 class="fw-bold mb-4">Payment Method</h4>
             <div class="payment-grid">
               <!-- Credit Card Option -->
-              <div 
-                class="payment-option" 
+              <div
+                class="payment-option"
                 :class="{ 'active': form.paymentMethod === 'card' }"
                 @click="form.paymentMethod = 'card'"
               >
@@ -95,8 +95,8 @@
               </div>
 
               <!-- Cash on Delivery Option -->
-              <div 
-                class="payment-option" 
+              <div
+                class="payment-option"
                 :class="{ 'active': form.paymentMethod === 'cash' }"
                 @click="form.paymentMethod = 'cash'"
               >
@@ -113,8 +113,8 @@
               </div>
 
               <!-- QR Code Option -->
-              <div 
-                class="payment-option" 
+              <div
+                class="payment-option"
                 :class="{ 'active': form.paymentMethod === 'qr' }"
                 @click="form.paymentMethod = 'qr'"
               >
@@ -166,8 +166,8 @@
             <div v-if="form.paymentMethod === 'qr'" class="mt-4 p-4 bg-light rounded border border-2 text-center">
               <p class="fw-bold mb-3">Scan to Pay</p>
               <div class="qr-code-container mx-auto mb-3">
-                <img 
-                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Payment:${{ cartStore.grandTotal.toFixed(2) }}" 
+                <img
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=Payment:${{ cartStore.grandTotal.toFixed(2) }}"
                   alt="QR Code for Payment"
                   class="w-100 h-100"
                   style="object-fit: contain;"
@@ -234,6 +234,37 @@
           <aside class="sticky-summary">
             <div class="card border-0 shadow-sm p-4 rounded-4">
               <h5 class="fw-bold mb-4">Order Summary</h5>
+              <!-- Coupon Input -->
+              <div class="mb-3">
+                <label class="form-label fw-bold">Coupon Code</label>
+                <div class="input-group">
+                  <input
+                    v-model="couponInput"
+                    type="text"
+                    class="form-control"
+                    placeholder="Enter coupon code"
+                    :disabled="couponLoading || couponApplied"
+                  />
+                  <button
+                    class="btn btn-outline-primary"
+                    @click="applyCoupon"
+                    :disabled="couponLoading || couponApplied || !couponInput"
+                  >
+                    <span v-if="couponLoading" class="spinner-border spinner-border-sm"></span>
+                    <span v-else>{{ couponApplied ? 'Applied' : 'Apply' }}</span>
+                  </button>
+                </div>
+                <div v-if="couponMessage" :class="['mt-2', couponMessage.type === 'success' ? 'text-success' : 'text-danger', 'small']">
+                  <template v-if="couponMessage.type === 'success' && appliedCoupon">
+                    <i class="bi bi-check-circle"></i>
+                    Coupon '<b>{{ appliedCoupon.code }}</b>' applied: -{{ appliedCoupon.discount }}%
+                  </template>
+                  <template v-else>
+                    {{ couponMessage.text }}
+                  </template>
+                </div>
+              </div>
+              <!-- Order Summary -->
               <div class="d-flex justify-content-between mb-2">
                 <span class="text-muted">Subtotal</span>
                 <span class="fw-bold">${{ cartStore.itemTotal.toFixed(2) }}</span>
@@ -242,9 +273,9 @@
                 <span class="text-muted">Shipping</span>
                 <span class="text-success fw-bold">{{ cartStore.shippingCost === 0 ? 'Free' : '$' + cartStore.shippingCost }}</span>
               </div>
-              <div v-if="cartStore.discount > 0" class="d-flex justify-content-between mb-2">
+              <div v-if="discountAmount > 0" class="d-flex justify-content-between mb-2">
                 <span class="text-muted">Discount</span>
-                <span class="text-danger fw-bold">-${{ cartStore.discount.toFixed(2) }}</span>
+                <span class="text-danger fw-bold">-${{ discountAmount.toFixed(2) }}</span>
               </div>
               <hr class="my-3">
               <div class="d-flex justify-content-between align-items-end mb-0">
@@ -252,7 +283,7 @@
                   <span class="fw-bold h5 mb-0">Total</span>
                   <p class="text-muted small mb-0">Inc. taxes</p>
                 </div>
-                <span class="fw-bold h3 text-primary mb-0">${{ cartStore.grandTotal.toFixed(2) }}</span>
+                <span class="fw-bold h3 text-primary mb-0">${{ finalTotal.toFixed(2) }}</span>
               </div>
             </div>
           </aside>
@@ -263,14 +294,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed } from 'vue'
+import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cartStore'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const cartStore = useCartStore()
+const authStore = useAuthStore()
 const step = ref(1)
 const isProcessing = ref(false)
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const form = reactive({
   firstName: '',
@@ -279,6 +315,23 @@ const form = reactive({
   city: '',
   zip: '',
   paymentMethod: 'card'
+})
+
+const couponInput = ref('')
+const couponLoading = ref(false)
+const couponApplied = ref(false)
+const couponMessage = ref<{ type: 'success' | 'danger', text: string } | null>(null)
+const appliedCoupon = ref<any>(null)
+
+const discountAmount = computed(() => {
+  if (appliedCoupon.value && appliedCoupon.value.discount) {
+    return (cartStore.itemTotal * appliedCoupon.value.discount) / 100
+  }
+  return 0
+})
+
+const finalTotal = computed(() => {
+  return cartStore.itemTotal + cartStore.shippingCost - discountAmount.value
 })
 
 const goBack = () => {
@@ -291,20 +344,152 @@ const nextStep = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+const applyCoupon = async () => {
+  couponMessage.value = null
+  couponLoading.value = true
+  try {
+    const code = couponInput.value.trim().toUpperCase()
+    const res = await axios.get(`${API_URL}/coupons/code/${code}`)
+    if (res.data && res.data.success && res.data.data && res.data.data.length > 0) {
+      appliedCoupon.value = res.data.data[0]
+      couponApplied.value = true
+      couponMessage.value = { type: 'success', text: '' }
+    } else {
+      couponMessage.value = { type: 'danger', text: 'Coupon not found.' }
+    }
+  } catch (err: any) {
+    couponMessage.value = { type: 'danger', text: err.response?.data?.message || 'Coupon not found.' }
+  } finally {
+    couponLoading.value = false
+  }
+}
+
+// Redeem coupon after order placed
+const redeemCoupon = async () => {
+  if (!appliedCoupon.value) return
+  try {
+    await axios.post(`${API_URL}/coupons/redeem/${appliedCoupon.value.code}`)
+  } catch (e) {
+    // Ignore error, coupon will be expired if limit reached
+  }
+}
+
 const placeOrder = async () => {
   isProcessing.value = true
-  
-  // Simulating real API delay
-  setTimeout(() => {
+
+  try {
+    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
+    const orderDate = new Date()
+    const deliveryDate = new Date()
+    deliveryDate.setDate(deliveryDate.getDate() + 7)
+
+    const shippingMethod = cartStore.shippingMethod || 'shipping'
+    const shippingCost = shippingMethod === 'pickup' ? 0 : (cartStore.shippingCost || 2.5)
+
+    const subtotalAll = cartStore.itemTotal
+    const discountPercentage = appliedCoupon.value?.discount || 0
+    const totalDiscountAmount = (subtotalAll * discountPercentage) / 100
+    const subtotalAfterDiscount = subtotalAll - totalDiscountAmount
+    const grandTotal = subtotalAfterDiscount + shippingCost
+
+    // Get logged-in user info
+    const currentUser = authStore.user
+    const userId = currentUser?.id || null
+    const userEmail = currentUser?.email || form.email || ''
+
+    const orderPromises = cartStore.items.map(async (item) => {
+      const itemSubtotal = (item.price || item.originalPrice) * item.quantity
+      const itemProportion = itemSubtotal / subtotalAll
+      const itemDiscountAmount = totalDiscountAmount * itemProportion
+      const itemShippingCost = shippingCost * itemProportion
+      const itemTotal = itemSubtotal - itemDiscountAmount + itemShippingCost
+
+      // Get product image URL
+      const productImage = getProductImageUrl(item)
+
+      const orderData = {
+        orderNumber: `${orderNumber}-${item._id}`,
+        user: userId,
+        product: item._id,
+        productName: item.name,
+        productImage: productImage, // Add product image
+        quantity: item.quantity,
+        customerName: `${form.firstName} ${form.lastName}`,
+        customerEmail: userEmail,
+        customerLocation: `${form.address}, ${form.city}, ${form.zip}, ${userEmail}`,
+        amount: itemSubtotal,
+        shippingMethod: shippingMethod,
+        shippingCost: parseFloat(itemShippingCost.toFixed(2)),
+        couponCode: appliedCoupon.value?.code || '',
+        discountPercent: discountPercentage,
+        discountAmount: parseFloat(itemDiscountAmount.toFixed(2)),
+        subtotal: parseFloat(itemSubtotal.toFixed(2)),
+        totalAmount: parseFloat(itemTotal.toFixed(2)),
+        paymentMethod: form.paymentMethod,
+        orderDate: orderDate.toISOString(),
+        orderTime: orderDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        deliveryDate: deliveryDate.toISOString(),
+        deliveryTime: shippingMethod === 'pickup' ? 'Pickup from store' : '10:00 AM - 6:00 PM',
+        status: 'pending'
+      }
+
+      return axios.post(`${API_URL}/orders`, orderData)
+    })
+
+    await Promise.all(orderPromises)
+
+    if (appliedCoupon.value) {
+      await redeemCoupon()
+    }
+
+    cartStore.$reset()
+
+    setTimeout(() => {
+      isProcessing.value = false
+      router.push({
+        name: 'OrderSuccess',
+        query: {
+          orderNumber,
+          total: grandTotal.toFixed(2)
+        }
+      })
+    }, 1000)
+
+  } catch (error: any) {
     isProcessing.value = false
-    
-    // EMPTY THE CART HERE
-    cartStore.$reset() 
-    
-    // NAVIGATE TO SUCCESS PAGE
-    router.push('/order-success')
-  }, 1800)
+    console.error('Order placement failed:', error)
+
+    const errorMsg = error.response?.data?.message || 'Failed to place order. Please try again.'
+    alert(errorMsg)
+
+    if (errorMsg.includes('Insufficient stock')) {
+      setTimeout(() => {
+        window.location.reload()
+      }, 2000)
+    }
+  }
 }
+
+// Helper function to get product image URL
+const getProductImageUrl = (item: any): string => {
+  // If image is a full URL, return it
+  if (item.image && typeof item.image === 'string') {
+    if (item.image.startsWith('http')) return item.image
+    // If image is a filename, build the backend URL
+    return `http://localhost:5000/uploads/products/${item.image}`
+  }
+  // If images array exists and has at least one image
+  if (item.images && Array.isArray(item.images) && item.images.length > 0) {
+    const img = item.images[0]
+    if (typeof img === 'string') {
+      if (img.startsWith('http')) return img
+      return `http://localhost:5000/uploads/products/${img}`
+    }
+  }
+  // Fallback to placeholder
+  return '/placeholder-image.jpg'
+}
+
 </script>
 
 <style scoped>
@@ -315,7 +500,7 @@ const placeOrder = async () => {
 
 .sticky-summary {
   position: sticky;
-  top: 90px; 
+  top: 90px;
   z-index: 1000;
 }
 
@@ -425,7 +610,7 @@ const placeOrder = async () => {
 /* Responsive Fixes */
 @media (max-width: 991.98px) {
   .sticky-summary {
-    position: static; 
+    position: static;
     margin-top: 2rem;
   }
   .checkout-card {
