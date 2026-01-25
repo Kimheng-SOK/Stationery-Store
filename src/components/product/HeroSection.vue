@@ -140,7 +140,7 @@ onUnmounted(() => {
 .hero-content a {
   pointer-events: auto;
 }
-\
+
 
 .btn-success {
   background-color: #7fb069;
