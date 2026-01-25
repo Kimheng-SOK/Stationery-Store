@@ -1,45 +1,36 @@
 <template>
   <div class="profile-page">
     <div class="container py-4">
-      <div class="row g-4">
-        <div class="col-lg-3 col-md-4">
-          <ProfileSidebar />
+      <div class="info-card">
+        <div class="info-card-header">
+          <h5 class="mb-0">Notification Preferences</h5>
         </div>
-
-        <main class="col-lg-9 col-md-8">
-          <div class="info-card">
-            <div class="info-card-header">
-              <h5 class="mb-0">Notification Preferences</h5>
-            </div>
-            <div class="info-card-body">
-              <div class="notification-item" v-for="setting in notificationSettings" :key="setting.id">
-                <div class="notification-info">
-                  <div class="d-flex align-items-center mb-2">
-                    <i :class="setting.icon" class="notification-icon me-3"></i>
-                    <h6 class="mb-0">{{ setting.title }}</h6>
-                  </div>
-                  <p class="text-muted mb-0 small">{{ setting.description }}</p>
-                </div>
-                <label class="toggle-switch">
-                  <input 
-                    v-model="setting.enabled" 
-                    type="checkbox"
-                    @change="handleToggle(setting)"
-                  >
-                  <span class="toggle-slider"></span>
-                </label>
+        <div class="info-card-body">
+          <div class="notification-item" v-for="setting in notificationSettings" :key="setting.id">
+            <div class="notification-info">
+              <div class="d-flex align-items-center mb-2">
+                <i :class="setting.icon" class="notification-icon me-3"></i>
+                <h6 class="mb-0">{{ setting.title }}</h6>
               </div>
+              <p class="text-muted mb-0 small">{{ setting.description }}</p>
             </div>
+            <label class="toggle-switch">
+              <input 
+                v-model="setting.enabled" 
+                type="checkbox"
+                @change="handleToggle(setting)"
+              >
+              <span class="toggle-slider"></span>
+            </label>
           </div>
-        </main>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import ProfileSidebar from '@/components/ProfileSidebar.vue'
+import { ref, onMounted } from 'vue'
 
 interface NotificationSetting {
   id: string
@@ -80,8 +71,38 @@ const notificationSettings = ref<NotificationSetting[]>([
   }
 ])
 
-const handleToggle = (setting: NotificationSetting) => {
-  console.log(`${setting.title} is now ${setting.enabled ? 'enabled' : 'disabled'}`)
+onMounted(async () => {
+  await loadSettings()
+})
+
+async function loadSettings() {
+  try {
+    const saved = localStorage.getItem('notificationSettings')
+    if (saved) {
+      const savedSettings = JSON.parse(saved)
+      notificationSettings.value = notificationSettings.value.map(setting => ({
+        ...setting,
+        enabled: savedSettings[setting.id] ?? setting.enabled
+      }))
+    }
+  } catch (error) {
+    console.error('Failed to load notification settings:', error)
+  }
+}
+
+const handleToggle = async (setting: NotificationSetting) => {
+  try {
+    const settings: Record<string, boolean> = {}
+    notificationSettings.value.forEach(s => {
+      settings[s.id] = s.enabled
+    })
+    localStorage.setItem('notificationSettings', JSON.stringify(settings))
+    console.log(`${setting.title} is now ${setting.enabled ? 'enabled' : 'disabled'}`)
+  } catch (error) {
+    console.error('Failed to update setting:', error)
+    setting.enabled = !setting.enabled
+    alert('Failed to update setting. Please try again.')
+  }
 }
 </script>
 
@@ -90,6 +111,11 @@ const handleToggle = (setting: NotificationSetting) => {
   min-height: 100vh;
   background-color: #f8f9fa;
   padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+.container {
+  max-width: 900px;
 }
 
 .info-card {
@@ -148,6 +174,7 @@ const handleToggle = (setting: NotificationSetting) => {
   height: 30px;
   margin: 0;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .toggle-switch input {
@@ -194,14 +221,20 @@ const handleToggle = (setting: NotificationSetting) => {
 }
 
 @media (max-width: 768px) {
+  .profile-page {
+    padding-top: 1rem;
+  }
+
   .notification-item {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
+    padding: 1.25rem;
   }
 
   .notification-info {
     padding-right: 0;
+    width: 100%;
   }
 
   .toggle-switch {

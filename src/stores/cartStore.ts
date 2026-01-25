@@ -1,22 +1,23 @@
-// stores/cartStore.ts
+import type { Product } from '@/types/product';
 import { defineStore } from 'pinia'
 import type { Product } from '@/types/product'
 import axios from 'axios'
 
+// Updated interface to handle backend _id (string)
 export interface CartItem {
-  id: number
-  name: string
-  price: number
-  originalPrice?: number
-  image: string
-  quantity: number
-  sku: string
-  category: string
-  brand?: string
-  badge?: string
-  description?: string
-  delivery: string
-  stock: number
+  _id: string;
+  name: string;
+  price: number;
+  originalPrice: number;
+  image: string;
+  quantity: number;
+  sku: string;
+  category: string;
+  brand?: string;
+  badge?: string;
+  description?: string;
+  delivery: string;
+  stock: number;
 }
 
 export interface AppliedCoupon {
@@ -38,7 +39,8 @@ export const useCartStore = defineStore('cart', {
     appliedCoupon: null as AppliedCoupon | null,
     couponDiscount: 0,
     shippingMethod: 'shipping' as 'shipping' | 'pickup',
-    deliverTogether: false
+    deliverTogether: false,
+    baseUrl: 'http://localhost:5000' 
   }),
 
   getters: {
@@ -46,8 +48,11 @@ export const useCartStore = defineStore('cart', {
       return state.items.reduce((sum, item) => sum + item.quantity, 0)
     },
 
-    itemTotal: (state) => {
-      return state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+   itemTotal: (state) => {
+      return state.items.reduce((sum, item) => {
+        const price = item.price && item.price > 0 ? item.price : (item.originalPrice || 0)
+        return sum + (price * item.quantity)
+      }, 0)
     },
 
     discount: () => {
@@ -62,44 +67,49 @@ export const useCartStore = defineStore('cart', {
       return this.itemTotal - this.discount - state.couponDiscount + this.shippingCost
     },
 
-    isInCart: (state) => (productId: number) => {
-      return state.items.some(item => item.id === productId)
+    isInCart: (state) => (productId: string) => {
+      return state.items.some(item => item._id === productId)
     },
 
-    getCartItem: (state) => (productId: number) => {
-      return state.items.find(item => item.id === productId)
+    getCartItem: (state) => (productId: string) => {
+      return state.items.find(item => item._id === productId)
     }
   },
 
   actions: {
-    addToCart(product: Product, quantity: number = 1) {
-      const existingItem = this.items.find(item => item.id === product.id)
+    addToCart(product: any, quantity: number = 1) {
+      const pId = product._id || product.id;
+      
+      const existingItem = this.items.find(item => item._id === pId)
 
       if (existingItem) {
-        // Update quantity if item already exists
         const newQuantity = existingItem.quantity + quantity
-        if (newQuantity <= product.stock) {
+        if (newQuantity <= (product.stock || 999)) {
           existingItem.quantity = newQuantity
         } else {
-          throw new Error(`Cannot add more than ${product.stock} items`)
+          alert(`Sorry, only ${product.stock || 999} units available in stock.`)
         }
       } else {
-        // Add new item
+        const formattedImage = product.image?.startsWith('http') 
+          ? product.image 
+          : `${this.baseUrl}${product.image?.replace(/^\/?public/, '')}`
+
         const cartItem: CartItem = {
-          id: product.id,
-          name: product.name,
-          price: product.price,
+          _id: pId,
+          name: product.name || 'Unnamed Product',
+          price: product.price || 0,
           originalPrice: product.originalPrice,
-          image: product.image,
+          image: formattedImage || '/placeholder.jpg',
           quantity: quantity,
-          sku: product.sku,
-          category: product.category,
-          brand: product.brand,
+          sku: product.sku || 'N/A',
+          category: typeof product.category === 'object' && product.category !== null ? product.category.name : product.category || 'General',
+          brand: product.brand || 'Premium',
           badge: product.isNew ? 'New' : undefined,
-          description: `${product.brand || ''} - ${product.category}`,
+          description: product.description || 'Quality Stationery Product',
           delivery: this.calculateDeliveryDate(),
-          stock: product.stock
+          stock: product.stock || 999
         }
+
         this.items.push(cartItem)
       }
     },
@@ -117,6 +127,8 @@ export const useCartStore = defineStore('cart', {
           this.removeFromCart(index)
         } else if (quantity <= item.stock) {
           item.quantity = quantity
+        } else {
+          alert(`Only ${item.stock} items available.`)
         }
       }
     },
@@ -125,6 +137,8 @@ export const useCartStore = defineStore('cart', {
       const item = this.items[index]
       if (item && item.quantity < item.stock) {
         item.quantity++
+      } else {
+        alert("Maximum stock reached")
       }
     },
 

@@ -1,94 +1,65 @@
 <template>
   <div class="shop-view">
-    <div class="container-fluid px-4">
-      <div class="row">
-        <!-- Sidebar Filter -->
-        <aside class="col-lg-3 col-md-4 mb-4">
+    <div class="container-fluid px-2 px-md-4">
+      <div v-if="productStore.loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-3">Loading your products...</p>
+      </div>
+
+      <div v-else class="row g-2 g-md-4">
+        <aside class="col-lg-3 col-md-12 mb-4">
           <SidebarFilter
-            v-model:selected-category="selectedCategory"
+            v-model:selected-category="selectedCategoryName"
             v-model:selected-brand="selectedBrand"
             v-model:selected-rating="selectedRating"
             v-model:price-range="priceRange"
-            :categories="categories"
-            :brands="brands"
+            :categories="categoryOptions"
+            :brands="productStore.getBrands"
             @clear-filters="clearFilters"
           />
         </aside>
 
-        <!-- Main Content -->
-        <main class="col-lg-9 col-md-8">
-          <!-- Page Header -->
-          <div class="mb-4">
-            <h3 class="mb-3">
-              {{ selectedCategory ? selectedCategory : 'All Products' }}
-              <span v-if="selectedCategory" class="badge bg-primary ms-2">
-                {{ filteredProducts.length }}
-              </span>
-            </h3>
+        <main class="col-lg-9 col-md-12">
+          <SortBar
+            v-model:sortBy="sortBy"
+            :shown-count="paginatedProducts.length"
+            :total-count="filteredProducts.length"
+          />
 
-            <SortBar
-              v-model:sortBy="sortBy"
-              :shown-count="paginatedProducts.length"
-              :total-count="filteredProducts.length"
-            />
-          </div>
-
-          <!-- Products Grid -->
-          <div v-if="paginatedProducts.length > 0" class="row g-4 mb-4">
+          <div v-if="paginatedProducts.length > 0" class="row g-2 g-md-4 mb-4">
             <div
               v-for="product in paginatedProducts"
-              :key="product.id"
-              class="col-lg-4 col-md-6 col-sm-6"
+              :key="product._id"
+              class="col-xl-4 col-lg-6 col-md-6 col-sm-6 col-6"
             >
               <ProductCard
-                :product="product"
-                @add-to-cart="handleAddToCart(product)"
+                :product="productStore.formatProduct(product)"
+                @add-to-cart="handleAddToCart"
               />
             </div>
           </div>
 
-          <!-- No Products Message -->
-          <div v-else class="no-products">
-            <div class="text-center py-5">
-              <i class="bi bi-inbox" style="font-size: 4rem; color: #dee2e6;"></i>
-              <h5 class="mt-3 text-muted">Oops, no products found!</h5>
-              <p class="text-muted" v-if="selectedCategory">
-                No products found in "{{ selectedCategory }}" category.
-              </p>
-              <p class="text-muted" v-else-if="selectedRating > 0">
-                No products with {{ selectedRating }} star{{ selectedRating > 1 ? 's' : '' }} rating.
-              </p>
-              <p class="text-muted" v-else>
-                Try adjusting your filters to see more results.
-              </p>
-              <button @click="clearFilters" class="btn btn-primary mt-3">
-                Clear All Filters
-              </button>
-            </div>
+          <div v-else class="text-center py-5 no-products">
+            <i class="bi bi-search" style="font-size: 3rem; color: #ccc;"></i>
+            <h5 class="mt-3">No products found matching your filters.</h5>
+            <button @click="clearFilters" class="btn btn-primary mt-2">Clear Filters</button>
           </div>
 
-          <!-- Pagination -->
           <nav v-if="totalPages > 1" aria-label="Product pagination" class="mt-4">
-            <ul class="pagination justify-content-center">
+            <ul class="pagination pagination-custom justify-content-center">
               <li class="page-item" :class="{ disabled: currentPage === 1 }">
-                <a class="page-link" href="#" @click.prevent="changePage(currentPage - 1)">
-                  Previous
-                </a>
+                <a class="page-link" href="#" @click.prevent="changePage(currentPage - 1)">&lt;</a>
               </li>
               <li
-                v-for="page in totalPages"
+                v-for="page in displayPages"
                 :key="page"
                 class="page-item"
                 :class="{ active: currentPage === page }"
               >
-                <a class="page-link" href="#" @click.prevent="changePage(page)">
-                  {{ page }}
-                </a>
+                <a class="page-link" href="#" @click.prevent="changePage(page)">{{ page }}</a>
               </li>
               <li class="page-item" :class="{ disabled: currentPage === totalPages }">
-                <a class="page-link" href="#" @click.prevent="changePage(currentPage + 1)">
-                  Next
-                </a>
+                <a class="page-link" href="#" @click.prevent="changePage(currentPage + 1)">&gt;</a>
               </li>
             </ul>
           </nav>
@@ -99,119 +70,58 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { ref, computed, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { useProductStore } from '@/stores/product'
+import { useCategoryStore } from '@/stores/category'
 import SidebarFilter from '@/components/product/SidebarFilter.vue'
 import SortBar from '@/components/product/SortBar.vue'
 import ProductCard from '@/components/product/ProductCard.vue'
-import { products as fakeProducts, categories as fakeCategories } from '@/data/products'
-import type { Product } from '@/types/product'
 
 const route = useRoute()
-const router = useRouter()
+const productStore = useProductStore()
+const categoryStore = useCategoryStore()
 
-// --- STATE ---
-const products = ref<Product[]>(
-  fakeProducts.map(p => ({
-    ...p,
-    image: p.image.replace(/^\/public/, ''),
-    category: (p.category || '')
-      .replace(/NoteBooks/i, 'Notebooks')
-      .replace(/Pens& Pencils|Pens & Pencil|Pens and Pencils/i, 'Pens & Pencils')
-      .replace(/Office Supplices/i, 'Office Supplies'),
-  }))
+const selectedCategoryName = ref('')
+const selectedBrand = ref('')
+const selectedRating = ref(0)
+const priceRange = ref({ min: 0, max: 2000 })
+const sortBy = ref('default')
+const currentPage = ref(1)
+
+const categoryOptions = computed(() => categoryStore.categories.map(c => c.name))
+const selectedCategoryId = computed(() =>
+  categoryStore.categories.find(c => c.name === selectedCategoryName.value)?._id
 )
 
-const selectedCategory = ref<string>('')
-const selectedBrand = ref<string>('')
-const selectedRating = ref<number>(0)
-const priceRange = ref({ min: 0, max: 1000 })
-const sortBy = ref<string>('default')
-const currentPage = ref<number>(1)
-const itemsPerPage = 9
+// This extracts the search term from the URL Query ?search=...
+const searchTerm = computed(() => (route.query.search as string) || '')
 
-// Sidebar options
-const categories = fakeCategories.map(c => c.name)
-const brands = [...new Set(products.value.map(p => p.brand).filter((b): b is string => b !== undefined))]
-
-// Initialize from URL query parameters
-onMounted(() => {
-  if (route.query.category) {
-    selectedCategory.value = route.query.category as string
-  }
-})
-
-// Watch for route changes
-watch(() => route.query.category, (newCategory) => {
-  if (newCategory) {
-    selectedCategory.value = newCategory as string
-  } else {
-    selectedCategory.value = ''
-  }
-  currentPage.value = 1
-})
-
-// Update URL when category changes
-watch(selectedCategory, (newCategory) => {
-  if (newCategory) {
-    router.push({ query: { ...route.query, category: newCategory } })
-  } else {
-    const query = { ...route.query }
-    delete query.category
-    router.push({ query })
-  }
-})
-
-// --- COMPUTED FILTER + SORT ---
 const filteredProducts = computed(() => {
-  let result = products.value
-
-  // Category filter - flexible matching
-  if (selectedCategory.value) {
-    result = result.filter(p => {
-      const normalizedProductCategory = (p.category || '')
-        .toLowerCase()
-        .replace(/&/g, 'and')
-        .replace(/\s+/g, ' ')
-        .trim()
-      
-      const normalizedSelectedCategory = selectedCategory.value
-        .toLowerCase()
-        .replace(/&/g, 'and')
-        .replace(/\s+/g, ' ')
-        .trim()
-      
-      return normalizedProductCategory.includes(normalizedSelectedCategory) ||
-             normalizedSelectedCategory.includes(normalizedProductCategory)
-    })
-  }
-
-  if (selectedBrand.value) result = result.filter(p => p.brand === selectedBrand.value)
-  result = result.filter(p => p.price >= priceRange.value.min && p.price <= priceRange.value.max)
-  if (selectedRating.value > 0) result = result.filter(p => p.rating === selectedRating.value)
-
-  switch (sortBy.value) {
-    case 'price-asc': result.sort((a, b) => a.price - b.price); break
-    case 'price-desc': result.sort((a, b) => b.price - a.price); break
-    case 'rating': result.sort((a, b) => b.rating - a.rating); break
-    case 'popular': result.sort((a, b) => (b.rating * (b.reviewCount || 0)) - (a.rating * (a.reviewCount || 0))); break
-    case 'newest': result.sort((a, b) => new Date(b.addedDate || 0).getTime() - new Date(a.addedDate || 0).getTime()); break
-  }
-
-  return result
+  return productStore.getFilteredProducts({
+    categoryId: selectedCategoryId.value,
+    brand: selectedBrand.value,
+    rating: selectedRating.value,
+    priceRange: priceRange.value,
+    sortBy: sortBy.value,
+    searchTerm: searchTerm.value // Re-filters instantly when URL changes
+  })
 })
 
-const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage))
+watch(() => route.query.search, () => { currentPage.value = 1 })
+
+const totalPages = computed(() => Math.ceil(filteredProducts.value.length / 9))
+
 const paginatedProducts = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  return filteredProducts.value.slice(start, start + itemsPerPage)
+  const start = (currentPage.value - 1) * 9
+  return filteredProducts.value.slice(start, start + 9)
 })
 
-// --- METHODS ---
-const handleAddToCart = (product: Product) => {
-  console.log('Add to cart:', product)
-  alert(`${product.name} added to cart!`)
-}
+const displayPages = computed(() => {
+  const pages = []
+  for (let i = 1; i <= totalPages.value; i++) pages.push(i)
+  return pages
+})
 
 const changePage = (page: number) => {
   if (page >= 1 && page <= totalPages.value) {
@@ -220,62 +130,39 @@ const changePage = (page: number) => {
   }
 }
 
-const clearFilters = () => {
-  selectedCategory.value = ''
-  selectedBrand.value = ''
-  selectedRating.value = 0
-  priceRange.value = { min: 0, max: 1000 }
-  sortBy.value = 'default'
-  currentPage.value = 1
-  
-  // Clear URL query parameters
-  router.push({ query: {} })
+const syncQuery = () => {
+  const categorySlug = route.query.category
+  if (categorySlug && categoryStore.categories.length > 0) {
+    const match = categoryStore.categories.find(c => c.slug === categorySlug)
+    if (match) selectedCategoryName.value = match.name
+  }
 }
+
+watch(() => route.query.category, syncQuery)
+watch(() => categoryStore.categories, syncQuery)
+
+const handleAddToCart = (product: any) => {
+  console.log('Adding to cart:', product.name)
+}
+
+const clearFilters = () => {
+  selectedCategoryName.value = ''; selectedBrand.value = ''; selectedRating.value = 0;
+  priceRange.value = { min: 0, max: 2000 }; sortBy.value = 'default'
+  // Logic to also clear the URL search
+}
+
+onMounted(async () => {
+  await categoryStore.fetchCategories()
+  await productStore.fetchProducts()
+  syncQuery()
+})
 </script>
 
 <style scoped>
-.shop-view { 
-  padding: 2rem 0; 
-  min-height: calc(100vh - 300px); 
-  background-color: #f8f9fa; 
-}
-
-.badge {
-  font-size: 0.8rem;
-  font-weight: 500;
-  padding: 0.4rem 0.8rem;
-}
-
-.pagination { 
-  margin-top: 2rem; 
-}
-
-.no-products { 
-  background: white; 
-  border-radius: 8px; 
-  padding: 2rem; 
-  margin-bottom: 2rem; 
-}
-
-.page-link { 
-  color: #495057; 
-  border-color: #dee2e6; 
-}
-
-.page-link:hover { 
-  color: #198754; 
-  background-color: #e9ecef; 
-  border-color: #dee2e6; 
-}
-
-.page-item.active .page-link { 
-  background-color: #198754; 
-  border-color: #198754; 
-}
-
-@media (max-width: 768px) {
-  .shop-view { 
-    padding: 1rem 0; 
-  }
-}
+.shop-view { padding: 2rem 0; min-height: 80vh; background-color: #f8f9fa; }
+.no-products { background: white; border-radius: 8px; padding: 2rem; }
+.pagination-custom .page-link { color: #374151; border: 1px solid #e5e7eb; padding: 0.5rem 0.85rem; font-size: 0.95rem; background-color: white; }
+.pagination-custom .page-item.active .page-link { background-color: #10b981; border-color: #10b981; color: white; }
+.pagination-custom .page-item.disabled .page-link { background-color: #f3f4f6; color: #9ca3af; }
+@media (max-width: 576px) { .shop-view { padding: 1rem 0; } .row.g-2 { --bs-gutter-x: 0.5rem; --bs-gutter-y: 0.5rem; } .pagination-custom .page-link { padding: 0.4rem 0.7rem; font-size: 0.85rem; } }
 </style>

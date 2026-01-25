@@ -40,13 +40,13 @@
               <!-- Badges -->
               <div class="position-absolute top-0 start-0 p-3">
                 <span v-if="product.isNew" class="badge bg-success me-2">New</span>
-                <span v-if="product.discount" class="badge bg-danger">
-                  -{{ product.discount }}%
+                <span v-if="calculateDiscount() > 0" class="badge bg-danger">
+                  -{{ calculateDiscount() }}%
                 </span>
               </div>
             </div>
 
-            <!-- Thumbnail Images -->
+            <!-- Thumbnail Images (if you have multiple images) -->
             <div class="thumbnail-images d-flex gap-2">
               <img
                 :src="product.image"
@@ -69,7 +69,11 @@
             <div class="rating-section mb-3 d-flex align-items-center">
               <div class="stars text-warning me-2">
                 <i v-for="i in 5" :key="i"
+<<<<<<< HEAD
                    :class="i <= product.rating ? 'bi bi-star-fill' : 'bi bi-star'">
+=======
+                   :class="i <= (product.rating || 0) ? 'bi bi-star-fill' : 'bi bi-star'">
+>>>>>>> e74fec6dc00073df23c78ddf1dfa9a63af982ffb
                 </i>
               </div>
               <span class="text-muted">({{ product.reviewCount || 0 }} reviews)</span>
@@ -81,27 +85,34 @@
               <p class="mb-1" v-if="product.brand">
                 <strong>Brand:</strong> {{ product.brand }}
               </p>
-              <p class="mb-1"><strong>Category:</strong> {{ product.category }}</p>
+              <p class="mb-1"><strong>Category:</strong> {{ product.categoryName }}</p>
             </div>
 
             <!-- Price -->
             <div class="price-section mb-4">
-              <h3 class="current-price text-primary mb-2">
-                ${{ product.price.toFixed(2) }}
-              </h3>
-              <div v-if="product.originalPrice && product.originalPrice > product.price">
-                <span class="original-price text-muted text-decoration-line-through me-2">
-                  ${{ product.originalPrice.toFixed(2) }}
-                </span>
-                <span class="save-amount text-success">
-                  Save ${{ (product.originalPrice - product.price).toFixed(2) }}
-                </span>
-              </div>
+              <template v-if="!product.price || product.price === 0">
+                <h3 class="current-price text-primary mb-2">
+                  ${{ (product.originalPrice || 0).toFixed(2) }}
+                </h3>
+              </template>
+              <template v-else>
+                <h3 class="current-price text-primary mb-2">
+                  ${{ product.price.toFixed(2) }}
+                </h3>
+                <div v-if="product.originalPrice && product.originalPrice > product.price">
+                  <span class="original-price text-muted text-decoration-line-through me-2">
+                    ${{ product.originalPrice.toFixed(2) }}
+                  </span>
+                  <span class="save-amount text-success">
+                    Save ${{ (product.originalPrice - product.price).toFixed(2) }}
+                  </span>
+                </div>
+              </template>
             </div>
 
             <!-- Stock Status -->
             <div class="stock-status mb-4">
-              <span v-if="product.inStock" class="badge bg-success-subtle text-success">
+              <span v-if="product.stock > 0" class="badge bg-success-subtle text-success">
                 <i class="bi bi-check-circle"></i> In Stock ({{ product.stock }} available)
               </span>
               <span v-else class="badge bg-danger-subtle text-danger">
@@ -144,10 +155,14 @@
               <button
                 class="btn btn-primary btn-lg flex-grow-1"
                 @click="addToCart"
-                :disabled="!product.inStock || addingToCart"
+                :disabled="product.stock <= 0"
               >
+<<<<<<< HEAD
                 <i class="bi bi-cart-plus"></i>
                 {{ addingToCart ? 'Adding...' : 'Add to Cart' }}
+=======
+                <i class="bi bi-cart-plus"></i> Add to Cart
+>>>>>>> e74fec6dc00073df23c78ddf1dfa9a63af982ffb
               </button>
               <button
                 class="btn btn-outline-secondary btn-lg"
@@ -157,6 +172,7 @@
               </button>
             </div>
 
+<<<<<<< HEAD
             <!-- Success Message -->
             <div v-if="showSuccessMessage" class="alert alert-success alert-dismissible fade show" role="alert">
               <i class="bi bi-check-circle-fill"></i>
@@ -168,6 +184,8 @@
               ></button>
             </div>
 
+=======
+>>>>>>> e74fec6dc00073df23c78ddf1dfa9a63af982ffb
             <!-- Product Description -->
             <div class="product-description">
               <h5 class="mb-3">Product Description</h5>
@@ -193,9 +211,9 @@
                   <div id="specifications" class="accordion-collapse collapse" data-bs-parent="#productAccordion">
                     <div class="accordion-body">
                       <ul class="list-unstyled">
-                        <li><strong>Product ID:</strong> {{ product.id }}</li>
-                        <li><strong>Added Date:</strong> {{ formatDate(product.addedDate) }}</li>
-                        <li><strong>Category:</strong> {{ product.category }}</li>
+                        <li><strong>Product ID:</strong> {{ product._id || product.id }}</li>
+                        <li><strong>Added Date:</strong> {{ formatDate(product.createdAt || product.addedDate) }}</li>
+                        <li><strong>Category:</strong> {{ product.categoryName }}</li>
                         <li v-if="product.brand"><strong>Brand:</strong> {{ product.brand }}</li>
                       </ul>
                     </div>
@@ -233,7 +251,11 @@
         <div class="row g-4">
           <div
             v-for="relatedProduct in relatedProducts"
+<<<<<<< HEAD
             :key="relatedProduct.id"
+=======
+            :key="relatedProduct._id || relatedProduct.id"
+>>>>>>> e74fec6dc00073df23c78ddf1dfa9a63af982ffb
             class="col-md-3 col-sm-6"
           >
             <div class="card h-100">
@@ -242,16 +264,16 @@
                 class="card-img-top"
                 :alt="relatedProduct.name"
                 style="height: 200px; object-fit: cover; cursor: pointer;"
-                @click="navigateToProduct(relatedProduct.id)"
+                @click="navigateToProduct(relatedProduct._id || relatedProduct.id)"
               />
               <div class="card-body">
                 <h6 class="card-title">{{ relatedProduct.name }}</h6>
                 <p class="card-text text-primary fw-bold">
-                  ${{ relatedProduct.price.toFixed(2) }}
+                  ${{ (relatedProduct.displayPrice || 0).toFixed(2) }}
                 </p>
                 <button
                   class="btn btn-sm btn-outline-primary w-100"
-                  @click="navigateToProduct(relatedProduct.id)"
+                  @click="navigateToProduct(relatedProduct._id || relatedProduct.id)"
                 >
                   View Details
                 </button>
@@ -265,40 +287,74 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { Product } from '@/types/product'
-import { products } from '@/data/products'
 import { useCartStore } from '@/stores/cartStore'
+import { useProductStore } from '@/stores/product'
 
 const route = useRoute()
 const router = useRouter()
 const cartStore = useCartStore()
+const productStore = useProductStore()
 
-const product = ref<Product | null>(null)
+const product = ref<any>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
 const quantity = ref(1)
 const selectedImage = ref<string>('')
 const isInWishlist = ref(false)
-const addingToCart = ref(false)
-const showSuccessMessage = ref(false)
 
-// Related products based on category
+// Related products based on category - first 5 products
 const relatedProducts = computed(() => {
-  if (!product.value) return []
-  return products
-    .filter(p => p.category === product.value?.category && p.id !== product.value?.id)
-    .slice(0, 4)
+  console.log('=== RELATED PRODUCTS DEBUG ===')
+  console.log('Product loaded:', !!product.value)
+  console.log('Product:', product.value)
+  console.log('Total products in store:', productStore.products.length)
+
+  if (!product.value) {
+    console.log('No product - returning empty array')
+    return []
+  }
+
+  const currentCategoryId = typeof product.value.category === 'object' && product.value.category !== null
+    ? product.value.category._id
+    : product.value.category
+  console.log('Current category ID:', currentCategoryId)
+  console.log('Current product ID:', product.value._id)
+
+  const filtered = productStore.products.filter(p => {
+    const pCategoryId = typeof p.category === 'object' && p.category !== null ? p.category._id : p.category
+    const isSameCategory = String(pCategoryId) === String(currentCategoryId)
+    const isNotCurrentProduct = String(p._id) !== String(product.value._id)
+
+    if (isSameCategory && isNotCurrentProduct) {
+      console.log('Match found:', p.name, '- Category:', pCategoryId)
+    }
+
+    return isSameCategory && isNotCurrentProduct
+  })
+
+  console.log('Filtered results:', filtered.length)
+  console.log('Final related products:', filtered.slice(0, 5).map(p => p.name))
+
+  return filtered.slice(0, 5).map(p => productStore.formatProduct(p))
+})
+
+// Watch route params to reload product when navigating between products
+watch(() => route.params.id, () => {
+  if (route.params.id) {
+    loadProduct()
+  }
 })
 
 onMounted(() => {
   loadProduct()
 })
 
-const loadProduct = () => {
+const loadProduct = async () => {
   try {
     loading.value = true
+<<<<<<< HEAD
     const productId = Number(route.params.id)
 
     const foundProduct = products.find(p => p.id === productId)
@@ -307,6 +363,24 @@ const loadProduct = () => {
       product.value = foundProduct
       selectedImage.value = foundProduct.image
 
+=======
+    error.value = null
+    const productId = route.params.id as string
+
+    // Fetch products if not already fetched
+    if (!productStore.isFetched) {
+      await productStore.fetchProducts()
+    }
+
+    // Find product by _id
+    const foundProduct = productStore.products.find(p => String(p._id) === String(productId))
+
+    if (foundProduct) {
+      // Format the product using the store's getter
+      product.value = productStore.formatProduct(foundProduct)
+      selectedImage.value = product.value.image
+      quantity.value = 1
+>>>>>>> e74fec6dc00073df23c78ddf1dfa9a63af982ffb
     } else {
       error.value = 'Product not found'
     }
@@ -316,6 +390,12 @@ const loadProduct = () => {
   } finally {
     loading.value = false
   }
+}
+
+const calculateDiscount = () => {
+  if (!product.value?.originalPrice || !product.value?.price) return 0
+  if (product.value.originalPrice <= product.value.price) return 0
+  return Math.round(((product.value.originalPrice - product.value.price) / product.value.originalPrice) * 100)
 }
 
 const increaseQuantity = () => {
@@ -330,12 +410,10 @@ const decreaseQuantity = () => {
   }
 }
 
-const addToCart = async () => {
-  if (!product.value || !product.value.inStock) return
-
-  try {
-    addingToCart.value = true
+const addToCart = () => {
+  if (product.value) {
     cartStore.addToCart(product.value, quantity.value)
+<<<<<<< HEAD
 
     // Show success message
     showSuccessMessage.value = true
@@ -351,6 +429,9 @@ const addToCart = async () => {
     }
   } finally {
     addingToCart.value = false
+=======
+    alert(`${quantity.value} ${product.value.name}(s) added to cart!`)
+>>>>>>> e74fec6dc00073df23c78ddf1dfa9a63af982ffb
   }
 }
 
@@ -362,13 +443,13 @@ const toggleWishlist = () => {
   console.log(message)
 }
 
-const navigateToProduct = (productId: number) => {
+const navigateToProduct = (productId: string | number) => {
   router.push({ name: 'ProductDetail', params: { id: productId } })
-  loadProduct()
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 const formatDate = (dateString: string) => {
+  if (!dateString) return 'N/A'
   const date = new Date(dateString)
   return date.toLocaleDateString('en-US', {
     year: 'numeric',

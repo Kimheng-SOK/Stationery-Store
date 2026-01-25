@@ -81,90 +81,115 @@
       </div>
     </div>
 
-    <!-- Add/Edit Modal -->
+<!-- Add/Edit Modal - Simple & Cool -->
     <div class="modal fade" id="categoryModal" tabindex="-1" ref="modalRef">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">{{ isEditMode ? 'Edit Category' : 'Add New Category' }}</h5>
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <!-- Simple Header -->
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold">
+              <i :class="isEditMode ? 'bi bi-pencil-square me-2' : 'bi bi-plus-circle me-2'" style="color: #667eea;"></i>
+              {{ isEditMode ? 'Edit Category' : 'New Category' }}
+            </h5>
             <button type="button" class="btn-close" @click="closeModal"></button>
           </div>
+
           <form @submit.prevent="handleSubmit">
-            <div class="modal-body">
+            <div class="modal-body pt-3">
+              <!-- Image Upload -->
+              <div class="mb-3">
+                <label class="form-label small text-muted">Image</label>
+                <div class="text-center">
+                  <div v-if="imagePreview || formData.existingImage" class="position-relative d-inline-block mb-2">
+                    <img
+                      :src="imagePreview || getImageUrl(formData.existingImage)"
+                      alt="Preview"
+                      class="rounded"
+                      style="width: 120px; height: 120px; object-fit: cover; border: 2px solid #e9ecef;"
+                      @error="handleImageError"
+                    />
+                    <button type="button"
+                            class="btn btn-sm btn-danger rounded-circle position-absolute"
+                            @click="removeImage"
+                            style="top: -8px; right: -8px; width: 28px; height: 28px; padding: 0;"
+                            title="Remove">
+                      <i class="bi bi-x" style="font-size: 1.1rem;"></i>
+                    </button>
+                  </div>
+
+                  <label v-else for="fileInput"
+                         class="d-block border rounded p-4 text-center bg-light"
+                         style="cursor: pointer; transition: all 0.2s;">
+                    <i class="bi bi-image text-muted d-block mb-2" style="font-size: 2rem;"></i>
+                    <span class="text-muted small">Click to upload</span>
+                  </label>
+                  <input
+                    type="file"
+                    id="fileInput"
+                    class="d-none"
+                    @change="handleImageChange"
+                    accept="image/*"
+                    ref="fileInputRef"
+                  />
+                </div>
+              </div>
+
               <!-- Name -->
               <div class="mb-3">
-                <label class="form-label">Category Name *</label>
+                <label class="form-label small text-muted">Name <span class="text-danger">*</span></label>
                 <input
                   type="text"
                   class="form-control"
                   v-model="formData.name"
                   required
-                  placeholder="Enter category name"
+                  placeholder="Category name"
+                  autofocus
                 />
               </div>
 
               <!-- Description -->
               <div class="mb-3">
-                <label class="form-label">Description</label>
+                <label class="form-label small text-muted">Description</label>
                 <textarea
                   class="form-control"
                   v-model="formData.description"
-                  rows="3"
-                  placeholder="Enter category description"
+                  placeholder="Optional description"
+                  maxlength="120"
+                  rows="2"
+                  style="resize: none;"
                 ></textarea>
+                <div class="text-end">
+                  <small class="text-muted">{{ formData.description.length }}/120</small>
+                </div>
               </div>
 
-              <!-- Active Status -->
-              <div class="mb-3">
-                <div class="form-check form-switch">
+              <!-- Status -->
+              <div class="d-flex justify-content-between align-items-center py-2">
+                <div>
+                  <label class="form-label small text-muted mb-0">Active</label>
+                  <p class="text-muted mb-0" style="font-size: 0.8rem;">
+                    {{ formData.isActive ? 'Visible to users' : 'Hidden' }}
+                  </p>
+                </div>
+                <div class="form-check form-switch" style="font-size: 1.5rem;">
                   <input
                     class="form-check-input"
                     type="checkbox"
-                    id="isActiveSwitch"
+                    role="switch"
+                    id="statusSwitch"
                     v-model="formData.isActive"
+                    style="cursor: pointer;"
                   >
-                  <label class="form-check-label" for="isActiveSwitch">
-                    Active
-                  </label>
-                </div>
-              </div>
-
-              <!-- Image Upload -->
-              <div class="mb-3">
-                <label class="form-label">Category Image</label>
-                <input
-                  type="file"
-                  class="form-control"
-                  @change="handleImageChange"
-                  accept="image/*"
-                  ref="fileInputRef"
-                />
-                <small class="text-muted">Recommended: 500x500px, Max 2MB</small>
-              </div>
-
-              <!-- Image Preview -->
-              <div v-if="imagePreview || formData.existingImage" class="mb-3">
-                <label class="form-label">Preview</label>
-                <div class="image-preview-container">
-                  <img
-                    :src="imagePreview || getImageUrl(formData.existingImage)"
-                    alt="Preview"
-                    class="img-fluid"
-                    @error="handleImageError"
-                  />
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-danger remove-image"
-                    @click="removeImage"
-                  >
-                    <i class="bi bi-x"></i>
-                  </button>
                 </div>
               </div>
             </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" @click="closeModal">Cancel</button>
-              <button type="submit" class="btn btn-primary" :disabled="categoryApi.loading.value">
+
+            <!-- Footer -->
+            <div class="modal-footer border-0 pt-0">
+              <button type="button" class="btn btn-light" @click="closeModal">Cancel</button>
+              <button type="submit"
+                      class="btn btn-primary"
+                      :disabled="categoryApi.loading.value">
                 <span v-if="categoryApi.loading.value" class="spinner-border spinner-border-sm me-2"></span>
                 {{ isEditMode ? 'Update' : 'Create' }}
               </button>
@@ -203,6 +228,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useCategoryApi } from '@/composables/useCategoryApi'
 import type { Category } from '@/types/category'
 import { Modal } from 'bootstrap'
+import { formatDate, getImageUrl, handleImageError } from '@/utils/categoryUtils'
 
 const categoryApi = useCategoryApi()
 const categories = computed(() => categoryApi.categories.value)
@@ -357,38 +383,6 @@ const closeDeleteModal = () => {
   deleteModalInstance?.hide()
   categoryToDelete.value = null
 }
-
-const formatDate = (date?: string) => {
-  if (!date) return 'N/A'
-  try {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    })
-  } catch (error) {
-    console.error('Date formatting error:', error, date)
-    return 'Invalid Date'
-  }
-}
-
-const getImageUrl = (imagePath?: string) => {
-  if (!imagePath) return '/placeholder.png'
-
-  // If it's already a full URL, return as is
-  if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    return imagePath
-  }
-
-  // If it's a relative path from your API
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000'
-  return `${baseUrl}${imagePath}`
-}
-
-const handleImageError = (event: Event) => {
-  const img = event.target as HTMLImageElement
-  img.src = '/placeholder.png'
-}
 </script>
 
 <style scoped>
@@ -409,31 +403,6 @@ const handleImageError = (event: Event) => {
   object-fit: cover;
   border-radius: 8px;
   border: 2px solid #e0e0e0;
-}
-
-.image-preview-container {
-  position: relative;
-  display: inline-block;
-  max-width: 200px;
-}
-
-.image-preview-container img {
-  max-width: 100%;
-  border-radius: 8px;
-  border: 2px solid #e0e0e0;
-}
-
-.remove-image {
-  position: absolute;
-  top: -10px;
-  right: -10px;
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .table th {

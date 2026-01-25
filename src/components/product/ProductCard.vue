@@ -1,48 +1,61 @@
 <template>
   <div class="product-card">
-    <!-- Badges -->
-    <div v-if="product.badges && product.badges.length > 0" class="product-badges">
-      <span
-        v-for="badgeType in product.badges"
-        :key="badgeType"
-        :class="['badge', getBadgeClass(badgeType)]"
-      >
-        {{ getBadgeText(badgeType) }}
+    <div class="product-badges">
+      <span v-if="product.isNew" class="badge badge-new">
+        NEW
+      </span>
+
+      <span v-if="product.discount && product.discount > 0" class="badge badge-discount">
+        -{{ product.discount }}%
+      </span>
+
+      <span v-if="product.rating >= 4.5" class="badge badge-popular">
+        <i class="bi bi-star-fill me-1"></i> POPULAR
+      </span>
+
+      <span v-if="!product.inStock" class="badge badge-out">
+        OUT OF STOCK
       </span>
     </div>
 
-    <!-- Product Image -->
-    <div class="product-image-container" @click="viewDetails" style="cursor: pointer;">
-      <img :src="product.image" :alt="product.name" class="product-image" />
+    <div class="product-image-container" @click="viewDetails">
+      <img :src="product.image" :alt="product.name" class="product-image" loading="lazy" />
+      <div class="image-overlay">
+        <span class="view-text">View Details</span>
+      </div>
     </div>
 
-    <!-- Product Info -->
     <div class="product-info">
-      <h6 class="product-title" @click="viewDetails" style="cursor: pointer;">{{ product.name }}</h6>
-      <div class="product-rating mb-2">
-        <span class="stars">{{ renderStars(product.rating) }}</span>
+      <p class="product-category text-uppercase">{{ product.categoryName }}</p>
+
+      <h6 class="product-title" @click="viewDetails">{{ product.name }}</h6>
+
+      <div class="product-rating mb-3">
+        <span class="stars">{{ renderStars(Math.round(product.rating)) }}</span>
         <span class="rating-count">({{ product.reviewCount }})</span>
       </div>
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <span class="product-price">${{ product.price }}</span>
-          <span v-if="product.originalPrice" class="product-original-price">
+
+      <div class="d-flex justify-content-between align-items-center mt-auto">
+        <div class="price-wrapper">
+          <span class="product-price">${{ product.displayPrice }}</span>
+          <span v-if="product.showStrikePrice" class="product-original-price">
             ${{ product.originalPrice }}
           </span>
         </div>
-        <button 
-          class="btn btn-sm btn-outline-primary" 
+        <button
+          class="btn btn-sm btn-outline-primary"
           @click="addToCart"
           :disabled="!product.inStock || addingToCart"
+          :class="{ 'loading': addingToCart }"
         >
-          <i :class="addingToCart ? 'bi bi-hourglass-split' : 'bi bi-cart-plus'"></i>
+          <i :class="addingToCart ? 'bi bi-arrow-repeat spin' : 'bi bi-bag-plus'"></i>
         </button>
       </div>
     </div>
 
     <!-- Success Toast Message -->
-    <div 
-      v-if="showSuccessMessage" 
+    <div
+      v-if="showSuccessMessage"
       class="success-toast"
     >
       <i class="bi bi-check-circle-fill me-2"></i>
@@ -55,14 +68,13 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cartStore'
-import type { Product, BadgeType } from '@/types/product'
 
+// Note: We use 'any' here because the Store formatter adds displayPrice/showStrikePrice
 interface Props {
-  product: Product
+  product: any
 }
 
 const props = defineProps<Props>()
-
 const router = useRouter()
 const cartStore = useCartStore()
 
@@ -73,42 +85,19 @@ const renderStars = (rating: number): string => {
   return '★'.repeat(rating) + '☆'.repeat(5 - rating)
 }
 
-const getBadgeClass = (badgeType: BadgeType): string => {
-  const classes: Record<BadgeType, string> = {
-    'new': 'bg-success',
-    'hot': 'bg-danger',
-    'popular': 'bg-warning',
-    'instock': 'bg-info',
-    'discount': 'bg-primary'
-  }
-  return classes[badgeType] || 'bg-secondary'
-}
-
-const getBadgeText = (badgeType: BadgeType): string => {
-  const texts: Record<BadgeType, string> = {
-    'new': 'NEW',
-    'hot': 'HOT',
-    'popular': 'POPULAR',
-    'instock': 'IN STOCK',
-    'discount': props.product.discount ? `-${props.product.discount}%` : 'SALE'
-  }
-  return texts[badgeType] || badgeType.toUpperCase()
-}
-
 const addToCart = async () => {
-  if (!props.product.inStock) {
-    return
-  }
+  if (!props.product.inStock) return
 
+  addingToCart.value = true
   try {
     addingToCart.value = true
-    
+
     // Add to cart with quantity of 1
     cartStore.addToCart(props.product, 1)
-    
+
     // Show success message
     showSuccessMessage.value = true
-    
+
     // Hide message after 2 seconds
     setTimeout(() => {
       showSuccessMessage.value = false
@@ -123,133 +112,194 @@ const addToCart = async () => {
 }
 
 const viewDetails = () => {
-  router.push({ name: 'ProductDetail', params: { id: props.product.id } })
+  router.push({ name: 'ProductDetail', params: { id: props.product._id } })
 }
 </script>
 
 <style scoped>
 .product-card {
-  background: white;
-  border-radius: 8px;
+  background: #ffffff;
+  border-radius: 12px;
   overflow: hidden;
-  transition: all 0.3s ease;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   height: 100%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #edf2f7;
   position: relative;
 }
 
 .product-card:hover {
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-  transform: translateY(-4px);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
+/* Badges Styling */
 .product-badges {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 10;
+  top: 12px;
+  left: 12px;
+  z-index: 5;
   display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  max-width: calc(100% - 20px);
+  flex-direction: row; /* Changed from column to row */
+  flex-wrap: nowrap;   /* Keeps them in one line */
+  gap: 6px;
+  max-width: calc(100% - 24px); /* Prevents badges from overshooting the card edge */
+  overflow: hidden;    /* Clips if they are somehow too long */
 }
 
-.product-badges .badge {
-  font-size: 0.7rem;
-  padding: 0.35em 0.65em;
-  font-weight: 600;
+.badge {
+  padding: 4px 10px;
+  font-size: 10px;     /* Slightly smaller to fit better in one line */
+  font-weight: 700;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+  border: none;
+  white-space: nowrap; /* Ensures text like "IN STOCK" doesn't break into two lines */
+  display: flex;
+  align-items: center;
 }
 
+.badge-new { background: #10b981; color: white; }
+.badge-discount { background: #3b82f6; color: white; }
+.badge-popular { background: #f59e0b; color: white; }
+.badge-out { background: #64748b; color: white; }
+
+/* Image Section */
 .product-image-container {
   position: relative;
+  aspect-ratio: 1 / 1;
+  background: #f7fafc;
+  cursor: pointer;
   overflow: hidden;
-  padding-top: 100%;
-  background: #f8f9fa;
 }
 
 .product-image {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform 0.6s ease;
 }
 
 .product-card:hover .product-image {
-  transform: scale(1.08);
+  transform: scale(1.1);
 }
 
+.image-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.product-card:hover .image-overlay {
+  opacity: 1;
+}
+
+.view-text {
+  color: white;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* Info Section */
 .product-info {
-  padding: 1rem;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.product-category {
+  font-size: 11px;
+  color: #a0aec0;
+  margin-bottom: 4px;
+  font-weight: 600;
 }
 
 .product-title {
-  font-size: 0.95rem;
+  font-size: 15px;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #212529;
-  min-height: 2.4em;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  color: #2d3748;
+  margin-bottom: 8px;
+  line-height: 1.4;
+  cursor: pointer;
 }
 
-.product-rating {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
+.product-title:hover { color: #3182ce; }
 
-.stars {
-  color: #ffc107;
-  font-size: 0.85rem;
-}
+.stars { color: #ecc94b; letter-spacing: 2px; }
+.rating-count { font-size: 12px; color: #718096; margin-left: 6px; }
 
-.rating-count {
-  font-size: 0.8rem;
-  color: #6c757d;
-}
-
+/* Price and Button */
 .product-price {
-  font-size: 1.25rem;
+  font-size: 18px;
   font-weight: 700;
-  color: #198754;
+  color: #2d3748;
 }
 
 .product-original-price {
-  font-size: 0.85rem;
-  color: #6c757d;
+  font-size: 13px;
+  color: #a0aec0;
   text-decoration: line-through;
-  margin-left: 0.5rem;
+  margin-left: 8px;
 }
 
-.btn-outline-primary:disabled {
-  opacity: 0.5;
+.btn-add-cart {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: #ebf8ff;
+  color: #3182ce;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.btn-add-cart:hover:not(:disabled) {
+  background: #3182ce;
+  color: white;
+}
+
+.btn-add-cart:disabled {
+  background: #f7fafc;
+  color: #cbd5e0;
   cursor: not-allowed;
+}
+
+.spin {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* Success Toast */
 .success-toast {
   position: absolute;
-  bottom: 20px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  background: #198754;
+  transform: translate(-50%, -50%);
+  background: rgba(45, 55, 72, 0.95);
   color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 20;
-  animation: slideUp 0.3s ease-out;
-  display: flex;
-  align-items: center;
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-size: 13px;
   white-space: nowrap;
+  z-index: 100;
 }
 
 @keyframes slideUp {

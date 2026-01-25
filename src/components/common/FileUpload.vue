@@ -77,8 +77,14 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
 
+<<<<<<< HEAD
 
 const fileInput = ref<HTMLInputElement>()
+=======
+const uploadMode = ref<'url' | 'device'>('device')
+const urlInput = ref('')
+const fileInput = ref<HTMLInputElement | null>(null)
+>>>>>>> e74fec6dc00073df23c78ddf1dfa9a63af982ffb
 const isDragging = ref(false)
 const imagePreview = ref(props.modelValue)
 const errorMessage = ref('')
@@ -90,6 +96,45 @@ watch(
   }
 )
 
+<<<<<<< HEAD
+=======
+const validateImageUrl = async (url: string): Promise<boolean> => {
+  try {
+    const response = await fetch(url, { method: 'HEAD' })
+    const contentType = response.headers.get('content-type')
+    return contentType?.startsWith('image/') ?? false
+  } catch {
+    return false
+  }
+}
+
+const addFromUrl = async () => {
+  if (!urlInput.value) {
+    errorMessage.value = 'Please enter a URL'
+    return
+  }
+
+  try {
+    errorMessage.value = ''
+    isLoading.value = true
+
+    const isValid = await validateImageUrl(urlInput.value)
+    if (!isValid) {
+      errorMessage.value = 'Invalid image URL or image is not accessible'
+      return
+    }
+
+    imagePreview.value = urlInput.value
+    emit('update:modelValue', urlInput.value)
+    urlInput.value = ''
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (error) {
+    errorMessage.value = 'Failed to load image from URL'
+  } finally {
+    isLoading.value = false
+  }
+}
+>>>>>>> e74fec6dc00073df23c78ddf1dfa9a63af982ffb
 
 const handleFileSelect = (event: Event) => {
   const target = event.target as HTMLInputElement

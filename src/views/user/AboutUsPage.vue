@@ -486,5 +486,17 @@ export default {
   .cta-section {
     padding: 60px 0;
   }
+
+  /* Center hero title on small screens */
+  .hero-title {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Optional: center subtitle too */
+  .hero-subtitle {
+    text-align: center;
+  }
 }
 </style>
