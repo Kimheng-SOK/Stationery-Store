@@ -94,15 +94,21 @@ const selectedCategoryId = computed(() =>
   categoryStore.categories.find(c => c.name === selectedCategoryName.value)?._id
 )
 
+// This extracts the search term from the URL Query ?search=...
+const searchTerm = computed(() => (route.query.search as string) || '')
+
 const filteredProducts = computed(() => {
   return productStore.getFilteredProducts({
     categoryId: selectedCategoryId.value,
     brand: selectedBrand.value,
     rating: selectedRating.value,
     priceRange: priceRange.value,
-    sortBy: sortBy.value
+    sortBy: sortBy.value,
+    searchTerm: searchTerm.value // Re-filters instantly when URL changes
   })
 })
+
+watch(() => route.query.search, () => { currentPage.value = 1 })
 
 const totalPages = computed(() => Math.ceil(filteredProducts.value.length / 9))
 
@@ -142,6 +148,7 @@ const handleAddToCart = (product: any) => {
 const clearFilters = () => {
   selectedCategoryName.value = ''; selectedBrand.value = ''; selectedRating.value = 0;
   priceRange.value = { min: 0, max: 2000 }; sortBy.value = 'default'
+  // Logic to also clear the URL search
 }
 
 onMounted(async () => {
@@ -154,37 +161,8 @@ onMounted(async () => {
 <style scoped>
 .shop-view { padding: 2rem 0; min-height: 80vh; background-color: #f8f9fa; }
 .no-products { background: white; border-radius: 8px; padding: 2rem; }
-
-/* Custom Pagination styles to match image_0821b4.png */
-.pagination-custom .page-link {
-  color: #374151;
-  border: 1px solid #e5e7eb;
-  padding: 0.5rem 0.85rem;
-  font-size: 0.95rem;
-  background-color: white;
-}
-
-.pagination-custom .page-item.active .page-link {
-  background-color: #10b981; /* Green color from your image */
-  border-color: #10b981;
-  color: white;
-}
-
-.pagination-custom .page-item.disabled .page-link {
-  background-color: #f3f4f6;
-  color: #9ca3af;
-}
-
-@media (max-width: 576px) {
-  .shop-view { padding: 1rem 0; }
-  /* Match the row spacing from your image */
-  .row.g-2 {
-    --bs-gutter-x: 0.5rem;
-    --bs-gutter-y: 0.5rem;
-  }
-  .pagination-custom .page-link {
-    padding: 0.4rem 0.7rem;
-    font-size: 0.85rem;
-  }
-}
+.pagination-custom .page-link { color: #374151; border: 1px solid #e5e7eb; padding: 0.5rem 0.85rem; font-size: 0.95rem; background-color: white; }
+.pagination-custom .page-item.active .page-link { background-color: #10b981; border-color: #10b981; color: white; }
+.pagination-custom .page-item.disabled .page-link { background-color: #f3f4f6; color: #9ca3af; }
+@media (max-width: 576px) { .shop-view { padding: 1rem 0; } .row.g-2 { --bs-gutter-x: 0.5rem; --bs-gutter-y: 0.5rem; } .pagination-custom .page-link { padding: 0.4rem 0.7rem; font-size: 0.85rem; } }
 </style>
