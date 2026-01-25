@@ -37,13 +37,13 @@ const createCoupon = async (req, res) => {
         message: 'Coupon code already exists'
       });
     }
-    
+
     const start = startDate ? new Date(startDate) : new Date();
     const end = new Date(start);
     end.setDate(end.getDate() + daysNum);
 
     const coupon = await Coupon.create({
-      code: code.toUpperCase(), 
+      code: code.toUpperCase(),
       discount: discountNum,
       description: description || null,
       startDate: start,
@@ -143,10 +143,23 @@ const getCouponByCode = async (req, res) => {
 
     // Check if coupon is expired
     if (coupon.endDate && now > coupon.endDate) {
-      await Coupon.findByIdAndUpdate(coupon._id, { status: 'expired' });
+      if (coupon.status !== 'expired') {
+        await Coupon.findByIdAndUpdate(coupon._id, { status: 'expired' });
+      }
       return res.status(400).json({
         success: false,
         message: 'Coupon has expired'
+      });
+    }
+
+    // Check usage limit
+    if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+      if (coupon.status !== 'expired') {
+        await Coupon.findByIdAndUpdate(coupon._id, { status: 'expired' });
+      }
+      return res.status(400).json({
+        success: false,
+        message: 'Coupon usage limit reached'
       });
     }
 
@@ -155,14 +168,6 @@ const getCouponByCode = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: 'Coupon is not active'
-      });
-    }
-
-    // Check usage limit
-    if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
-      return res.status(400).json({
-        success: false,
-        message: 'Coupon usage limit reached'
       });
     }
 
@@ -201,7 +206,7 @@ const updateCoupon = async (req, res) => {
     // Recalculate endDate if startDate or validityDays changed
     const newStartDate = req.body.startDate ? new Date(req.body.startDate) : existingCoupon.startDate;
     const newValidityDays = req.body.validityDays !== undefined ? parseInt(req.body.validityDays) : existingCoupon.validityDays;
-    
+
     if (req.body.startDate || req.body.validityDays !== undefined) {
       const end = new Date(newStartDate);
       end.setDate(end.getDate() + newValidityDays);
@@ -275,11 +280,82 @@ const deleteCoupon = async (req, res) => {
   }
 };
 
+// @desc    Redeem coupon by code (increment usedCount)
+// @route   POST /api/coupons/redeem/:code
+// @access  Public
+const redeemCoupon = async (req, res) => {
+  try {
+    const coupon = await Coupon.findOne({ code: req.params.code.toUpperCase() });
+
+    if (!coupon) {
+      return res.status(404).json({
+        success: false,
+        message: 'Coupon not found'
+      });
+    }
+
+    const now = new Date();
+
+    if (coupon.startDate && now < coupon.startDate) {
+      return res.status(400).json({
+        success: false,
+        message: 'Coupon is not yet active'
+      });
+    }
+
+    if (coupon.endDate && now > coupon.endDate) {
+      await Coupon.findByIdAndUpdate(coupon._id, { status: 'expired' });
+      return res.status(400).json({
+        success: false,
+        message: 'Coupon has expired'
+      });
+    }
+
+    if (coupon.status !== 'active') {
+      return res.status(400).json({
+        success: false,
+        message: 'Coupon is not active'
+      });
+    }
+
+    if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+      await Coupon.findByIdAndUpdate(coupon._id, { status: 'expired' });
+      return res.status(400).json({
+        success: false,
+        message: 'Coupon usage limit reached'
+      });
+    }
+
+    // Increment usedCount
+    coupon.usedCount = (coupon.usedCount || 0) + 1;
+
+    // If usageLimit reached, expire coupon
+    if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
+      coupon.status = 'expired';
+    }
+
+    await coupon.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Coupon redeemed successfully',
+      data: coupon
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to redeem coupon',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   createCoupon,
   getAllCoupons,
   getCouponById,
   getCouponByCode,
   updateCoupon,
-  deleteCoupon
+  deleteCoupon,
+  redeemCoupon // <-- Export new redeem endpoint
 };

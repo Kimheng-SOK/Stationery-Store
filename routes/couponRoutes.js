@@ -6,7 +6,8 @@ const {
   getCouponById,
   getCouponByCode,
   updateCoupon,
-  deleteCoupon
+  deleteCoupon,
+  redeemCoupon
 } = require('../controllers/couponController');
 
 // @route   POST /api/coupons
@@ -38,5 +39,10 @@ router.put('/:id', updateCoupon);
 // @desc    Delete coupon by ID
 // @access  Public
 router.delete('/:id', deleteCoupon);
+
+// @route   POST /api/coupons/redeem/:code
+// @desc    Redeem coupon by code (increment usedCount)
+// @access  Public
+router.post('/redeem/:code', redeemCoupon);
 
 module.exports = router;
