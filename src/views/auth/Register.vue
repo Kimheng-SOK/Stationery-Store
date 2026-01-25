@@ -2,7 +2,9 @@
   <div class="login-container d-flex min-vh-100">
     <!-- Left Side - Image -->
     <div class="login-image-section d-none d-lg-flex">
-      <img src="@/assets/image/pfp.png" alt="Access Image" />
+      <a href="/home">
+        <img src="@/assets/image/pfp.png" alt="Access Image" />
+      </a>
     </div>
 
     <!-- Right Side - Form -->

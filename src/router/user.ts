@@ -6,7 +6,6 @@ import Privacy from '@/views/user/Privacy.vue'
 import TermCondition from '@/views/user/TermCondition.vue'
 import Checkout from '@/views/user/CheckoutView.vue'
 import CartView from '@/views/user/CartPage.vue'
-import EmptyProduct from '@/views/user/EmptyProduct.vue'
 import ProductDetailView from '@/views/user/ProductDetailView.vue'
 import PopularPage from '@/views/user/PopularPage.vue'
 import CategoriesPage from '@/views/user/CategoriesPage.vue'
@@ -43,10 +42,10 @@ export default [
       { path: '/terms', name: 'TermCondition', component: TermCondition},
       { path: '/checkout', name: 'Checkout', component: Checkout },
       { path: '/cart', name: 'Cart', component: CartView},
-      { path: '/empty-product', name: 'EmptyProduct', component: EmptyProduct},
       { path: '/product/:id', name: 'ProductDetail', component: ProductDetailView},
       { path: '/about-us', name: 'AboutUs', component: AboutUsPage },
       { path: '/order-success', name: 'OrderSuccess', component: OrderSuccessPage }, 
+      { path: '/checkout', name: 'Checkout', component: Checkout, meta: { requiresAuth: true } },
 
       { path: '/profile', name: 'Profile', component: ProfileMain },
       { path: '/profile/edit', name: 'ProfileEdit', component: EditProfile },

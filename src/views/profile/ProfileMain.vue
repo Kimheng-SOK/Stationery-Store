@@ -2,20 +2,17 @@
   <div class="profile-page">
     <div class="container py-4">
       <div class="row g-4">
-        <!-- Sidebar -->
-        <div class="col-lg-3 col-md-4">
-          <ProfileSidebar />
-        </div>
-
-        <!-- Main Content -->
-        <main class="col-lg-9 col-md-8">
+        <main class="col-12">
           <!-- Profile Header Card -->
           <div class="profile-header-card mb-4">
             <div class="profile-cover">
-              
               <div class="profile-info-on-cover">
                 <div class="profile-avatar-wrapper">
+                  <div v-if="!user.avatar" class="profile-avatar-placeholder">
+                    {{ getInitials(user.name) }}
+                  </div>
                   <img 
+                    v-else
                     :src="user.avatar" 
                     alt="Profile"
                     class="profile-avatar"
@@ -47,9 +44,10 @@
                   <i class="bi bi-bag-check"></i>
                 </div>
                 <div class="stat-content">
-                  <h3 class="stat-value">{{ user.stats.totalOrders }}</h3>
+                  <h3 class="stat-value">{{ stats.totalOrders }}</h3>
                   <p class="stat-label">Total Orders</p>
-                  <small class="text-success">+3 this month</small>
+                  <small class="text-success" v-if="stats.recentOrders > 0">+{{ stats.recentOrders }} this month</small>
+                  <small class="text-muted" v-else>No recent orders</small>
                 </div>
               </div>
             </div>
@@ -59,9 +57,9 @@
                   <i class="bi bi-wallet2"></i>
                 </div>
                 <div class="stat-content">
-                  <h3 class="stat-value">${{ user.stats.totalSpent }}</h3>
+                  <h3 class="stat-value">${{ stats.totalSpent.toFixed(2) }}</h3>
                   <p class="stat-label">Total Spent</p>
-                  <small class="text-muted">Gold Member Status</small>
+                  <small class="text-muted">{{ getMemberStatus() }}</small>
                 </div>
               </div>
             </div>
@@ -100,7 +98,25 @@
                     <label class="info-label">Phone Number</label>
                     <div class="info-value">
                       <i class="bi bi-telephone me-2 text-muted"></i>
-                      {{ user.phone }}
+                      {{ user.phone || 'Not provided' }}
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="info-item">
+                    <label class="info-label">Date of Birth</label>
+                    <div class="info-value">
+                      <i class="bi bi-calendar-check me-2 text-muted"></i>
+                      {{ formatDateOfBirth(user.dateOfBirth) }}
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="info-item">
+                    <label class="info-label">Address</label>
+                    <div class="info-value">
+                      <i class="bi bi-geo-alt me-2 text-muted"></i>
+                      {{ user.address || 'Not provided' }}
                     </div>
                   </div>
                 </div>
@@ -109,7 +125,7 @@
                     <label class="info-label">Member Since</label>
                     <div class="info-value">
                       <i class="bi bi-calendar-check me-2 text-muted"></i>
-                      {{ user.memberSince }}
+                      {{ formatDate(user.createdAt) }}
                     </div>
                   </div>
                 </div>
@@ -123,7 +139,16 @@
               <h5 class="mb-0">Recent Orders</h5>
               <router-link to="/profile/orders" class="btn btn-sm btn-link">View All</router-link>
             </div>
-            <div class="table-responsive">
+            <div v-if="recentOrders.length === 0" class="empty-orders">
+              <i class="bi bi-cart-x"></i>
+              <h5 class="mt-3 mb-2">No Orders Yet</h5>
+              <p class="text-muted mb-3">Start shopping to see your orders here</p>
+              <router-link to="/shop" class="btn btn-primary btn-sm">
+                <i class="bi bi-shop"></i>
+                <span>Browse Products</span>
+              </router-link>
+            </div>
+            <div v-else class="table-responsive">
               <table class="table table-hover mb-0">
                 <thead>
                   <tr>
@@ -139,7 +164,7 @@
                     <td><strong>{{ order.id }}</strong></td>
                     <td>{{ order.date }}</td>
                     <td>{{ order.items }} items</td>
-                    <td><strong>${{ order.total }}</strong></td>
+                    <td><strong>${{ order.total.toFixed(2) }}</strong></td>
                     <td>
                       <span class="badge" :class="getStatusClass(order.status)">
                         {{ order.status }}
@@ -157,20 +182,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import ProfileSidebar from '@/components/ProfileSidebar.vue'
+import { useAuthStore } from '@/stores/auth'
 
-interface User {
+interface ExtendedUser {
   name: string
   email: string
-  phone: string
-  avatar: string
-  memberSince: string
-  stats: {
-    totalOrders: number
-    totalSpent: number
-  }
+  phone?: string
+  avatar?: string
+  dateOfBirth?: string
+  address?: string
+  createdAt?: string
+  [key: string]: unknown
 }
 
 interface Order {
@@ -182,56 +206,135 @@ interface Order {
 }
 
 const router = useRouter()
+const authStore = useAuthStore()
 const fileInput = ref<HTMLInputElement | null>(null)
+const recentOrders = ref<Order[]>([])
+const isLoading = ref(true)
 
-const user = ref<User>({
-  name: 'Robert Ford',
-  email: 'robertford@gmail.com',
-  phone: '(+855) 111 222 333',
-  avatar: 'https://i.pravatar.cc/150?img=12',
-  memberSince: 'November 2025',
-  stats: {
-    totalOrders: 10,
-    totalSpent: 1000
+const user = computed(() => {
+  const currentUser = authStore.user as ExtendedUser | null
+  return currentUser || {
+    name: 'Guest User',
+    email: 'guest@example.com',
+    phone: '',
+    avatar: '',
+    dateOfBirth: '',
+    address: '',
+    createdAt: new Date().toISOString()
   }
 })
 
-const recentOrders = ref<Order[]>([
-  {
-    id: '#ORD2024001',
-    date: 'Dec 28, 2024',
-    items: 3,
-    total: 127.50,
-    status: 'Delivered'
-  },
-  {
-    id: '#ORD2024002',
-    date: 'Dec 25, 2024',
-    items: 2,
-    total: 85.00,
-    status: 'Processing'
-  },
-  {
-    id: '#ORD2024003',
-    date: 'Dec 20, 2024',
-    items: 1,
-    total: 45.00,
-    status: 'Shipped'
+const stats = computed(() => {
+  const totalOrders = recentOrders.value.length
+  const totalSpent = recentOrders.value.reduce((sum, order) => sum + order.total, 0)
+  const now = new Date()
+  const thisMonth = recentOrders.value.filter(order => {
+    const orderDate = new Date(order.date)
+    return orderDate.getMonth() === now.getMonth() && 
+           orderDate.getFullYear() === now.getFullYear()
+  }).length
+
+  return {
+    totalOrders,
+    totalSpent,
+    recentOrders: thisMonth
   }
-])
+})
+
+onMounted(async () => {
+  await loadUserOrders()
+})
+
+async function loadUserOrders() {
+  try {
+    const saved = localStorage.getItem('orders')
+    if (saved) {
+      recentOrders.value = JSON.parse(saved).slice(0, 3)
+    }
+  } catch (error) {
+    console.error('Failed to load orders:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+function getInitials(name: string): string {
+  if (!name) return 'U'
+  const parts = name.trim().split(' ').filter(part => part.length > 0)
+  
+  if (parts.length === 0) return 'U'
+  if (parts.length === 1) {
+    return parts[0]?.[0]?.toUpperCase() || 'U'
+  }
+  
+  const firstInitial = parts[0]?.[0]?.toUpperCase() || ''
+  const lastInitial = parts[parts.length - 1]?.[0]?.toUpperCase() || ''
+  
+  return (firstInitial + lastInitial) || 'U'
+}
+
+function getMemberStatus(): string {
+  const spent = stats.value.totalSpent
+  if (spent >= 1000) return 'Gold Member'
+  if (spent >= 500) return 'Silver Member'
+  if (spent >= 100) return 'Bronze Member'
+  return 'New Member'
+}
+
+function formatDate(dateString?: string): string {
+  if (!dateString) return 'N/A'
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return 'N/A'
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long' 
+    })
+  } catch {
+    return 'N/A'
+  }
+}
+
+function formatDateOfBirth(dateString?: string): string {
+  if (!dateString) return 'Not provided'
+  try {
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return 'Not provided'
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long',
+      day: 'numeric'
+    })
+  } catch {
+    return 'Not provided'
+  }
+}
 
 const triggerFileUpload = () => {
   fileInput.value?.click()
 }
 
-const handleAvatarUpload = (event: Event) => {
+const handleAvatarUpload = async (event: Event) => {
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   
   if (file) {
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB')
+      return
+    }
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file')
+      return
+    }
+
     const reader = new FileReader()
-    reader.onload = (e) => {
-      user.value.avatar = e.target?.result as string
+    reader.onload = async (e) => {
+      const base64Image = e.target?.result as string
+      if (authStore.user) {
+        authStore.updateUser({ avatar: base64Image })
+      }
     }
     reader.readAsDataURL(file)
   }
@@ -257,6 +360,7 @@ const getStatusClass = (status: string) => {
   min-height: 100vh;
   background-color: #f8f9fa;
   padding-top: 2rem;
+  padding-bottom: 2rem;
 }
 
 .profile-header-card {
@@ -268,7 +372,7 @@ const getStatusClass = (status: string) => {
 
 .profile-cover {
   height: 200px;
-  background: #141B3E;
+  background: linear-gradient(135deg, #141B3E 0%, #0d1228 100%);
   position: relative;
   display: flex;
   align-items: center;
@@ -287,13 +391,27 @@ const getStatusClass = (status: string) => {
   flex-shrink: 0;
 }
 
-.profile-avatar {
+.profile-avatar, .profile-avatar-placeholder {
   width: 120px;
   height: 120px;
   border-radius: 50%;
   border: 4px solid white;
-  object-fit: cover;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.profile-avatar {
+  object-fit: cover;
+}
+
+.profile-avatar-placeholder {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 .avatar-edit-btn {
@@ -303,7 +421,7 @@ const getStatusClass = (status: string) => {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #0d6efd;
+  background: #141B3E;
   color: white;
   border: 3px solid white;
   display: flex;
@@ -314,7 +432,7 @@ const getStatusClass = (status: string) => {
 }
 
 .avatar-edit-btn:hover {
-  background: #0b5ed7;
+  background: #0d1228;
   transform: scale(1.1);
 }
 
@@ -363,6 +481,10 @@ const getStatusClass = (status: string) => {
   color: white;
 }
 
+.bg-primary {
+  background-color: #141B3E !important;
+}
+
 .stat-content {
   flex-grow: 1;
 }
@@ -395,6 +517,11 @@ const getStatusClass = (status: string) => {
   border-bottom: 1px solid #e9ecef;
 }
 
+.info-card-header .btn {
+  padding: 0.35rem 0.9rem;
+  font-size: 0.85rem;
+}
+
 .info-card-body {
   padding: 1.5rem;
 }
@@ -414,6 +541,59 @@ const getStatusClass = (status: string) => {
   align-items: center;
 }
 
+/* CRITICAL: Empty Orders with SMALL button */
+.empty-orders {
+  text-align: center;
+  padding: 3rem 2rem;
+}
+
+.empty-orders i {
+  font-size: 3.5rem !important;
+  opacity: 0.2;
+  color: #6c757d;
+  margin-bottom: 1rem;
+}
+
+.empty-orders h5 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #212529;
+}
+
+.empty-orders p {
+  font-size: 0.95rem;
+  margin-bottom: 1.25rem;
+  color: #6c757d;
+}
+
+/* CRITICAL: Button MUST be small */
+.empty-orders .btn {
+  padding: 0.35rem 0.9rem !important;
+  font-size: 0.85rem !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.35rem !important;
+  text-decoration: none !important;
+  min-width: auto !important;
+  width: auto !important;
+}
+
+.empty-orders .btn i {
+  font-size: 0.85rem !important;
+  margin: 0 !important;
+}
+
+.btn-primary {
+  background-color: #141B3E !important;
+  border-color: #141B3E !important;
+}
+
+.btn-primary:hover {
+  background-color: #0d1228 !important;
+  border-color: #0d1228 !important;
+}
+
 .table thead th {
   font-weight: 600;
   font-size: 0.875rem;
@@ -431,18 +611,67 @@ const getStatusClass = (status: string) => {
 @media (max-width: 768px) {
   .profile-info-on-cover {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    text-align: center;
     padding-top: 2rem;
   }
 
   .profile-cover {
     height: auto;
-    min-height: 250px;
+    min-height: 280px;
     padding: 2rem 1.5rem;
   }
 
   .profile-name {
     font-size: 1.5rem;
+  }
+
+  .profile-avatar, .profile-avatar-placeholder {
+    width: 100px;
+    height: 100px;
+  }
+
+  .profile-avatar-placeholder {
+    font-size: 2rem;
+  }
+
+  .stat-card {
+    padding: 1.25rem;
+  }
+
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.25rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .table-responsive {
+    font-size: 0.875rem;
+  }
+
+  .table thead th,
+  .table tbody td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .profile-page {
+    padding-top: 1rem;
+  }
+
+  .info-card-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .info-card-header .btn {
+    width: 100%;
   }
 }
 </style>

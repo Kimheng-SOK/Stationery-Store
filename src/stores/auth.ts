@@ -39,7 +39,10 @@ export const useAuthStore = defineStore('auth', () => {
           email: response.user.email,
           role: response.user.role === 'admin' ? 'admin' : 'user',
           phone: response.user.phone,
-          avatar: response.user.avatar
+          avatar: response.user.avatar,
+          dateOfBirth: response.user.dateOfBirth,
+          address: response.user.address,
+          createdAt: response.user.createdAt || new Date().toISOString()
         }
       }
     } catch (error) {
@@ -60,11 +63,26 @@ export const useAuthStore = defineStore('auth', () => {
           email: response.user.email,
           role: response.user.role === 'admin' ? 'admin' : 'user',
           phone: response.user.phone,
-          avatar: response.user.avatar
+          avatar: response.user.avatar,
+          dateOfBirth: response.user.dateOfBirth,
+          address: response.user.address,
+          createdAt: response.user.createdAt || new Date().toISOString()
         }
       }
     } catch (error) {
       user.value = null
+    }
+  }
+
+  // ADD THIS NEW METHOD
+  function updateUser(updates: Partial<User>) {
+    if (user.value) {
+      user.value = {
+        ...user.value,
+        ...updates
+      }
+      // Save to localStorage
+      localStorage.setItem('user', JSON.stringify(user.value))
     }
   }
 
@@ -77,6 +95,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     initializeAuth,
-    refreshUser
+    refreshUser,
+    updateUser 
   }
 })
