@@ -1,106 +1,209 @@
 <template>
-  <div class="d-flex flex-column bg-white rounded px-4 h-100 py-3 shadow-sm">
-    <!-- Header Section -->
-    <div class="mb-3 border-bottom pb-2">
-      <div class="d-flex justify-content-between align-items-center gap-3">
-        <h1 class="h5 fw-semibold mb-0">All Customers ({{ totalCustomers }})</h1>
-        <div class="position-relative" style="width: 280px">
-          <i
-            class="bi bi-search position-absolute start-0 top-50 translate-middle-y ps-2 text-secondary"
-            style="font-size: 1rem"
-          ></i>
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search by name, email or phone"
-            class="form-control form-control-sm ps-5"
-            @input="handleSearch"
-          />
+  <div class="manage-users-container">
+    <div class="users-card">
+      <!-- Enhanced Header Section -->
+      <div class="card-header bg-white border-0">
+        <div class="container-fluid">
+          <div class="row align-items-center">
+            <div class="col-md-6 mb-3 mb-md-0">
+              <div class="d-flex align-items-center gap-3">
+                <div class="icon-box">
+                  <i class="bi bi-people"></i>
+                </div>
+                <div>
+                  <h2 class="header-title mb-1">Manage Customers</h2>
+                  <p class="text-muted mb-0 small">View and manage customer accounts</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex gap-2 justify-content-md-end">
+                <div class="search-box flex-grow-1 flex-md-grow-0">
+                  <i class="bi bi-search search-icon"></i>
+                  <input
+                    v-model="searchQuery"
+                    type="text"
+                    class="search-input"
+                    placeholder="Search by name, email or phone"
+                    @input="handleSearch"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Table Section -->
-    <div class="table-responsive border-top rounded-2 border bg-white">
-      <table class="table table-hover mb-0">
-        <thead>
-          <tr class="table-light">
-            <th class="px-2 py-3 text-uppercase text-muted small fw-semibold">Name</th>
-            <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Phone Number</th>
-            <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Email Address</th>
-            <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Member Since</th>
-            <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Purchased Items</th>
-            <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Reward Point</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="customer in displayedCustomers"
-            :key="customer.id"
-            class="user-row border-bottom hover-bg-light align-middle"
-            style="cursor: pointer"
-            @click="showProfile(customer)"
-          >
-            <td class="px-2 py-3">
-              <div class="d-flex align-items-center gap-3">
-                <!-- Avatar with fallback to grey default -->
-                <div
-                  v-if="!customer.avatar"
-                  class="rounded-circle bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center"
-                  style="width: 40px; height: 40px"
-                >
-                  <i class="bi bi-person-fill text-secondary" style="font-size: 1.2rem"></i>
+      <!-- Enhanced Stats Section -->
+      <div class="stats-section">
+        <div class="container-fluid">
+          <div class="row g-3">
+            <div class="col-sm-6 col-xl-3">
+              <div class="stat-card stat-total">
+                <div class="stat-card-inner">
+                  <div class="stat-icon-wrapper">
+                    <div class="stat-icon">
+                      <i class="bi bi-people"></i>
+                    </div>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-label">Total Customers</div>
+                    <div class="stat-value">{{ totalCustomers }}</div>
+                    <div class="stat-badge">
+                      <i class="bi bi-person-check"></i>
+                      <span>All Users</span>
+                    </div>
+                  </div>
                 </div>
-                <img
-                  v-else
-                  :src="customer.avatar"
-                  :alt="customer.name"
-                  class="rounded-circle"
-                  style="width: 40px; height: 40px; object-fit: cover"
-                />
-                <span class="fw-medium text-dark text-sm mb-0">{{ customer.name }}</span>
               </div>
-            </td>
-            <td class="px-4 py-3 text-dark small">{{ customer.phone }}</td>
-            <td class="px-4 py-3 text-dark small">{{ customer.email }}</td>
-            <td class="px-4 py-3 text-dark small">{{ customer.memberSince }}</td>
-            <td class="px-4 py-3 text-dark small">
-              <span class="px-4 py-3 text-danger">{{ customer.purchasedItems }} Items</span>
-            </td>
-            <td class="px-4 py-3 text-dark small">{{ customer.rewardPoints }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+            </div>
 
-    <!-- Pagination -->
-    <div class="d-flex justify-content-center align-items-center mt-4 gap-2 pt-2 border-top">
-      <button
-        @click="previousPage"
-        :disabled="currentPage === 1"
-        class="btn btn-sm btn-outline-secondary"
-      >
-        <i class="bi bi-caret-left-fill"></i>
-        <span class="ms-0.5">PREV</span>
-      </button>
-      <div class="d-flex align-items-center gap-1">
+            <div class="col-sm-6 col-xl-3">
+              <div class="stat-card stat-active">
+                <div class="stat-card-inner">
+                  <div class="stat-icon-wrapper">
+                    <div class="stat-icon">
+                      <i class="bi bi-person-check-fill"></i>
+                    </div>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-label">Active Members</div>
+                    <div class="stat-value">{{ stats.activeMembers }}</div>
+                    <div class="stat-badge">
+                      <i class="bi bi-arrow-up"></i>
+                      <span>This Month</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+              <div class="stat-card stat-orders">
+                <div class="stat-card-inner">
+                  <div class="stat-icon-wrapper">
+                    <div class="stat-icon">
+                      <i class="bi bi-bag-check-fill"></i>
+                    </div>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-label">Total Orders</div>
+                    <div class="stat-value">{{ stats.totalOrders }}</div>
+                    <div class="stat-badge">
+                      <i class="bi bi-graph-up"></i>
+                      <span>Purchases</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+              <div class="stat-card stat-rewards">
+                <div class="stat-card-inner">
+                  <div class="stat-icon-wrapper">
+                    <div class="stat-icon">
+                      <i class="bi bi-star-fill"></i>
+                    </div>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-label">Reward Points</div>
+                    <div class="stat-value">{{ stats.totalRewards }}</div>
+                    <div class="stat-badge">
+                      <i class="bi bi-award"></i>
+                      <span>Earned</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table Section -->
+      <div class="table-responsive rounded-2 border border-top bg-white">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr class="table-light">
+              <th class="px-2 py-3 text-uppercase text-muted small fw-semibold">Name</th>
+              <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Phone Number</th>
+              <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Email Address</th>
+              <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Member Since</th>
+              <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Purchased Items</th>
+              <th class="px-4 py-3 text-uppercase text-muted small fw-semibold">Reward Point</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="customer in displayedCustomers"
+              :key="customer.id"
+              class="user-row border-bottom hover-bg-light align-middle"
+              style="cursor: pointer"
+              @click="showProfile(customer)"
+            >
+              <td class="px-2 py-3">
+                <div class="d-flex align-items-center gap-3">
+                  <div
+                    v-if="!customer.avatar"
+                    class="rounded-circle bg-secondary bg-opacity-25 d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px"
+                  >
+                    <i class="bi bi-person-fill text-secondary" style="font-size: 1.2rem"></i>
+                  </div>
+                  <img
+                    v-else
+                    :src="customer.avatar"
+                    :alt="customer.name"
+                    class="rounded-circle"
+                    style="width: 40px; height: 40px; object-fit: cover"
+                  />
+                  <span class="fw-medium text-dark text-sm mb-0">{{ customer.name }}</span>
+                </div>
+              </td>
+              <td class="px-4 py-3 text-dark small">{{ customer.phone }}</td>
+              <td class="px-4 py-3 text-dark small">{{ customer.email }}</td>
+              <td class="px-4 py-3 text-dark small">{{ customer.memberSince }}</td>
+              <td class="px-4 py-3 text-dark small">
+                <span class="badge bg-primary">{{ customer.purchasedItems }} Items</span>
+              </td>
+              <td class="px-4 py-3 text-dark small">
+                <span class="badge bg-warning text-dark">{{ customer.rewardPoints }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="d-flex justify-content-center align-items-center mt-4 gap-2 pt-2 border-top">
         <button
-          v-for="page in totalPages"
-          :key="page"
-          @click="goToPage(page)"
-          :class="['btn btn-sm', currentPage === page ? 'btn-primary' : 'btn-outline-secondary']"
+          @click="previousPage"
+          :disabled="currentPage === 1"
+          class="btn btn-sm btn-outline-secondary"
         >
-          {{ page }}
+          <i class="bi bi-caret-left-fill"></i>
+          <span class="ms-0.5">PREV</span>
+        </button>
+        <div class="d-flex align-items-center gap-1">
+          <button
+            v-for="page in totalPages"
+            :key="page"
+            @click="goToPage(page)"
+            :class="['btn btn-sm', currentPage === page ? 'btn-primary' : 'btn-outline-secondary']"
+          >
+            {{ page }}
+          </button>
+        </div>
+        <button
+          @click="nextPage"
+          :disabled="currentPage === totalPages"
+          class="btn btn-sm btn-outline-secondary"
+        >
+          <span class="ms-0.5">NEXT</span>
+          <i class="bi bi-caret-right-fill"></i>
         </button>
       </div>
-      <button
-        @click="nextPage"
-        :disabled="currentPage === totalPages"
-        class="btn btn-sm btn-outline-secondary"
-      >
-        <span class="ms-0.5">NEXT</span>
-        <i class="bi bi-caret-right-fill"></i>
-      </button>
     </div>
 
     <!-- Profile Modal -->
@@ -142,7 +245,7 @@
                   class="rounded-circle border border-4 border-white"
                   style="width: 140px; height: 140px; object-fit: cover"
                 />
-                
+
               </div>
 
               <!-- Name and Email -->
@@ -246,24 +349,6 @@
   </div>
 </template>
 
-<style scoped>
-.user-row {
-  height: 44px;
-}
-
-.modal.show {
-  display: block;
-}
-
-.card {
-  transition: transform 0.2s ease;
-}
-
-.card:hover {
-  transform: translateY(-2px);
-}
-</style>
-
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import type { Customer } from '@/types/customer'
@@ -280,6 +365,13 @@ const selectedCustomer = ref<Customer | null>(null)
 
 const totalPages = computed(() => Math.ceil(totalCustomers.value / pageSize.value))
 const displayedCustomers = computed(() => customers.value)
+
+// Add stats computed property
+const stats = computed(() => ({
+  activeMembers: customers.value.filter(c => c.purchasedItems > 0).length,
+  totalOrders: customers.value.reduce((sum, c) => sum + c.purchasedItems, 0),
+  totalRewards: customers.value.reduce((sum, c) => sum + c.rewardPoints, 0)
+}))
 
 const showProfile = (customer: Customer) => {
   selectedCustomer.value = customer
@@ -338,3 +430,230 @@ const goToPage = (page: number) => {
 // Initial load
 loadCustomers(1)
 </script>
+
+<style scoped>
+.manage-users-container {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+.users-card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Enhanced Header Section */
+.card-header {
+  padding: 2rem 0;
+  border-bottom: 1px solid #e9ecef !important;
+}
+
+.icon-box {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0d1228 0%, #1a2642 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.header-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0d1228;
+  margin: 0;
+}
+
+/* Search Box */
+.search-box {
+  position: relative;
+  width: 320px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.625rem 2.5rem 0.625rem 2.75rem;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  background: #f8f9fa;
+  font-size: 0.875rem;
+  transition: all 0.3s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #0d1228;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(13, 18, 40, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+/* Enhanced Stats Section */
+.stats-section {
+  padding: 2rem 0;
+  background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+  border-bottom: 1px solid #e9ecef;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  height: 100%;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent 0%, currentColor 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-color: transparent;
+}
+
+.stat-card:hover::before {
+  opacity: 1;
+}
+
+.stat-total { color: #3b82f6; }
+.stat-active { color: #10b981; }
+.stat-orders { color: #f59e0b; }
+.stat-rewards { color: #8b5cf6; }
+
+.stat-card-inner {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.stat-icon-wrapper {
+  flex-shrink: 0;
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.stat-total .stat-icon {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.stat-active .stat-icon {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.stat-orders .stat-icon {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.stat-rewards .stat-icon {
+  background: rgba(139, 92, 246, 0.1);
+  color: #8b5cf6;
+}
+
+.stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0d1228;
+  line-height: 1;
+  margin-bottom: 0.75rem;
+}
+
+.stat-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.stat-badge i {
+  font-size: 0.875rem;
+}
+
+.user-row {
+  height: 44px;
+}
+
+.modal.show {
+  display: block;
+}
+
+.card {
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .header-title {
+    font-size: 1.5rem;
+  }
+
+  .icon-box {
+    width: 48px;
+    height: 48px;
+    font-size: 1.25rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+}
+</style>

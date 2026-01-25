@@ -1,62 +1,172 @@
 <template>
-  <div class="flex-grow-1 overflow-auto">
-    <div class="p-4">
-      <!-- Header Section -->
-      <div
-        class="d-flex flex-column flex-md-row align-items-md-center justify-content-md-between gap-3 mb-4"
-      >
-        <h2 class="h4 fw-semibold text-dark">
-          All Products
-          <span v-if="pagination" class="text-muted small">
-            ({{ pagination.total }})
-          </span>
-        </h2>
-        <button @click="showAddModal = true" class="btn btn-primary">
-          <i class="bi bi-plus-square-dotted"></i>
-          <span class="ms-2">Add New Product</span>
-        </button>
+  <div class="manage-products-container">
+    <div class="products-card">
+      <!-- Enhanced Header Section -->
+      <div class="card-header bg-white border-0">
+        <div class="container-fluid">
+          <div class="row align-items-center">
+            <div class="col-md-6 mb-3 mb-md-0">
+              <div class="d-flex align-items-center gap-3">
+                <div class="icon-box">
+                  <i class="bi bi-box-seam"></i>
+                </div>
+                <div>
+                  <h2 class="header-title mb-1">Product Management</h2>
+                  <p class="text-muted mb-0 small">Manage your product inventory</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="d-flex gap-2 justify-content-md-end">
+                <button @click="showAddModal = true" class="btn btn-theme d-flex align-items-center gap-2">
+                  <i class="bi bi-plus-square-dotted"></i>
+                  <span>Add Product</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Enhanced Stats Section -->
+      <div class="stats-section">
+        <div class="container-fluid">
+          <div class="row g-3">
+            <div class="col-sm-6 col-xl-3">
+              <div class="stat-card stat-total">
+                <div class="stat-card-inner">
+                  <div class="stat-icon-wrapper">
+                    <div class="stat-icon">
+                      <i class="bi bi-box-seam"></i>
+                    </div>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-label">Total Products</div>
+                    <div class="stat-value">{{ stats.total }}</div>
+                    <div class="stat-badge">
+                      <i class="bi bi-archive"></i>
+                      <span>All Items</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+              <div class="stat-card stat-active">
+                <div class="stat-card-inner">
+                  <div class="stat-icon-wrapper">
+                    <div class="stat-icon">
+                      <i class="bi bi-check-circle"></i>
+                    </div>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-label">Active Products</div>
+                    <div class="stat-value">{{ stats.active }}</div>
+                    <div class="stat-badge">
+                      <i class="bi bi-check2"></i>
+                      <span>Available</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+              <div class="stat-card stat-low-stock">
+                <div class="stat-card-inner">
+                  <div class="stat-icon-wrapper">
+                    <div class="stat-icon">
+                      <i class="bi bi-exclamation-triangle"></i>
+                    </div>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-label">Low Stock</div>
+                    <div class="stat-value">{{ stats.lowStock }}</div>
+                    <div class="stat-badge">
+                      <i class="bi bi-arrow-down"></i>
+                      <span>&lt; 10 units</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6 col-xl-3">
+              <div class="stat-card stat-draft">
+                <div class="stat-card-inner">
+                  <div class="stat-icon-wrapper">
+                    <div class="stat-icon">
+                      <i class="bi bi-file-earmark"></i>
+                    </div>
+                  </div>
+                  <div class="stat-content">
+                    <div class="stat-label">Draft Products</div>
+                    <div class="stat-value">{{ stats.draft }}</div>
+                    <div class="stat-badge">
+                      <i class="bi bi-pencil"></i>
+                      <span>Pending</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Filters Section -->
-      <div class="d-flex flex-column flex-md-row gap-2 mb-4">
-        <div class="flex-grow-1">
-          <span class="input-group-text bg-white border-0 rounded-2 shadow-sm gap-2">
-            <i class="bi bi-search"></i>
-            <input
-              v-model="filters.search"
-              type="text"
-              placeholder="Search by name, SKU or description"
-              class="form-control form-control-sm border-0"
-              @input="debouncedSearch"
-            />
-          </span>
+      <div class="filters-section">
+        <div class="container-fluid">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="search-box">
+                <i class="bi bi-search search-icon"></i>
+                <input
+                  v-model="filters.search"
+                  type="text"
+                  class="search-input"
+                  placeholder="Search by name, SKU or description"
+                  @input="debouncedSearch"
+                />
+              </div>
+            </div>
+            <div class="col-md-2">
+              <select v-model="filters.category" class="filter-select" @change="loadProducts">
+                <option value="">All Categories</option>
+                <option v-for="cat in categories" :key="cat._id" :value="cat._id">
+                  {{ cat.name }}
+                </option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <select v-model="filters.status" class="filter-select" @change="loadProducts">
+                <option value="">All Status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="draft">Draft</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select v-model="filters.sortBy" class="filter-select" @change="loadProducts">
+                <option value="createdAt">Sort By: Date</option>
+                <option value="name">Sort By: Name</option>
+                <option value="price">Sort By: Price</option>
+                <option value="stock">Sort By: Stock</option>
+                <option value="rating">Sort By: Rating</option>
+              </select>
+            </div>
+            <div class="col-md-1">
+              <button
+                @click="toggleSortOrder"
+                class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center"
+                type="button"
+              >
+                <i :class="filters.sortOrder === 'asc' ? 'bi bi-sort-up' : 'bi bi-sort-down'"></i>
+              </button>
+            </div>
+          </div>
         </div>
-        <select v-model="filters.category" class="form-select form-select-sm w-25" @change="loadProducts">
-          <option value="">All Categories</option>
-          <option v-for="cat in categories" :key="cat._id" :value="cat._id">
-            {{ cat.name }}
-          </option>
-        </select>
-        <select v-model="filters.status" class="form-select form-select-sm w-25" @change="loadProducts">
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-          <option value="draft">Draft</option>
-        </select>
-        <select v-model="filters.sortBy" class="form-select form-select-sm w-25" @change="loadProducts">
-          <option value="createdAt">Sort By: Date</option>
-          <option value="name">Sort By: Name</option>
-          <option value="price">Sort By: Price</option>
-          <option value="stock">Sort By: Stock</option>
-          <option value="rating">Sort By: Rating</option>
-        </select>
-        <button
-          @click="toggleSortOrder"
-          class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2"
-          type="button"
-        >
-          <i :class="filters.sortOrder === 'asc' ? 'bi bi-sort-down-alt' : 'bi bi-sort-down'"></i>
-        </button>
       </div>
 
       <!-- Loading State -->
@@ -911,6 +1021,14 @@ function onImagesChange(event: Event) {
   }
 }
 
+// Add stats computed property
+const stats = computed(() => ({
+  total: products.value.length,
+  active: products.value.filter(p => p.status === 'active').length,
+  lowStock: products.value.filter(p => p.stock < 10).length,
+  draft: products.value.filter(p => p.status === 'draft').length
+}))
+
 // Initialize
 onMounted(() => {
   loadProducts()
@@ -918,4 +1036,249 @@ onMounted(() => {
 })
 </script>
 
-<style scoped></style>
+<style scoped>
+.manage-products-container {
+  padding: 1.5rem;
+  background: #f8f9fa;
+  min-height: 100vh;
+}
+
+.products-card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Enhanced Header Section */
+.card-header {
+  padding: 2rem 0;
+  border-bottom: 1px solid #e9ecef !important;
+}
+
+.icon-box {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0d1228 0%, #1a2642 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.header-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0d1228;
+  margin: 0;
+}
+
+.btn-theme {
+  background: linear-gradient(135deg, #0d1228 0%, #1a2642 100%);
+  border: none;
+  color: white;
+  padding: 0.625rem 1.25rem;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.btn-theme:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(13, 18, 40, 0.3);
+  background: linear-gradient(135deg, #1a2642 0%, #0d1228 100%);
+  color: white;
+}
+
+/* Enhanced Stats Section */
+.stats-section {
+  padding: 2rem 0;
+  background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+  border-bottom: 1px solid #e9ecef;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  height: 100%;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent 0%, currentColor 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-color: transparent;
+}
+
+.stat-card:hover::before {
+  opacity: 1;
+}
+
+.stat-total { color: #3b82f6; }
+.stat-active { color: #10b981; }
+.stat-low-stock { color: #f59e0b; }
+.stat-draft { color: #6b7280; }
+
+.stat-card-inner {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.stat-icon-wrapper {
+  flex-shrink: 0;
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.stat-total .stat-icon {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.stat-active .stat-icon {
+  background: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+}
+
+.stat-low-stock .stat-icon {
+  background: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+}
+
+.stat-draft .stat-icon {
+  background: rgba(107, 114, 128, 0.1);
+  color: #6b7280;
+}
+
+.stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #0d1228;
+  line-height: 1;
+  margin-bottom: 0.75rem;
+}
+
+.stat-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.stat-badge i {
+  font-size: 0.875rem;
+}
+
+/* Filters Section */
+.filters-section {
+  padding: 1.5rem 0;
+  background: white;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.search-box {
+  position: relative;
+  width: 100%;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.625rem 2.5rem 0.625rem 2.75rem;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  background: #f8f9fa;
+  font-size: 0.875rem;
+  transition: all 0.3s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #0d1228;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(13, 18, 40, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.filter-select {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  background: white;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #0d1228;
+  box-shadow: 0 0 0 4px rgba(13, 18, 40, 0.1);
+}
+
+@media (max-width: 768px) {
+  .header-title {
+    font-size: 1.5rem;
+  }
+
+  .icon-box {
+    width: 48px;
+    height: 48px;
+    font-size: 1.25rem;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+}
+</style>
