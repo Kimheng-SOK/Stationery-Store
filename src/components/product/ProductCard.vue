@@ -9,7 +9,7 @@
         -{{ product.discount }}%
       </span>
 
-      <span v-if="product.rating >= 4.5" class="badge badge-popular">
+      <span v-if="product.rating >= 4" class="badge badge-popular">
         <i class="bi bi-star-fill me-1"></i> POPULAR
       </span>
 
@@ -26,7 +26,7 @@
     </div>
 
     <div class="product-info">
-      <p class="product-category text-uppercase">{{ product.categoryName }}</p>
+      <p class="product-category text-uppercase">{{ product.category.name }}</p>
 
       <h6 class="product-title" @click="viewDetails">{{ product.name }}</h6>
 
@@ -38,7 +38,10 @@
       <div class="d-flex justify-content-between align-items-center mt-auto">
         <div class="price-wrapper">
           <span class="product-price">${{ product.displayPrice }}</span>
-          <span v-if="product.showStrikePrice" class="product-original-price">
+          <span
+            v-if="product.discount > 0"
+            class="product-original-price"
+          >
             ${{ product.originalPrice }}
           </span>
         </div>
@@ -68,10 +71,10 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cartStore'
+import type { Product } from '@/types/product'
 
-// Note: We use 'any' here because the Store formatter adds displayPrice/showStrikePrice
 interface Props {
-  product: any
+  product: Product
 }
 
 const props = defineProps<Props>()

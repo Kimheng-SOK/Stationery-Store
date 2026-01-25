@@ -153,18 +153,6 @@
           <i class="bi bi-arrow-right"></i>
         </span>
       </button>
-
-      <!-- Trust Badges -->
-      <div class="d-flex justify-content-around gap-2 pt-3 border-top">
-        <div class="text-center">
-          <i class="bi bi-shield-check fs-4 mb-1 d-block" style="color: #d4af37;"></i>
-          <small class="text-muted" style="font-size: 0.7rem;">Secure Payment</small>
-        </div>
-        <div class="text-center">
-          <i class="bi bi-arrow-repeat fs-4 mb-1 d-block" style="color: #d4af37;"></i>
-          <small class="text-muted" style="font-size: 0.7rem;">Easy Returns</small>
-        </div>
-      </div>
     </div>
   </div>
 </template>

@@ -173,7 +173,7 @@
                 class="card-img-top"
                 :alt="relatedProduct.name"
                 style="height: 200px; object-fit: cover; cursor: pointer;"
-                @click="navigateToProduct(relatedProduct._id || relatedProduct.id)"
+                @click="navigateToProduct(relatedProduct._id)"
               />
               <div class="card-body">
                 <h6 class="card-title">{{ relatedProduct.name }}</h6>
@@ -182,7 +182,7 @@
                 </p>
                 <button
                   class="btn btn-sm btn-outline-primary w-100"
-                  @click="navigateToProduct(relatedProduct._id || relatedProduct.id)"
+                  @click="navigateToProduct(relatedProduct._id)"
                 >
                   View Details
                 </button>
@@ -195,10 +195,10 @@
       <div class="row mt-5 border-top pt-5">
         <div class="col-lg-5 mb-4">
           <div v-if="authStore.isAuthenticated">
-            <ReviewProductForm 
-              :productId="productId" 
-              :user="authStore.user" 
-              @submit="handleNewReview" 
+            <ReviewProductForm
+              :productId="productId"
+              :user="authStore.user"
+              @submit="handleNewReview"
             />
           </div>
           <div v-else class="card bg-light border-0 text-center p-5">
@@ -226,7 +226,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cartStore'
 import { useProductStore } from '@/stores/product'
 import { useReviewStore } from '@/stores/reviewStore'
-import { useAuthStore } from '@/stores/auth' 
+import { useAuthStore } from '@/stores/auth'
 import ReviewProductForm from '@/components/Review/ReviewProductForm.vue'
 import ReviewProductCard from '@/components/Review/ReviewProductCard.vue'
 
@@ -303,8 +303,8 @@ const handleNewReview = async (payload: any) => {
   if (!result?.success) {
     reviewStore.fetchReviews(productId.value)
   } else {
-    loadProduct() 
-    reviewStore.fetchReviews(productId.value) 
+    loadProduct()
+    reviewStore.fetchReviews(productId.value)
   }
 }
 
@@ -325,7 +325,7 @@ const decreaseQuantity = () => {
 const addToCart = () => {
   if (product.value) {
     cartStore.addToCart(product.value, quantity.value)
-    alert(`${quantity.value} ${product.value.name}(s) added to cart!`)
+    console.log(`${quantity.value} ${product.value.name}(s) added to cart!`)
   }
 }
 
