@@ -1,3 +1,4 @@
+
 <template>
   <div class="manage-banner-container">
     <div class="card">
@@ -22,7 +23,7 @@
             <input
               v-model="searchQuery"
               type="text"
-              placeholder="Search by link or date..."
+              placeholder="Search by date..."
               class="form-control form-control-sm"
             />
           </div>
@@ -53,10 +54,7 @@
             <span class="stat-label">Active</span>
             <span class="stat-value text-success">{{ activeCount }}</span>
           </div>
-          <div class="stat-item">
-            <span class="stat-label">Pending</span>
-            <span class="stat-value text-warning">{{ pendingCount }}</span>
-          </div>
+
           <div class="stat-item">
             <span class="stat-label">Inactive</span>
             <span class="stat-value text-secondary">{{ inactiveCount }}</span>
@@ -65,7 +63,14 @@
 
         <!-- Banners Grid/List -->
         <div class="banners-list">
-          <div v-if="filteredBanners.length === 0" class="empty-state">
+          <div v-if="isLoading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="text-muted mt-2">Loading banners...</p>
+          </div>
+
+          <div v-else-if="filteredBanners.length === 0" class="empty-state">
             <i class="bi bi-inbox text-muted mb-2"></i>
             <p class="text-muted">No banners found</p>
           </div>
@@ -74,8 +79,8 @@
             <!-- Left Section: Image -->
             <div class="banner-card-image">
               <img
-                :src="banner.image"
-                :alt="banner.link"
+                :src="getImageUrl(banner.image)"
+                alt="Banner image"
                 class="banner-image"
               />
               <span :class="`status-badge-card status-${banner.status}`">
@@ -85,22 +90,13 @@
 
             <!-- Middle Section: Details -->
             <div class="banner-card-content">
-              <!-- Campaign Link -->
-              <div class="banner-link-section">
-                <a :href="`https://${banner.link}`" target="_blank" class="banner-link">
-                  {{ banner.link }}
-                  <i class="bi bi-box-arrow-up-right"></i>
-                </a>
-                <small class="text-muted">{{ banner.requestedDate }}</small>
-              </div>
-
               <!-- Timeline -->
               <div class="banner-timeline">
                 <div class="timeline-item">
                   <i class="bi bi-calendar-event"></i>
                   <div class="timeline-content">
                     <small class="label">Start</small>
-                    <p class="text-muted">{{ banner.startDate }}</p>
+                    <p class="text-muted">{{ formatDate(banner.startDate) }}</p>
                   </div>
                 </div>
                 <div class="timeline-divider">
@@ -110,7 +106,7 @@
                   <i class="bi bi-calendar-event"></i>
                   <div class="timeline-content">
                     <small class="label">End</small>
-                    <p class="text-muted">{{ banner.endDate }}</p>
+                    <p class="text-muted">{{ formatDate(banner.endDate) }}</p>
                   </div>
                 </div>
               </div>
@@ -184,11 +180,49 @@
                 <i class="bi bi-image text-primary"></i>
                 Banner Image
               </label>
-              <FileUpload
-                v-model="formData.image"
-                alt-text="Banner image"
-                @update:model-value="(val) => (formData.image = val)"
-              />
+
+              <!-- Image Preview or Upload Area -->
+              <div v-if="formData.image" class="image-preview mb-3">
+                <div class="position-relative d-inline-block w-100">
+                  <img
+                    :src="formData.image"
+                    alt="Banner preview"
+                    class="img-fluid rounded shadow-sm w-100"
+                    style="max-height: 300px; object-fit: cover; border: 2px solid #dee2e6;"
+                  />
+                  <div class="position-absolute top-0 end-0 m-2">
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-sm"
+                      @click="clearImage"
+                      style="opacity: 0.9;"
+                    >
+                      <i class="bi bi-trash"></i> Remove
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="upload-area border rounded p-4 text-center" style="border: 2px dashed #dee2e6; background: #f8f9fa;">
+                <i class="bi bi-cloud-upload fs-1 text-muted mb-3 d-block"></i>
+                <input
+                  type="file"
+                  accept="image/*"
+                  class="d-none"
+                  @change="handleFileChange"
+                  ref="fileInput"
+                  id="bannerFileInput"
+                />
+                <label for="bannerFileInput" class="btn btn-primary btn-lg mb-2" style="cursor: pointer;">
+                  <i class="bi bi-folder2-open me-2"></i>Browse Image
+                </label>
+                <p class="text-muted mb-0">
+                  <small><i class="bi bi-info-circle me-1"></i>Click to select image from your device</small>
+                </p>
+                <small class="text-muted d-block mt-1">
+                  Supported: JPG, PNG, GIF (Max 5MB)
+                </small>
+              </div>
+
               <small v-if="errors.image" class="text-danger d-block mt-2">{{ errors.image }}</small>
             </div>
 
@@ -204,38 +238,11 @@
                   <input
                     type="date"
                     :class="['form-control', { 'is-invalid': errors.startDate }]"
-                    v-model="formData.startDate"
+                    v-model="formData.startDate" :min="minDate"
                   />
                   <small v-if="errors.startDate" class="text-danger">{{ errors.startDate }}</small>
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label small">End Date</label>
-                  <input
-                    type="date"
-                    :class="['form-control', { 'is-invalid': errors.endDate }]"
-                    v-model="formData.endDate"
-                  />
-                  <small v-if="errors.endDate" class="text-danger">{{ errors.endDate }}</small>
-                </div>
-              </div>
-            </div>
 
-            <!-- Campaign Details -->
-            <div class="form-section mb-4">
-              <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                <i class="bi bi-info-circle text-primary"></i>
-                Campaign Details
-              </label>
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label small">Request Date</label>
-                  <input
-                    type="date"
-                    :class="['form-control', { 'is-invalid': errors.requestedDate }]"
-                    v-model="formData.requestedDate"
-                  />
-                  <small v-if="errors.requestedDate" class="text-danger">{{ errors.requestedDate }}</small>
-                </div>
                 <div class="col-md-6">
                   <label class="form-label small">Duration (Days)</label>
                   <input
@@ -247,24 +254,14 @@
                   <small v-if="errors.days" class="text-danger">{{ errors.days }}</small>
                 </div>
               </div>
-            </div>
 
-            <!-- Link -->
-            <div class="form-section mb-4">
-              <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                <i class="bi bi-link-45deg text-primary"></i>
-                Destination Link
-              </label>
-              <div class="row g-3">
-                <div class="col-12">
-                  <label class="form-label small">Campaign Link</label>
-                  <input
-                    type="text"
-                    :class="['form-control', { 'is-invalid': errors.link }]"
-                    v-model="formData.link"
-                    placeholder="example.com"
-                  />
-                  <small v-if="errors.link" class="text-danger">{{ errors.link }}</small>
+              <!-- Show calculated end date -->
+              <div v-if="calculateEndDate" class="mt-3 p-3 bg-light rounded">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-calendar-check text-success"></i>
+                  <small class="text-muted fw-semibold">
+                    Campaign will end on {{ calculateEndDate }}
+                  </small>
                 </div>
               </div>
             </div>
@@ -339,38 +336,153 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { mockBanners } from '@/data/banners'
-import type { Banner, BannerStatus } from '@/types/banner'
-import FileUpload from '@/components/common/FileUpload.vue'
-import { useFormState } from '@/composables/useFormState'
+import { ref, computed, watch, onMounted } from 'vue'
+
+// Types
+type BannerStatus = 'active' | 'inactive'
+
+interface Banner {
+  id: number
+  image: string
+  link: string
+  days: number
+  startDate: string
+  endDate: string
+  status: BannerStatus
+}
+
+// Validation rule type
+interface ValidationRule {
+  required?: boolean
+  min?: number
+  [key: string]: boolean | number | undefined
+}
+
+const getImageUrl = (image: string): string => {
+  if (!image) return '';
+  if (image.startsWith('http') || image.startsWith('data:')) {
+    return image; // Already absolute or base64
+  }
+  // Backend saves to uploads/banners/ folder, so prepend that path
+  return `http://localhost:5000/uploads/banners/${image}`;
+};
+
+// Form state composable (inline)
+function useFormState<T extends Record<string, string | number | boolean>>(defaultData: T) {
+  const formData = ref({ ...defaultData })
+  const errors = ref<Record<string, string>>({})
+  const isSubmitting = ref(false)
+  const submitMessage = ref<{ type: 'success' | 'danger'; text: string } | null>(null)
+
+  const validateForm = (rules: Record<string, ValidationRule>) => {
+    errors.value = {}
+    let isValid = true
+
+    for (const [field, rule] of Object.entries(rules)) {
+      if (rule.required && !formData.value[field]) {
+        errors.value[field] = 'This field is required'
+        isValid = false
+      }
+      if (rule.min && formData.value[field] < rule.min) {
+        errors.value[field] = `Minimum value is ${rule.min}`
+        isValid = false
+      }
+    }
+
+    return isValid
+  }
+
+  const resetForm = () => {
+    Object.assign(formData.value, defaultData)
+    errors.value = {}
+    submitMessage.value = null
+  }
+
+  const showSuccess = (text: string) => {
+    submitMessage.value = { type: 'success', text }
+  }
+
+  const showError = (text: string) => {
+    submitMessage.value = { type: 'danger', text }
+  }
+
+  const clearErrors = () => {
+    errors.value = {}
+    submitMessage.value = null
+  }
+
+  return {
+    formData: formData.value,
+    errors,
+    isSubmitting,
+    submitMessage,
+    validateForm,
+    resetForm,
+    showSuccess,
+    showError,
+    clearErrors
+  }
+}
 
 // State
-const banners = ref<Banner[]>(JSON.parse(JSON.stringify(mockBanners)))
+const banners = ref<Banner[]>([])
 const showModal = ref(false)
 const showDeleteModal = ref(false)
 const isEditing = ref(false)
 const bannerToDelete = ref<Banner | null>(null)
 const searchQuery = ref('')
 const selectedStatus = ref<BannerStatus | 'all'>('all')
+const isLoading = ref(false)
+
+// API Base URL - Update this to match your backend
+const API_URL = 'http://localhost:5000/api/banners'
+
+// Fetch banners from API
+const fetchBanners = async () => {
+  isLoading.value = true
+  try {
+    const response = await fetch(API_URL)
+
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`)
+    }
+
+    const contentType = response.headers.get('content-type')
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Server did not return JSON response')
+    }
+
+    const result = await response.json()
+
+    if (result.success) {
+      banners.value = result.data
+    }
+  } catch (error) {
+    console.error('Failed to fetch banners:', error)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Load banners on mount
+onMounted(() => {
+  fetchBanners()
+})
 
 // Status options
 const statusOptions = [
   { value: 'active' as BannerStatus, label: 'Active' },
-  { value: 'pending' as BannerStatus, label: 'Pending' },
   { value: 'inactive' as BannerStatus, label: 'Inactive' },
-  { value: 'expired' as BannerStatus, label: 'Expired' },
 ]
 
 // Form Data
 const defaultFormData = {
   id: 0,
-  requestedDate: '',
   image: '',
+  link: '/shop',
   days: 7,
   startDate: '',
   endDate: '',
-  link: '',
   status: 'active' as BannerStatus,
 }
 
@@ -386,11 +498,25 @@ const {
   clearErrors,
 } = useFormState(defaultFormData)
 
+
+watch(() => [formData.startDate, formData.days], ([startDate, days]) => {
+  const daysNum = Number(days)
+  if (startDate && daysNum > 0) {
+    const start = new Date(startDate as string)
+    const end = new Date(start)
+    end.setDate(start.getDate() + daysNum);
+  }
+})
+
+const minDate = computed(() => {
+  return new Date().toISOString().split('T')[0];
+});
+
 // Computed
 const filteredBanners = computed(() => {
   return banners.value.filter((banner) => {
     const matchesSearch =
-      banner.link.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      (banner.link && banner.link.toLowerCase().includes(searchQuery.value.toLowerCase())) ||
       banner.startDate.includes(searchQuery.value) ||
       banner.endDate.includes(searchQuery.value)
     const matchesStatus = selectedStatus.value === 'all' || banner.status === selectedStatus.value
@@ -399,80 +525,166 @@ const filteredBanners = computed(() => {
 })
 
 const activeCount = computed(() => banners.value.filter((b) => b.status === 'active').length)
-const pendingCount = computed(() => banners.value.filter((b) => b.status === 'pending').length)
 const inactiveCount = computed(() => banners.value.filter((b) => b.status === 'inactive').length)
+
+const calculateEndDate = computed(() => {
+  if (formData.startDate && formData.days > 0) {
+    const start = new Date(formData.startDate)
+    const end = new Date(start)
+    end.setDate(start.getDate() + Number(formData.days))
+
+    const options: Intl.DateTimeFormatOptions = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }
+    return end.toLocaleDateString('en-US', options)
+  }
+
+  return ''
+})
 
 // Methods
 const formatStatus = (status: BannerStatus): string => {
   const map: Record<BannerStatus, string> = {
     active: 'Active',
-    pending: 'Pending',
     inactive: 'Inactive',
-    expired: 'Expired',
   }
   return map[status]
 }
 
 const openAddModal = () => {
+  console.log('Opening add modal...')
   isEditing.value = false
   resetForm()
   clearErrors()
   showModal.value = true
+  console.log('Modal should be visible now, showModal:', showModal.value)
 }
 
 const editBanner = (banner: Banner) => {
   isEditing.value = true
-  Object.assign(formData, banner)
+   // Deep copy the banner data
+  const bannerCopy = JSON.parse(JSON.stringify(banner))
+  // Ensure the image is a full URL for preview
+  bannerCopy.image = getImageUrl(banner.image)
+  Object.assign(formData, bannerCopy)
   clearErrors()
   showModal.value = true
 }
 
 const closeModal = () => {
   showModal.value = false
-  resetForm()
+  setTimeout(() => {
+    resetForm()
+  }, 300)
 }
 
 const saveBanner = async () => {
+  console.log('saveBanner called, formData:', formData)
+
+
+
   const validationRules = {
-    requestedDate: { required: true },
     image: { required: true },
     days: { required: true, min: 1 },
     startDate: { required: true },
-    endDate: { required: true },
-    link: { required: true, minLength: 3 },
     status: { required: true },
   }
 
   if (!validateForm(validationRules)) {
     showError('Please fix the errors in the form')
+    console.log('Validation failed, errors:', errors.value)
     return
   }
 
+  console.log('Validation passed, submitting...')
   isSubmitting.value = true
 
   try {
-    await new Promise((resolve) => setTimeout(resolve, 500))
+    // Calculate end date
+    const start = new Date(formData.startDate)
+    const end = new Date(start)
+    end.setDate(start.getDate() + Number(formData.days))
+    formData.endDate = end.toISOString().split('T')[0]
+
+    console.log('Converting image to file...')
+    // Convert base64 image to File object for upload
+    const imageFile = await base64ToFile(formData.image, 'banner-image.jpg')
+    console.log('Image file created:', imageFile)
+
+    // Create FormData for file upload
+    const formDataToSend = new FormData()
+    formDataToSend.append('image', imageFile)
+    formDataToSend.append('days', String(formData.days))
+    formDataToSend.append('startDate', formData.startDate)
+    formDataToSend.append('link', formData.link || '/shop')
+    formDataToSend.append('status', formData.status)
+
+    console.log('FormData created, making API call...')
+
+    let response: Response
 
     if (isEditing.value) {
-      const index = banners.value.findIndex((b) => b.id === formData.id)
-      if (index !== -1) {
-        banners.value[index] = { ...formData } as Banner
-      }
-      showSuccess('Banner updated successfully')
+      // Update existing banner
+      console.log('Updating banner ID:', formData.id)
+      response = await fetch(`${API_URL}/${formData.id}`, {
+        method: 'PUT',
+        body: formDataToSend
+      })
     } else {
-      const newBanner = {
-        ...formData,
-        id: Math.max(...banners.value.map((b) => b.id), 0) + 1,
-      } as Banner
-      banners.value.unshift(newBanner)
-      showSuccess('Banner created successfully')
+      // Create new banner
+      console.log('Creating new banner...')
+      response = await fetch(API_URL, {
+        method: 'POST',
+        body: formDataToSend
+      })
     }
 
-    closeModal()
+    console.log('Response status:', response.status)
+
+    // Check if response is OK before parsing JSON
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status} ${response.statusText}`)
+    }
+
+    // Check if response has content before parsing
+    const contentType = response.headers.get('content-type')
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Server did not return JSON response')
+    }
+
+    const result = await response.json()
+    console.log('API response:', result)
+
+    if (result.success) {
+      showSuccess(isEditing.value ? 'Banner updated successfully!' : 'Banner created successfully!')
+      await fetchBanners()
+
+      setTimeout(() => {
+        closeModal()
+      }, 1500)
+    } else {
+      showError(result.message || 'Failed to save banner')
+    }
   } catch (error) {
-    showError('Failed to save banner')
+    console.error('Error saving banner:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    showError('Failed to save banner: ' + errorMessage)
   } finally {
     isSubmitting.value = false
+  }
+}
+
+// Helper function to convert base64 to File
+const base64ToFile = async (base64String: string, filename: string): Promise<File> => {
+  try {
+    const response = await fetch(base64String)
+    const blob = await response.blob()
+    return new File([blob], filename, { type: blob.type })
+  } catch (error) {
+    console.error('Error converting base64 to file:', error)
+    throw error
   }
 }
 
@@ -485,15 +697,80 @@ const deleteBanner = async () => {
   if (!bannerToDelete.value) return
 
   try {
-    await new Promise((resolve) => setTimeout(resolve, 300))
-    banners.value = banners.value.filter((b) => b.id !== bannerToDelete.value!.id)
-    showSuccess('Banner deleted successfully')
+    const response = await fetch(`${API_URL}/${bannerToDelete.value.id}`, {
+      method: 'DELETE'
+    })
+
+    if (!response.ok) {
+      throw new Error(`Server error: ${response.status}`)
+    }
+
+    const contentType = response.headers.get('content-type')
+    if (!contentType || !contentType.includes('application/json')) {
+      throw new Error('Server did not return JSON response')
+    }
+
+    const result = await response.json()
+
+    if (result.success) {
+      showSuccess('Banner deleted successfully')
+      await fetchBanners()
+    } else {
+      showError(result.message || 'Failed to delete banner')
+    }
+
     showDeleteModal.value = false
     bannerToDelete.value = null
   } catch (error) {
+    console.error('Error deleting banner:', error)
     showError('Failed to delete banner')
   }
 }
+
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
+}
+
+// File handling methods
+const fileInput = ref<HTMLInputElement | null>(null)
+
+const handleFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
+
+  if (file) {
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      showError('File size must be less than 5MB')
+      return
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      showError('Please select an image file')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      formData.image = e.target?.result as string
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+const clearImage = () => {
+  formData.image = ''
+  if (fileInput.value) {
+    fileInput.value.value = ''
+  }
+}
+
 </script>
 
 <style scoped>
@@ -969,6 +1246,7 @@ const deleteBanner = async () => {
 
 .form-section {
   padding-bottom: 1rem;
+  height: 20%;
 }
 
 .form-section .form-label {

@@ -3,11 +3,10 @@
     <div
       v-if="slides.length"
       id="heroCarousel"
+      ref="carouselEl"
       class="carousel slide carousel-fade"
       data-bs-ride="carousel"
-      data-bs-interval="3000"
     >
-      <!-- Background Slides -->
       <div class="carousel-inner">
         <div
           v-for="(slide, index) in slides"
@@ -18,7 +17,6 @@
         </div>
       </div>
 
-      <!-- Indicators -->
       <div class="carousel-indicators">
         <button
           v-for="(slide, index) in slides"
@@ -27,11 +25,12 @@
           data-bs-target="#heroCarousel"
           :data-bs-slide-to="index"
           :class="{ active: index === 0 }"
+          :aria-current="index === 0 ? 'true' : 'false'"
+
         ></button>
       </div>
     </div>
 
-    <!-- Static Content (stays in place) -->
     <div class="hero-content">
       <div class="container">
         <div class="row">
@@ -40,14 +39,8 @@
               Welcome to<br>
               <span class="fw-bold text-primary">StationeryBox</span> Shop
             </h1>
-            <p class="lead text-white mb-4">
-              Discover premium notebooks, elegant pens, and thoughtfully designed
-              desk accessories for the modern professional
-            </p>
             <router-link to="/shop">
-              <button class="btn btn-success btn-lg">
-                Shop Collection →
-              </button>
+              <button class="btn btn-success btn-lg">Shop Collection →</button>
             </router-link>
           </div>
         </div>
@@ -57,12 +50,51 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useHeroSectionStore } from '@/stores/heroSection'
 
 const heroStore = useHeroSectionStore()
-
 const slides = computed(() => heroStore.heroSlides)
+const carouselEl = ref<HTMLElement | null>(null)
+let carouselInstance: any = null
+
+// MANUAL NAVIGATION FIX:
+// This ensures the button click works even if Bootstrap's data-attributes fail
+const goToSlide = (index: number) => {
+  if (carouselInstance) {
+    carouselInstance.to(index)
+  }
+}
+
+const initCarousel = async () => {
+  await nextTick()
+
+  // Guard for TypeScript error: ensure element exists before passing to Bootstrap
+  if (!carouselEl.value || slides.value.length === 0 || !window.bootstrap) return
+
+  if (carouselInstance) {
+    carouselInstance.dispose()
+  }
+
+  // Initializing with the element reference directly
+  carouselInstance = new window.bootstrap.Carousel(carouselEl.value, {
+    interval: 3000,
+    ride: 'carousel',
+    wrap: true
+  })
+}
+
+onMounted(async () => {
+  await heroStore.fetchBanners()
+  await initCarousel()
+})
+
+onUnmounted(() => {
+  if (carouselInstance) {
+    carouselInstance.dispose()
+  }
+})
+
 </script>
 
 <style scoped>
@@ -99,6 +131,16 @@ const slides = computed(() => heroStore.heroSlides)
   align-items: center;
   padding: 50px 0;
 }
+
+.hero-content {
+  pointer-events: none;
+}
+
+.hero-content button,
+.hero-content a {
+  pointer-events: auto;
+}
+\
 
 .btn-success {
   background-color: #7fb069;

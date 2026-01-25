@@ -32,9 +32,9 @@
         <div class="col-lg-6 mb-4">
           <div class="product-images">
             <div class="main-image-container mb-3">
-              <img 
-                :src="selectedImage || product.image" 
-                :alt="product.name" 
+              <img
+                :src="selectedImage || product.image"
+                :alt="product.name"
                 class="main-image img-fluid rounded"
               />
               <!-- Badges -->
@@ -48,9 +48,9 @@
 
             <!-- Thumbnail Images -->
             <div class="thumbnail-images d-flex gap-2">
-              <img 
-                :src="product.image" 
-                alt="Thumbnail" 
+              <img
+                :src="product.image"
+                alt="Thumbnail"
                 class="thumbnail-image img-thumbnail"
                 :class="{ active: selectedImage === product.image }"
                 @click="selectedImage = product.image"
@@ -68,7 +68,7 @@
             <!-- Rating & Reviews -->
             <div class="rating-section mb-3 d-flex align-items-center">
               <div class="stars text-warning me-2">
-                <i v-for="i in 5" :key="i" 
+                <i v-for="i in 5" :key="i"
                    :class="i <= product.rating ? 'bi bi-star-fill' : 'bi bi-star'">
                 </i>
               </div>
@@ -113,23 +113,23 @@
             <div class="quantity-section mb-4">
               <label class="form-label fw-semibold">Quantity:</label>
               <div class="input-group w-50">
-                <button 
-                  class="btn btn-outline-secondary" 
+                <button
+                  class="btn btn-outline-secondary"
                   type="button"
                   @click="decreaseQuantity"
                   :disabled="quantity <= 1"
                 >
                   <i class="bi bi-dash"></i>
                 </button>
-                <input 
-                  type="number" 
-                  class="form-control text-center" 
+                <input
+                  type="number"
+                  class="form-control text-center"
                   v-model.number="quantity"
                   min="1"
                   :max="product.stock"
                 />
-                <button 
-                  class="btn btn-outline-secondary" 
+                <button
+                  class="btn btn-outline-secondary"
                   type="button"
                   @click="increaseQuantity"
                   :disabled="quantity >= product.stock"
@@ -141,15 +141,15 @@
 
             <!-- Action Buttons -->
             <div class="action-buttons d-flex gap-3 mb-4">
-              <button 
+              <button
                 class="btn btn-primary btn-lg flex-grow-1"
                 @click="addToCart"
                 :disabled="!product.inStock || addingToCart"
               >
-                <i class="bi bi-cart-plus"></i> 
+                <i class="bi bi-cart-plus"></i>
                 {{ addingToCart ? 'Adding...' : 'Add to Cart' }}
               </button>
-              <button 
+              <button
                 class="btn btn-outline-secondary btn-lg"
                 @click="toggleWishlist"
               >
@@ -161,9 +161,9 @@
             <div v-if="showSuccessMessage" class="alert alert-success alert-dismissible fade show" role="alert">
               <i class="bi bi-check-circle-fill"></i>
               {{ quantity }} {{ product.name }}(s) added to cart!
-              <button 
-                type="button" 
-                class="btn-close" 
+              <button
+                type="button"
+                class="btn-close"
                 @click="showSuccessMessage = false"
               ></button>
             </div>
@@ -181,10 +181,10 @@
               <div class="accordion" id="productAccordion">
                 <div class="accordion-item">
                   <h2 class="accordion-header">
-                    <button 
-                      class="accordion-button collapsed" 
-                      type="button" 
-                      data-bs-toggle="collapse" 
+                    <button
+                      class="accordion-button collapsed"
+                      type="button"
+                      data-bs-toggle="collapse"
                       data-bs-target="#specifications"
                     >
                       Specifications
@@ -201,13 +201,13 @@
                     </div>
                   </div>
                 </div>
-                
+
                 <div class="accordion-item">
                   <h2 class="accordion-header">
-                    <button 
-                      class="accordion-button collapsed" 
-                      type="button" 
-                      data-bs-toggle="collapse" 
+                    <button
+                      class="accordion-button collapsed"
+                      type="button"
+                      data-bs-toggle="collapse"
                       data-bs-target="#shipping"
                     >
                       Shipping & Returns
@@ -231,15 +231,15 @@
       <div v-if="relatedProducts.length > 0" class="related-products mt-5">
         <h3 class="mb-4">Related Products</h3>
         <div class="row g-4">
-          <div 
-            v-for="relatedProduct in relatedProducts" 
+          <div
+            v-for="relatedProduct in relatedProducts"
             :key="relatedProduct.id"
             class="col-md-3 col-sm-6"
           >
             <div class="card h-100">
-              <img 
-                :src="relatedProduct.image" 
-                class="card-img-top" 
+              <img
+                :src="relatedProduct.image"
+                class="card-img-top"
                 :alt="relatedProduct.name"
                 style="height: 200px; object-fit: cover; cursor: pointer;"
                 @click="navigateToProduct(relatedProduct.id)"
@@ -249,7 +249,7 @@
                 <p class="card-text text-primary fw-bold">
                   ${{ relatedProduct.price.toFixed(2) }}
                 </p>
-                <button 
+                <button
                   class="btn btn-sm btn-outline-primary w-100"
                   @click="navigateToProduct(relatedProduct.id)"
                 >
@@ -300,12 +300,13 @@ const loadProduct = () => {
   try {
     loading.value = true
     const productId = Number(route.params.id)
-    
+
     const foundProduct = products.find(p => p.id === productId)
-    
+
     if (foundProduct) {
       product.value = foundProduct
       selectedImage.value = foundProduct.image
+
     } else {
       error.value = 'Product not found'
     }
@@ -335,7 +336,7 @@ const addToCart = async () => {
   try {
     addingToCart.value = true
     cartStore.addToCart(product.value, quantity.value)
-    
+
     // Show success message
     showSuccessMessage.value = true
     setTimeout(() => {
@@ -355,8 +356,8 @@ const addToCart = async () => {
 
 const toggleWishlist = () => {
   isInWishlist.value = !isInWishlist.value
-  const message = isInWishlist.value 
-    ? 'Added to wishlist' 
+  const message = isInWishlist.value
+    ? 'Added to wishlist'
     : 'Removed from wishlist'
   console.log(message)
 }
@@ -369,12 +370,14 @@ const navigateToProduct = (productId: number) => {
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString)
-  return date.toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   })
 }
+
+
 </script>
 
 <style scoped>
@@ -496,15 +499,15 @@ const formatDate = (dateString: string) => {
   .product-name {
     font-size: 1.5rem;
   }
-  
+
   .current-price {
     font-size: 2rem;
   }
-  
+
   .action-buttons {
     flex-direction: column;
   }
-  
+
   .action-buttons .btn-lg {
     width: 100%;
   }
