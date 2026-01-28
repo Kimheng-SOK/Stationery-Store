@@ -95,10 +95,8 @@ export default {
   methods: {
     async loadReviews() {
       try {
-        // Try to get real data from API
-        const res = await fetch('https://your-api.com/reviews') // Change this later
-        // For testing now, we'll just use fake data below
-        throw new Error('Using fake data') // Force fake data
+        // For now, use fake data (API integration coming soon)
+        throw new Error('Using fake data')
       } catch (error) {
         // Use beautiful fake reviews (always shows these 3 for testing)
         this.reviews = [
