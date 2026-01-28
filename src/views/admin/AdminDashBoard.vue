@@ -288,8 +288,9 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
+import { API_BASE_URL, getUploadUrl } from '@/config/api'
 
-const API_URL = 'http://localhost:5000/api'
+const API_URL = API_BASE_URL
 
 interface Product {
   _id?: string
@@ -640,13 +641,13 @@ const fetchDashboardData = async () => {
 const getProductImageUrl = (product: Product): string => {
   if (product.image && typeof product.image === 'string') {
     if (product.image.startsWith('http')) return product.image
-    return `http://localhost:5000/uploads/products/${product.image}`
+    return getUploadUrl(`products/${product.image}`)
   }
   const productAny = product as any
   if (productAny.images && Array.isArray(productAny.images) && productAny.images.length > 0) {
     const img = productAny.images[0]
     if (typeof img === 'string' && img.startsWith('http')) return img
-    return `http://localhost:5000/uploads/products/${img}`
+    return getUploadUrl(`products/${img}`)
   }
   return 'https://via.placeholder.com/60'
 }

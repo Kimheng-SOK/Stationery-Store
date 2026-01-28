@@ -358,13 +358,15 @@ interface ValidationRule {
   [key: string]: boolean | number | undefined
 }
 
+import { API_BASE_URL, getUploadUrl as getUploadUrlHelper } from '@/config/api'
+
 const getImageUrl = (image: string): string => {
   if (!image) return '';
   if (image.startsWith('http') || image.startsWith('data:')) {
     return image; // Already absolute or base64
   }
   // Backend saves to uploads/banners/ folder, so prepend that path
-  return `http://localhost:5000/uploads/banners/${image}`;
+  return getUploadUrlHelper(`banners/${image}`);
 };
 
 // Form state composable (inline)
@@ -435,7 +437,7 @@ const selectedStatus = ref<BannerStatus | 'all'>('all')
 const isLoading = ref(false)
 
 // API Base URL - Update this to match your backend
-const API_URL = 'http://localhost:5000/api/banners'
+const API_URL = `${API_BASE_URL}/banners`
 
 // Fetch banners from API
 const fetchBanners = async () => {

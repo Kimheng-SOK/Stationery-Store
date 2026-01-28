@@ -1,8 +1,9 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { Banner } from '@/types/banner'
+import { API_BASE_URL, getUploadUrl } from '@/config/api'
 
-const API_URL = 'http://localhost:5000/api/banners'
+const API_URL = `${API_BASE_URL}/banners`
 
 const parseDate = (value: string): Date | null => {
   const parsed = new Date(value)
@@ -38,7 +39,7 @@ const getImageUrl = (image: string): string => {
   if (image.startsWith('http') || image.startsWith('data:')) {
     return image
   }
-  return `http://localhost:5000/uploads/banners/${image}`
+  return getUploadUrl(`banners/${image}`)
 }
 
 export const useHeroSectionStore = defineStore('heroSection', () => {

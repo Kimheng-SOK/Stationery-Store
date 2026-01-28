@@ -299,6 +299,7 @@ import axios from 'axios'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cartStore'
 import { useAuthStore } from '@/stores/auth'
+import { API_BASE_URL, getUploadUrl } from '@/config/api'
 
 const router = useRouter()
 const cartStore = useCartStore()
@@ -306,7 +307,7 @@ const authStore = useAuthStore()
 const step = ref(1)
 const isProcessing = ref(false)
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+const API_URL = API_BASE_URL
 
 const form = reactive({
   firstName: '',
@@ -476,14 +477,14 @@ const getProductImageUrl = (item: any): string => {
   if (item.image && typeof item.image === 'string') {
     if (item.image.startsWith('http')) return item.image
     // If image is a filename, build the backend URL
-    return `http://localhost:5000/uploads/products/${item.image}`
+    return getUploadUrl(`products/${item.image}`)
   }
   // If images array exists and has at least one image
   if (item.images && Array.isArray(item.images) && item.images.length > 0) {
     const img = item.images[0]
     if (typeof img === 'string') {
       if (img.startsWith('http')) return img
-      return `http://localhost:5000/uploads/products/${img}`
+      return getUploadUrl(`products/${img}`)
     }
   }
   // Fallback to placeholder

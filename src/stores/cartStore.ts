@@ -159,7 +159,7 @@ export const useCartStore = defineStore('cart', {
   this.couponCode = code
 
   try {
-    const res = await axios.get(`http://localhost:5000/api/coupons/code/${code.toUpperCase()}`)
+    const res = await axios.get(`${API_BASE_URL}/coupons/code/${code.toUpperCase()}`)
 
     if (res.data.success) {
       const coupon = res.data.data[0]
@@ -235,7 +235,7 @@ export const useCartStore = defineStore('cart', {
             if (this.appliedCoupon) {
               try {
           await axios.put(
-            `http://localhost:5000/api/coupons/${this.appliedCoupon._id}`,
+            `${API_BASE_URL}/coupons/${this.appliedCoupon._id}`,
             {
               usedCount: this.appliedCoupon.usedCount + 1
             }

@@ -353,8 +353,9 @@
 import { ref, computed } from 'vue'
 import type { Customer } from '@/types/customer'
 import axios from 'axios'
+import { API_BASE_URL } from '@/config/api'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+const API_URL = API_BASE_URL
 
 const customers = ref<Customer[]>([])
 const searchQuery = ref('')

@@ -3,7 +3,8 @@
  * Handles all HTTP requests to the backend API
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+import { API_BASE_URL, API_SERVER_URL } from '@/config/api'
+export { API_BASE_URL, API_SERVER_URL }
 console.log('API Base URL:', API_BASE_URL)
 
 interface ApiResponse<T> {

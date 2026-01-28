@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
+import { API_BASE_URL } from '@/config/api';
 
-const API_BASE_URL = 'http://localhost:5000/api/reviews';
+const API_REVIEWS_URL = `${API_BASE_URL}/reviews`;
 
 interface Review {
   _id?: string;
@@ -47,7 +48,7 @@ export const useReviewStore = defineStore('reviewStore', {
       this.loading = true;
       this.error = null;
       try {
-        const response = await axios.get(`${API_BASE_URL}?productId=${productId}`);
+        const response = await axios.get(`${API_REVIEWS_URL}?productId=${productId}`);
         // Support both direct array response or { data: [...] } structure
         this.reviews = response.data.data || response.data || [];
       } catch (err: any) {
@@ -68,7 +69,7 @@ export const useReviewStore = defineStore('reviewStore', {
           role: 'Guest'
         };
 
-        const response = await axios.post(API_BASE_URL, finalPayload);
+        const response = await axios.post(API_REVIEWS_URL, finalPayload);
 
         if (response.data.success) {
           // Add the new review from the server response to the top of the local list

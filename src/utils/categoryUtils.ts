@@ -12,6 +12,8 @@ export function formatDate(date?: string): string {
   }
 }
 
+import { API_SERVER_URL } from '@/config/api'
+
 export function getImageUrl(imagePath?: string): string {
   if (!imagePath) return '/placeholder.png'
 
@@ -21,7 +23,7 @@ export function getImageUrl(imagePath?: string): string {
   }
 
   // If it's a relative path from your API
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+  const baseUrl = API_SERVER_URL
   return `${baseUrl}${imagePath}`
 }
 

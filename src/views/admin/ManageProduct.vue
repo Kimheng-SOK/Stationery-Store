@@ -989,18 +989,20 @@ const getCategoryName = (category: any): string => {
   return category.name || 'N/A'
 }
 
+import { getUploadUrl } from '@/config/api'
+
 const getProductImageUrl = (product: Product): string => {
   // If image is a full URL, use it
   if (product.image && typeof product.image === 'string') {
     if (product.image.startsWith('http')) return product.image
     // If image is a filename, build the backend URL
-    return `http://localhost:5000/uploads/products/${product.image}`
+    return getUploadUrl(`products/${product.image}`)
   }
   // If images array exists and has at least one image
   if (product.images && product.images.length > 0) {
     const img = product.images[0]
     if (typeof img === 'string' && img.startsWith('http')) return img
-    return `http://localhost:5000/uploads/products/${img}`
+    return getUploadUrl(`products/${img}`)
   }
   // Otherwise, fallback to placeholder
   return '/placeholder-image.jpg'

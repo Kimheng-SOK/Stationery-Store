@@ -88,13 +88,14 @@ export const useProductStore = defineStore('product', {
       return sorted
     },
 
+import { API_SERVER_URL } from '@/config/api'
+
     /**
      * Getter: Formats a single product for the UI
      * Fixes: Images, reviewCount, and Price logic
      */
     formatProduct: () => (product: Product) => {
-      const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
-      const BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '').replace(/\/$/, '')
+      const BASE_URL = API_SERVER_URL
 
       // Image Construction
       let imageUrl = '/placeholder.jpg'

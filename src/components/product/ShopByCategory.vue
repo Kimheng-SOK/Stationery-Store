@@ -56,8 +56,8 @@ onMounted(async () => {
 })
 
 // Build category cards from store data
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
-const BASE_URL = API_BASE_URL.replace('/api', '')
+import { API_SERVER_URL } from '@/config/api'
+const BASE_URL = API_SERVER_URL
 
 const categoryCards = computed<CategoryCard[]>(() =>
   categoryStore.categories.map((category: Category) => ({
