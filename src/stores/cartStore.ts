@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import type { Product } from '@/types/product'
 import axios from 'axios'
+import { API_SERVER_URL, API_BASE_URL } from '@/config/api'
 
 // Updated interface to handle backend _id (string)
 export interface CartItem {
@@ -39,7 +40,7 @@ export const useCartStore = defineStore('cart', {
     couponDiscount: 0,
     shippingMethod: 'shipping' as 'shipping' | 'pickup',
     deliverTogether: false,
-    baseUrl: 'http://localhost:5000'
+    baseUrl: API_SERVER_URL
   }),
 
   getters: {
