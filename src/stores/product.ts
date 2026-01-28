@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { apiGet } from '@/services/api'
 import type { Product, ProductQueryParams } from '@/types/product'
+import { API_SERVER_URL } from '@/config/api'
 
 export const useProductStore = defineStore('product', {
   state: () => ({
@@ -87,8 +88,6 @@ export const useProductStore = defineStore('product', {
       }
       return sorted
     },
-
-import { API_SERVER_URL } from '@/config/api'
 
     /**
      * Getter: Formats a single product for the UI
