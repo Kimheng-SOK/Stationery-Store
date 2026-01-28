@@ -19,6 +19,8 @@ interface ApiResponse<T> {
     hasNextPage: boolean
     hasPrevPage: boolean
   }
+  total?: number
+  pages?: number
 }
 
 interface RequestOptions extends RequestInit {
@@ -46,8 +48,8 @@ async function apiRequest<T>(
   const { requiresAuth = false, ...fetchOptions } = options
 
   const url = `${API_BASE_URL}${endpoint}`
-  const headers: HeadersInit = {
-    ...fetchOptions.headers,
+  const headers: Record<string, string> = {
+    ...(fetchOptions.headers as Record<string, string>),
   }
 
   // Add Content-Type for JSON requests (not for FormData)

@@ -7,3 +7,6 @@ export const members: TeamMember[] = [
   { id: '4', name: 'SAR Vichada', role: 'Reporter' },
   { id: '5', name: 'PHE Rithika', role: 'Code reviewer' },
 ]
+
+// Export as mockTeamMembers for backward compatibility
+export const mockTeamMembers = members

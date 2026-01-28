@@ -9,7 +9,7 @@
         -{{ product.discount }}%
       </span>
 
-      <span v-if="product.rating >= 4" class="badge badge-popular">
+      <span v-if="product.rating && product.rating >= 4" class="badge badge-popular">
         <i class="bi bi-star-fill me-1"></i> POPULAR
       </span>
 
@@ -26,20 +26,20 @@
     </div>
 
     <div class="product-info">
-      <p class="product-category text-uppercase">{{ product.category.name }}</p>
+      <p class="product-category text-uppercase">{{ typeof product.category === 'object' ? product.category.name : product.category }}</p>
 
       <h6 class="product-title" @click="viewDetails">{{ product.name }}</h6>
 
       <div class="product-rating mb-3">
-        <span class="stars">{{ renderStars(Math.round(product.rating)) }}</span>
-        <span class="rating-count">({{ product.reviewCount }})</span>
+        <span class="stars">{{ renderStars(Math.round(product.rating || 0)) }}</span>
+        <span class="rating-count">({{ product.reviewCount || 0 }})</span>
       </div>
 
       <div class="d-flex justify-content-between align-items-center mt-auto">
         <div class="price-wrapper">
-          <span class="product-price">${{ product.displayPrice }}</span>
+          <span class="product-price">${{ product.displayPrice || product.price }}</span>
           <span
-            v-if="product.discount > 0"
+            v-if="product.discount && product.discount > 0"
             class="product-original-price"
           >
             ${{ product.originalPrice }}

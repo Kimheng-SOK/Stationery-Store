@@ -1,11 +1,11 @@
 <template>
   <div class="filter-sidebar">
     <h5 class="mb-3">Filters</h5>
-    
+
     <!-- Category Filter -->
     <div class="filter-section mb-4">
       <h6 class="filter-title">All Categories</h6>
-      <select :value="selectedCategory" @change="$emit('update:selectedCategory', $event.target.value)" class="form-select form-select-sm">
+      <select :value="selectedCategory" @change="$emit('update:selectedCategory', ($event.target as HTMLSelectElement).value)" class="form-select form-select-sm">
         <option value="">All Categories</option>
         <option v-for="category in categories" :key="category" :value="category">
           {{ category }}
@@ -17,18 +17,18 @@
     <div class="filter-section mb-4">
       <h6 class="filter-title">Price</h6>
       <div class="price-inputs">
-        <input 
+        <input
           :value="priceRange.min"
-          @input="$emit('update:priceRange', { ...priceRange, min: Number($event.target.value) })"
-          type="number" 
-          class="form-control form-control-sm mb-2" 
+          @input="$emit('update:priceRange', { ...priceRange, min: Number(($event.target as HTMLInputElement).value) })"
+          type="number"
+          class="form-control form-control-sm mb-2"
           placeholder="Min"
         >
-        <input 
+        <input
           :value="priceRange.max"
-          @input="$emit('update:priceRange', { ...priceRange, max: Number($event.target.value) })"
-          type="number" 
-          class="form-control form-control-sm" 
+          @input="$emit('update:priceRange', { ...priceRange, max: Number(($event.target as HTMLInputElement).value) })"
+          type="number"
+          class="form-control form-control-sm"
           placeholder="Max"
         >
       </div>
@@ -37,7 +37,7 @@
     <!-- Brand Filter -->
     <div class="filter-section mb-4">
       <h6 class="filter-title">Brand</h6>
-      <select :value="selectedBrand" @change="$emit('update:selectedBrand', $event.target.value)" class="form-select form-select-sm">
+      <select :value="selectedBrand" @change="$emit('update:selectedBrand', ($event.target as HTMLSelectElement).value)" class="form-select form-select-sm">
         <option value="">All Brands</option>
         <option v-for="brand in brands" :key="brand" :value="brand">
           {{ brand }}
@@ -49,9 +49,9 @@
     <div class="filter-section mb-4">
       <h6 class="filter-title">Rating</h6>
       <div class="form-check" v-for="rating in [5, 4, 3, 2, 1]" :key="rating">
-        <input 
-          class="form-check-input" 
-          type="radio" 
+        <input
+          class="form-check-input"
+          type="radio"
           :id="`rating-${rating}`"
           :value="rating"
           :checked="selectedRating === rating"

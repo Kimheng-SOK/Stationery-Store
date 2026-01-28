@@ -13,7 +13,7 @@
       <ProductCarousel v-else-if="featuredProducts.length > 0" :items="featuredProducts">
         <template #item="{ item }">
           <ProductCard
-            :product="item"
+            :product="item as Product"
             @add-to-cart="handleAddToCart(item as Product)"
           />
         </template>

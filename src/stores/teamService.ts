@@ -33,7 +33,7 @@ export async function updateTeamMember(
   id: string,
   member: Omit<TeamMember, 'id'>,
 ): Promise<TeamMember> {
-  const index = mockTeamMembers.findIndex((m) => m.id === id)
+  const index = mockTeamMembers.findIndex((m: TeamMember) => m.id === id)
   const updatedMember: TeamMember = { id, ...member }
   if (index !== -1) {
     mockTeamMembers[index] = updatedMember
@@ -49,7 +49,7 @@ export async function updateTeamMember(
  * Example: return fetch(`/api/team-members/${id}`, { method: 'DELETE' })
  */
 export async function deleteTeamMember(id: string): Promise<void> {
-  const index = mockTeamMembers.findIndex((m) => m.id === id)
+  const index = mockTeamMembers.findIndex((m: TeamMember) => m.id === id)
   if (index !== -1) {
     mockTeamMembers.splice(index, 1)
   }

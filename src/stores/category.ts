@@ -27,15 +27,15 @@ export const useCategoryStore = defineStore('category', {
 
       try {
         console.log('Fetching categories...')
-        const response = await apiGet('/categories')
+        const response = await apiGet<Category[]>('/categories')
 
         console.log('Categories API Response:', response)
-        
+
         // Handle different response structures
         this.categories = response.data
           ? Array.isArray(response.data)
             ? response.data
-            : response.data.data
+            : (response.data as any).data || []
           : []
 
         this.isFetched = true

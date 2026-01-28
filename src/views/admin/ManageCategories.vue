@@ -51,7 +51,7 @@
               <tr v-for="category in categories" :key="category._id">
                 <td>
                   <img
-                    :src="getImageUrl(category.image)"
+                    :src="getImageUrl(category.image || '')"
                     :alt="category.name"
                     class="category-image"
                     @error="handleImageError"
@@ -65,7 +65,7 @@
                     {{ category.isActive ? 'Active' : 'Inactive' }}
                   </span>
                 </td>
-                <td>{{ formatDate(category.createdAt) }}</td>
+                <td>{{ formatDate(category.createdAt || '') }}</td>
                 <td>
                   <button class="btn btn-sm btn-outline-primary me-2" @click="openEditModal(category)">
                     <i class="bi bi-pencil"></i>

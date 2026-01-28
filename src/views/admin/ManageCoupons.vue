@@ -357,7 +357,7 @@ const toggleStatus = async (coupon: Coupon) => {
     if (response.data.success) {
       // Update the coupon in the list
       const index = coupons.value.findIndex(c => c._id === coupon._id)
-      if (index !== -1) {
+      if (index !== -1 && coupons.value[index]) {
         coupons.value[index].status = newStatus
       }
     }

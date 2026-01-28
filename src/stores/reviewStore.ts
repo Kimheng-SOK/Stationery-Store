@@ -3,11 +3,21 @@ import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/api/reviews';
 
+interface Review {
+  _id?: string;
+  productId: string;
+  userId: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  createdAt?: string;
+}
+
 export const useReviewStore = defineStore('reviewStore', {
   state: () => ({
-    reviews: [],
+    reviews: [] as Review[],
     loading: false,
-    error: null
+    error: null as string | null
   }),
 
   getters: {
@@ -33,14 +43,14 @@ export const useReviewStore = defineStore('reviewStore', {
     /**
      * Fetch all reviews for a specific product from the backend.
      */
-    async fetchReviews(productId) {
+    async fetchReviews(productId: string) {
       this.loading = true;
       this.error = null;
       try {
         const response = await axios.get(`${API_BASE_URL}?productId=${productId}`);
         // Support both direct array response or { data: [...] } structure
         this.reviews = response.data.data || response.data || [];
-      } catch (err) {
+      } catch (err: any) {
         this.error = err.response?.data?.message || 'Failed to fetch reviews';
       } finally {
         this.loading = false;
@@ -50,31 +60,31 @@ export const useReviewStore = defineStore('reviewStore', {
     /**
      * Submits a new review and automatically sets the user role to 'Guest'.
      */
-    async submitReview(reviewData) {
+    async submitReview(reviewData: Partial<Review>) {
       try {
         // Automatically inject the 'Guest' role before sending to the server
-        const finalPayload = { 
-          ...reviewData, 
-          role: 'Guest' 
+        const finalPayload = {
+          ...reviewData,
+          role: 'Guest'
         };
 
         const response = await axios.post(API_BASE_URL, finalPayload);
-        
+
         if (response.data.success) {
           // Add the new review from the server response to the top of the local list
           // This makes the UI update instantly without a page refresh
-          this.reviews.unshift(response.data.data);
+          this.reviews.unshift(response.data.data as Review);
           return { success: true };
         }
-        
-        return { 
-          success: false, 
-          message: response.data.message || 'Submission failed' 
+
+        return {
+          success: false,
+          message: response.data.message || 'Submission failed'
         };
-      } catch (err) {
-        return { 
-          success: false, 
-          message: err.response?.data?.message || 'Error submitting review' 
+      } catch (err: any) {
+        return {
+          success: false,
+          message: err.response?.data?.message || 'Error submitting review'
         };
       }
     }

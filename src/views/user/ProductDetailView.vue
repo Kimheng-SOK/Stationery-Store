@@ -174,7 +174,7 @@
                 class="card-img-top"
                 :alt="relatedProduct.name"
                 style="height: 200px; object-fit: cover; cursor: pointer;"
-                @click="navigateToProduct(relatedProduct._id || relatedProduct.id)"
+                @click="navigateToProduct(relatedProduct._id || relatedProduct.id || '')"
               />
               <div class="card-body">
                 <h6 class="card-title">{{ relatedProduct.name }}</h6>
@@ -183,7 +183,7 @@
                 </p>
                 <button
                   class="btn btn-sm btn-outline-primary w-100"
-                  @click="navigateToProduct(relatedProduct._id)"
+                  @click="navigateToProduct(relatedProduct._id || '')"
                 >
                   View Details
                 </button>

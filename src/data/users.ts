@@ -3,59 +3,53 @@ import type { User } from '@/types/user'
 export const users: User[] = [
   // Admin Accounts
   {
-    id: 1,
-    username: 'admin',
+    id: '1',
+    name: 'Admin User',
     email: 'admin@stationerybox.com',
     password: 'admin123',
     role: 'admin',
-    fullName: 'Admin User',
     createdAt: '2025-01-01'
   },
   {
-    id: 2,
-    username: 'superadmin',
+    id: '2',
+    name: 'Super Admin',
     email: 'heng@gmail.com',
     password: '123',
     role: 'admin',
-    fullName: 'Super Admin',
     createdAt: '2025-01-01'
   },
 
   // Regular User Accounts
   {
-    id: 3,
-    username: 'john_doe',
+    id: '3',
+    name: 'John Doe',
     email: 'heng1@gmail.com',
     password: '1234',
     role: 'user',
-    fullName: 'John Doe',
     createdAt: '2025-01-05'
   },
   {
-    id: 4,
-    username: 'jane_smith',
+    id: '4',
+    name: 'Jane Smith',
     email: 'jane.smith@example.com',
     password: 'user123',
     role: 'user',
-    fullName: 'Jane Smith',
     createdAt: '2025-01-06'
   },
   {
-    id: 5,
-    username: 'mike_wilson',
+    id: '5',
+    name: 'Mike Wilson',
     email: 'mike.wilson@example.com',
     password: 'user123',
     role: 'user',
-    fullName: 'Mike Wilson',
     createdAt: '2025-01-08'
   },
   {
-    id: 6,
-    username: 'sarah_johnson',
+    id: '6',
+    name: 'Sarah Johnson',
     email: 'sarah.johnson@example.com',
     password: 'user123',
     role: 'user',
-    fullName: 'Sarah Johnson',
     createdAt: '2025-01-10'
   }
 ]

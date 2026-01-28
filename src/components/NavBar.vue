@@ -204,7 +204,7 @@
     </div>
 
     <div class="offcanvas-body p-0">
-      <div class="p-4"><SearchBar /></div>
+      <div class="p-4"><SearchBar v-model="searchQuery" /></div>
 
       <div class="mobile-menu-list">
         <div class="menu-group-label px-4 text-muted small text-uppercase fw-bold mb-2">Store</div>

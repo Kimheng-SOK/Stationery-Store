@@ -233,7 +233,7 @@
               <h4 class="product-name-small">{{ prod.name }}</h4>
               <p class="product-sku">
                 <i class="bi bi-upc me-1"></i>
-                {{ prod.sku }}
+                {{ (prod as any).sku || 'N/A' }}
               </p>
             </div>
             <div class="stock-badge-wrapper">
@@ -372,13 +372,13 @@ const revenueChartSeries = computed(() => {
 
 const revenueChartOptions = computed(() => ({
   chart: {
-    type: 'area',
+    type: 'area' as const,
     toolbar: { show: false },
     zoom: { enabled: false }
   },
   colors: ['#667eea'],
   dataLabels: { enabled: false },
-  stroke: { curve: 'smooth', width: 3 },
+  stroke: { curve: 'smooth' as const, width: 3 },
   fill: {
     type: 'gradient',
     gradient: {
@@ -431,11 +431,11 @@ const ordersChartSeries = computed(() => {
 })
 
 const ordersChartOptions = computed(() => ({
-  chart: { type: 'donut' },
+  chart: { type: 'donut' as const },
   labels: ['Completed', 'Pending', 'In Progress', 'Cancelled'],
   colors: ['#10b981', '#f59e0b', '#3b82f6', '#ef4444'],
   legend: {
-    position: 'bottom',
+    position: 'bottom' as const,
     fontSize: '14px',
   },
   dataLabels: { enabled: true },
@@ -504,7 +504,7 @@ const userGrowthChartSeries = computed(() => {
 
 const userGrowthChartOptions = computed(() => ({
   chart: {
-    type: 'bar',
+    type: 'bar' as const,
     toolbar: { show: false }
   },
   colors: ['#667eea', '#10b981'],
@@ -529,7 +529,8 @@ const userGrowthChartOptions = computed(() => ({
       for (let i = 6; i >= 0; i--) {
         const date = new Date(now)
         date.setDate(date.getDate() - i)
-        labels.push(days[date.getDay()])
+        const dayLabel = days[date.getDay()]
+        if (dayLabel) labels.push(dayLabel)
       }
       return labels
     })(),
@@ -605,8 +606,8 @@ const fetchDashboardData = async () => {
 
     // Get low stock products (stock < 10)
     lowStockProducts.value = allProducts
-      .filter((p: Product) => p.stock < 10)
-      .sort((a: Product, b: Product) => a.stock - b.stock)
+      .filter((p: Product) => (p.stock || 0) < 10)
+      .sort((a: Product, b: Product) => (a.stock || 0) - (b.stock || 0))
       .slice(0, 5)
 
     // Fallback: if no top products, show recent products
@@ -641,8 +642,9 @@ const getProductImageUrl = (product: Product): string => {
     if (product.image.startsWith('http')) return product.image
     return `http://localhost:5000/uploads/products/${product.image}`
   }
-  if (product.images && product.images.length > 0) {
-    const img = product.images[0]
+  const productAny = product as any
+  if (productAny.images && Array.isArray(productAny.images) && productAny.images.length > 0) {
+    const img = productAny.images[0]
     if (typeof img === 'string' && img.startsWith('http')) return img
     return `http://localhost:5000/uploads/products/${img}`
   }

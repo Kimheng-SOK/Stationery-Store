@@ -92,16 +92,16 @@ export function useFormState<T extends Record<string, any>>(initialData: T) {
   }
 
   const setFieldError = (fieldName: keyof T, error: string) => {
-    errors[fieldName] = error
+    (errors as any)[fieldName] = error
   }
 
   const clearFieldError = (fieldName: keyof T) => {
-    delete errors[fieldName]
+    delete (errors as any)[fieldName]
   }
 
   const clearErrors = () => {
     Object.keys(errors).forEach((key) => {
-      delete errors[key as keyof T]
+      delete (errors as any)[key as keyof T]
     })
   }
 

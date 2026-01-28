@@ -44,7 +44,7 @@ export const useProductStore = defineStore('product', {
           let pCatId
           if (typeof p.category === 'object' && p.category !== null) {
             // Handle both { _id: ... } and { $oid: ... }
-            pCatId = p.category._id || p.category.$oid
+            pCatId = p.category._id || (p.category as any).$oid
           } else {
             pCatId = p.category
           }
@@ -118,7 +118,7 @@ export const useProductStore = defineStore('product', {
         id: product._id,
         image: imageUrl,
         displayPrice: hasValidPrice ? product.price : product.originalPrice,
-        showStrikePrice: hasValidPrice && product.originalPrice > 0,
+        showStrikePrice: hasValidPrice && (product.originalPrice || 0) > 0,
         categoryName: typeof product.category === 'object' && product.category !== null ? product.category.name : product.category
       }
     }
@@ -134,16 +134,16 @@ export const useProductStore = defineStore('product', {
       try {
         const queryParams = new URLSearchParams()
         Object.entries(params).forEach(([key, value]) => {
-          if (value !== undefined && value !== '') queryParams.append(key, value.toString())
+          if (value !== undefined && value !== '' && value !== null) queryParams.append(key, value.toString())
         })
 
         const endpoint = `/products${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-        const response = await apiGet(endpoint)
+        const response = await apiGet<Product[]>(endpoint)
 
         if (response.data) {
-          this.products = Array.isArray(response.data) ? response.data : response.data.data || []
-          this.totalProducts = response.total || this.products.length
-          this.totalPages = response.pages || 1
+          this.products = Array.isArray(response.data) ? response.data : (response.data as any).data || []
+          this.totalProducts = response.total || (response as any).pagination?.total || this.products.length
+          this.totalPages = response.pages || (response as any).pagination?.totalPages || 1
         }
         this.isFetched = true
       } catch (err: any) {

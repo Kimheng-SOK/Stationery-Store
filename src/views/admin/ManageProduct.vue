@@ -364,9 +364,9 @@
                 <p class="text-muted small fw-medium mb-2">Stock Available</p>
                 <p
                   class="h6 fw-semibold mb-0"
-                  :class="selectedProduct.stock > 10 ? 'text-success' : 'text-warning'"
+                  :class="(selectedProduct.stock || 0) > 10 ? 'text-success' : 'text-warning'"
                 >
-                  {{ selectedProduct.stock }} units
+                  {{ selectedProduct.stock || 0 }} units
                 </p>
               </div>
               <div class="col-md-6">
@@ -676,21 +676,21 @@
                 <div v-if="formData.images && formData.images.length" class="d-flex flex-wrap gap-3 mt-2">
                   <div v-for="(img, idx) in formData.images" :key="idx" class="text-center">
                     <img
-                      v-if="img && typeof img === 'object' && 'type' in img && img.type && img.type.startsWith('image/')"
-                      :src="window.URL.createObjectURL(img)"
+                      v-if="img && typeof img === 'object' && 'type' in img && (img as any).type && (img as any).type.startsWith('image/')"
+                      :src="createObjectURL(img as File)"
                       alt="Preview"
                       class="rounded border"
                       style="max-width: 120px; max-height: 120px; object-fit: cover"
                     />
                     <img
-                      v-else-if="typeof img === 'string' && (img.endsWith('.jpg') || img.endsWith('.jpeg') || img.endsWith('.png') || img.endsWith('.gif') || img.endsWith('.webp') || img.endsWith('.bmp') || img.endsWith('.svg'))"
+                      v-else-if="typeof img === 'string' && ((img as string).endsWith('.jpg') || (img as string).endsWith('.jpeg') || (img as string).endsWith('.png') || (img as string).endsWith('.gif') || (img as string).endsWith('.webp') || (img as string).endsWith('.bmp') || (img as string).endsWith('.svg'))"
                       :src="img"
                       alt="Preview"
                       class="rounded border"
                       style="max-width: 120px; max-height: 120px; object-fit: cover"
                     />
                     <div v-else class="text-muted small mt-1">
-                      <i class="bi bi-file-earmark"></i> {{ img?.name || img }}
+                      <i class="bi bi-file-earmark"></i> {{ (img as any)?.name || img }}
                     </div>
                     <div class="text-muted small mt-1">File {{ idx + 1 }}</div>
                   </div>
@@ -733,7 +733,12 @@ const categoryApi = useCategoryApi()
 const categories = computed(() => categoryApi.categories.value)
 
 const products = ref<Product[]>([])
-const pagination = ref<unknown>(null)
+const pagination = ref<{
+  page: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+} | null>(null)
 const showAddModal = ref(false)
 const editingProduct = ref<Product | null>(null)
 const selectedProduct = ref<Product | null>(null)
@@ -1011,6 +1016,11 @@ const formatDate = (date: string | undefined): string => {
   return new Date(date).toLocaleDateString()
 }
 
+// Helper function to create object URL for file preview
+const createObjectURL = (file: File): string => {
+  return URL.createObjectURL(file)
+}
+
 function onImagesChange(event: Event) {
   const input = event.target as HTMLInputElement
   if (input.files && input.files.length > 0) {
@@ -1025,7 +1035,7 @@ function onImagesChange(event: Event) {
 const stats = computed(() => ({
   total: products.value.length,
   active: products.value.filter(p => p.status === 'active').length,
-  lowStock: products.value.filter(p => p.stock < 10).length,
+  lowStock: products.value.filter(p => (p.stock || 0) < 10).length,
   draft: products.value.filter(p => p.status === 'draft').length
 }))
 

@@ -43,7 +43,7 @@ const productStore = useProductStore()
 const hotProducts = computed(() => {
   return productStore.products
     // 1. Filter: Rating must be 4.5 or above
-    .filter(p => p.status === 'active' && p.rating >= 4.5)
+    .filter(p => p.status === 'active' && (p.rating || 0) >= 4.5)
     // 2. Sort: Popularity Score = rating * reviewCount
     .sort((a, b) => {
       const scoreA = (a.rating || 0) * (a.reviewCount || 0)

@@ -1,6 +1,7 @@
-import type { Product, Category } from '@/types/product'
+import type { Product } from '@/types/product'
+import type { Category } from '@/types/category'
 
-export const categories: Category[] = [
+export const categories = [
   { id: 1, name: 'Notebooks', image: '/images/notebooks/book1.jpg' },
   { id: 2, name: 'Pens', image: '/images/pens&pencils/pen1.jpg' },
   { id: 3, name: 'Pencils', image: '/images/pens&pencils/pen3.jpg' },
@@ -14,7 +15,7 @@ export const categories: Category[] = [
 
 export const products: Product[] = [
   {
-    id: 1,
+    _id: '1',
     name: 'Premium Leather Journal',
     price: 45.0,
     originalPrice: 55.0,
@@ -32,7 +33,7 @@ export const products: Product[] = [
     badges: ['new', 'popular', 'discount'],
   },
   {
-    id: 2,
+    _id: '2',
     name: 'Colorful Sticky Notes Set',
     price: 15.0,
     originalPrice: 25.0,
@@ -50,7 +51,7 @@ export const products: Product[] = [
     badges: ['new', 'discount', 'hot'],
   },
   {
-    id: 3,
+    _id: '3',
     name: 'Premium Pen Collection',
     price: 35.0,
     originalPrice: 45.0,
@@ -68,7 +69,7 @@ export const products: Product[] = [
     badges: ['new', 'discount'],
   },
   {
-    id: 4,
+    _id: '4',
     name: 'Bamboo Desk Organizer',
     price: 65.0,
     rating: 5,
@@ -84,7 +85,7 @@ export const products: Product[] = [
     badges: ['new', 'instock'],
   },
   {
-    id: 5,
+    _id: '5',
     name: 'Professional Pen Set 2024',
     price: 28.0,
     rating: 5,
@@ -100,7 +101,7 @@ export const products: Product[] = [
     badges: ['new', 'popular'],
   },
   {
-    id: 6,
+    _id: '6',
     name: 'Gel Pens Set - All Colors',
     price: 22.0,
     originalPrice: 30.0,
@@ -118,7 +119,7 @@ export const products: Product[] = [
     badges: ['new', 'discount', 'popular'],
   },
   {
-    id: 7,
+    _id: '7',
     name: 'Watercolor Paint Set',
     price: 42.0,
     rating: 5,
@@ -134,7 +135,7 @@ export const products: Product[] = [
     badges: ['new', 'hot', 'popular'],
   },
   {
-    id: 8,
+    _id: '8',
     name: 'Desk Calendar 2025',
     price: 18.0,
     rating: 4,
@@ -150,7 +151,7 @@ export const products: Product[] = [
     badges: ['new'],
   },
   {
-    id: 9,
+    _id: '9',
     name: 'Highlighter Set - Pastel',
     price: 12.0,
     originalPrice: 18.0,
@@ -168,7 +169,7 @@ export const products: Product[] = [
     badges: ['new', 'discount', 'hot'],
   },
   {
-    id: 10,
+    _id: '10',
     name: 'Executive Notebook Set',
     price: 38.0,
     rating: 4,
@@ -184,7 +185,7 @@ export const products: Product[] = [
     badges: ['new'],
   },
   {
-    id: 11,
+    _id: '11',
     name: 'Modern Desk Lamp',
     price: 55.0,
     originalPrice: 70.0,
@@ -202,7 +203,7 @@ export const products: Product[] = [
     badges: ['new', 'discount', 'popular'],
   },
   {
-    id: 12,
+    _id: '12',
     name: 'Marker Set - Vibrant Colors',
     price: 19.0,
     rating: 4,

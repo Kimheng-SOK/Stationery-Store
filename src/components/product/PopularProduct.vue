@@ -13,8 +13,8 @@
       <ProductCarousel v-else-if="popularProducts.length > 0" :items="popularProducts">
         <template #item="{ item }">
           <ProductCard
-            :product="item"
-            @add-to-cart="handleAddToCart(item)"
+            :product="item as Product"
+            @add-to-cart="handleAddToCart(item as Product)"
           />
         </template>
       </ProductCarousel>
@@ -35,6 +35,7 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue'
 import { useProductStore } from '@/stores/product'
+import type { Product } from '@/types/product'
 import ProductCarousel from '@/components/product/ProductCarousel.vue'
 import ProductCard from '@/components/product/ProductCard.vue'
 

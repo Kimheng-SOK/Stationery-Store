@@ -732,7 +732,8 @@ const formatDate = (dateString: string) => {
 const startEdit = (order: Order) => {
   editingOrderId.value = order._id
   editStatus.value = order.status
-  editDeliveryDate.value = order.deliveryDate.split('T')[0]
+  const dateStr = order.deliveryDate ? order.deliveryDate.split('T')[0] : ''
+  editDeliveryDate.value = dateStr as string
   editDeliveryTime.value = order.deliveryTime
 }
 

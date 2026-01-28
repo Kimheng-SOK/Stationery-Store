@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import type { User } from '@/types/user'
+import type { User, AuthResponse } from '@/types/user'
 import { useAuthApi } from '@/composables/useAuthApi'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -31,18 +31,18 @@ export const useAuthStore = defineStore('auth', () => {
     if (isInitialized.value) return
 
     try {
-      const response = await authApi.getCurrentUser()
-      if (response?.user) {
+      const response = await authApi.getCurrentUser() as AuthResponse
+      if (response?.data?.user) {
         user.value = {
-          id: response.user.id,
-          name: response.user.name,
-          email: response.user.email,
-          role: response.user.role === 'admin' ? 'admin' : 'user',
-          phone: response.user.phone,
-          avatar: response.user.avatar,
-          dateOfBirth: response.user.dateOfBirth,
-          address: response.user.address,
-          createdAt: response.user.createdAt || new Date().toISOString()
+          id: response.data.user.id,
+          name: response.data.user.name,
+          email: response.data.user.email,
+          role: response.data.user.role === 'admin' ? 'admin' : 'user',
+          phone: response.data.user.phone,
+          avatar: response.data.user.avatar,
+          dateOfBirth: response.data.user.dateOfBirth,
+          address: response.data.user.address,
+          createdAt: response.data.user.createdAt || new Date().toISOString()
         }
       }
     } catch (error) {
@@ -55,18 +55,18 @@ export const useAuthStore = defineStore('auth', () => {
 
   async function refreshUser() {
     try {
-      const response = await authApi.getCurrentUser()
-      if (response?.user) {
+      const response = await authApi.getCurrentUser() as AuthResponse
+      if (response?.data?.user) {
         user.value = {
-          id: response.user.id,
-          name: response.user.name,
-          email: response.user.email,
-          role: response.user.role === 'admin' ? 'admin' : 'user',
-          phone: response.user.phone,
-          avatar: response.user.avatar,
-          dateOfBirth: response.user.dateOfBirth,
-          address: response.user.address,
-          createdAt: response.user.createdAt || new Date().toISOString()
+          id: response.data.user.id,
+          name: response.data.user.name,
+          email: response.data.user.email,
+          role: response.data.user.role === 'admin' ? 'admin' : 'user',
+          phone: response.data.user.phone,
+          avatar: response.data.user.avatar,
+          dateOfBirth: response.data.user.dateOfBirth,
+          address: response.data.user.address,
+          createdAt: response.data.user.createdAt || new Date().toISOString()
         }
       }
     } catch (error) {
@@ -96,6 +96,6 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     initializeAuth,
     refreshUser,
-    updateUser 
+    updateUser
   }
 })

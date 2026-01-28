@@ -213,7 +213,7 @@
             </div>
 
             <div class="cart-items-preview">
-              <div v-for="item in cartStore.items" :key="item.id" class="d-flex align-items-center gap-3 py-3 border-bottom">
+              <div v-for="item in cartStore.items" :key="item._id" class="d-flex align-items-center gap-3 py-3 border-bottom">
                 <img :src="item.image" class="rounded border" width="60" height="60" style="object-fit: cover; background: #fff;">
                 <div class="flex-grow-1">
                   <h6 class="mb-0 fw-bold small">{{ item.name }}</h6>
@@ -395,7 +395,7 @@ const placeOrder = async () => {
     // Get logged-in user info
     const currentUser = authStore.user
     const userId = currentUser?.id || null
-    const userEmail = currentUser?.email || form.email || ''
+    const userEmail = currentUser?.email || (form as any).email || ''
 
     const orderPromises = cartStore.items.map(async (item) => {
       const itemSubtotal = (item.price || item.originalPrice) * item.quantity

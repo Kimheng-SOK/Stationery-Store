@@ -1,4 +1,3 @@
-import type { Product } from '@/types/product';
 import { defineStore } from 'pinia'
 import type { Product } from '@/types/product'
 import axios from 'axios'
@@ -40,7 +39,7 @@ export const useCartStore = defineStore('cart', {
     couponDiscount: 0,
     shippingMethod: 'shipping' as 'shipping' | 'pickup',
     deliverTogether: false,
-    baseUrl: 'http://localhost:5000' 
+    baseUrl: 'http://localhost:5000'
   }),
 
   getters: {
@@ -79,7 +78,7 @@ export const useCartStore = defineStore('cart', {
   actions: {
     addToCart(product: any, quantity: number = 1) {
       const pId = product._id || product.id;
-      
+
       const existingItem = this.items.find(item => item._id === pId)
 
       if (existingItem) {
@@ -90,8 +89,8 @@ export const useCartStore = defineStore('cart', {
           alert(`Sorry, only ${product.stock || 999} units available in stock.`)
         }
       } else {
-        const formattedImage = product.image?.startsWith('http') 
-          ? product.image 
+        const formattedImage = product.image?.startsWith('http')
+          ? product.image
           : `${this.baseUrl}${product.image?.replace(/^\/?public/, '')}`
 
         const cartItem: CartItem = {
